@@ -7,8 +7,8 @@
     <session-factory>
         <property name="connection.driver_class">org.mariadb.jdbc.Driver</property>
         <!-- Prvo kreirati bazu 
-        create database bazapodataka; -->
-        <property name="connection.url">jdbc:mariadb://localhost/bazapodataka</property>
+        create database spring_react_db; -->
+        <property name="connection.url">jdbc:mariadb://localhost/spring_react_db</property>
         <property name="dialect">org.hibernate.dialect.MariaDBDialect</property>
         <property name="connection.username">p2</property>
         <property name="connection.password">p2</property>
@@ -17,9 +17,11 @@
         <property name="show_sql">true</property>
         <property name="format_sql">true</property>
         <property name="hbm2ddl.auto">update</property>
-    
+        <!-- Postavljanje uvjeta mapiranja - entiteti -->
         <!-- <mapping class="ffos.kolokvij.model.ImeKlase" /> -->
-    
+        <mapping class="ffos.skroflin.model.Odjel" />
+        <mapping class="ffos.skroflin.model.Djelatnik" />
+        <mapping class="ffos.skroflin.model.Tvrtka" />
 
     </session-factory>
 </hibernate-configuration>
