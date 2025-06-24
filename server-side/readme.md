@@ -1,0 +1,1 @@
+Ovo je repozitorij java koda za potrebe kolegija Programiranje 2 na FFOS.
