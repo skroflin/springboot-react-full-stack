@@ -7,6 +7,7 @@ package ffos.skroflin.service;
 import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.dto.odjel.OdjelDTO;
 import ffos.skroflin.model.dto.odjel.OdjelOdgovorDTO;
+import jakarta.persistence.NoResultException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,28 +42,49 @@ public class OdjelService extends MainService {
                 .collect(Collectors.toList());
     }
 
-    public Odjel getBySifra(int sifra) {
-        return session.get(Odjel.class, sifra);
+    public OdjelOdgovorDTO getBySifra(int sifra) {
+        Odjel odjel = session.get(Odjel.class, sifra);
+        return convertToResponseDTO(odjel);
     }
 
     @PreAuthorize("hasRole('admin')")
-    public Odjel post(OdjelDTO o) {
-        Odjel od = new Odjel(o.nazivOdjela(), o.lokacijaOdjela(), o.jeAktivan());
+    public OdjelOdgovorDTO post(OdjelDTO o) {
+        Long count = session.createQuery(
+                "select (count) from odjel o where o.nazivOdjela = :naziv", Long.class)
+                .setParameter("naziv", o.nazivOdjela())
+                .uniqueResult();
+        if (count > 0) {
+            throw new IllegalArgumentException("Odjel s nazivom" + " " + o.nazivOdjela() + " " + "već postoji!");
+        }
+        Odjel odjel = convertToEntity(o);
         session.beginTransaction();
-        session.persist(od);
+        session.persist(odjel);
         session.getTransaction().commit();
-        return od;
+        return convertToResponseDTO(odjel);
     }
 
     @PreAuthorize("hasRole('admin')")
-    public void put(OdjelDTO o, int sifra) {
+    public OdjelOdgovorDTO put(OdjelDTO o, int sifra) {
         session.beginTransaction();
         Odjel od = (Odjel) session.get(Odjel.class, sifra);
-        od.setNazivOdjela(o.nazivOdjela());
-        od.setLokacijaOdjela(o.lokacijaOdjela());
-        od.setJeAktivan(o.jeAktivan());
+        if (od == null) {
+            session.getTransaction().rollback();
+            throw new NoResultException("Odjel s šifrom" + " " + sifra + " " + "ne postoji!");
+        }
+        if (!od.getNazivOdjela().equals(o.nazivOdjela())) {
+            Long count = session.createQuery(
+                    "select (count) from odjel o where o.nazivOdjela = :naziv", Long.class)
+                    .setParameter("naziv", o.nazivOdjela())
+                    .uniqueResult();
+            if (count > 0) {
+                session.getTransaction().rollback();
+                throw new IllegalArgumentException("Odjel s nazivom" + " " + o.nazivOdjela() + " " + "već postoji!");
+            }
+        }
+        updateEntityFromDto(od, o);
         session.persist(od);
         session.getTransaction().commit();
+        return convertToResponseDTO(od);
     }
 
     @PreAuthorize("hasRole('admin')")
