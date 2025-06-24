@@ -22,6 +22,7 @@
         <mapping class="ffos.skroflin.model.Odjel" />
         <mapping class="ffos.skroflin.model.Djelatnik" />
         <mapping class="ffos.skroflin.model.Tvrtka" />
+        <mapping class="ffos.skroflin.model.Korisnik" />
 
     </session-factory>
 </hibernate-configuration>

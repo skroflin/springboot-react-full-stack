@@ -25,17 +25,20 @@ public class Djelatnik extends Entitet{
     private BigDecimal placaDjelatnika;
     @Column(name = "datum_rodenja")
     private Date datumRodenja;
+    @Column(name = "pocetak_rada", nullable = false)
+    private Date pocetakRada;
     @Column(columnDefinition = "bit", name = "zaposlen")
     private boolean jeZaposlen;
 
     public Djelatnik() {
     }
 
-    public Djelatnik(String imeDjelatnika, String prezimeDjelatnika, BigDecimal placaDjelatnika, Date datumRodenja, boolean jeZaposlen) {
+    public Djelatnik(String imeDjelatnika, String prezimeDjelatnika, BigDecimal placaDjelatnika, Date datumRodenja, Date pocetakRada, boolean jeZaposlen) {
         this.imeDjelatnika = imeDjelatnika;
         this.prezimeDjelatnika = prezimeDjelatnika;
         this.placaDjelatnika = placaDjelatnika;
         this.datumRodenja = datumRodenja;
+        this.pocetakRada = pocetakRada;
         this.jeZaposlen = jeZaposlen;
     }
 
@@ -71,11 +74,19 @@ public class Djelatnik extends Entitet{
         this.datumRodenja = datumRodenja;
     }
 
-    public boolean isZaposlen() {
+    public Date getPocetakRada() {
+        return pocetakRada;
+    }
+
+    public void setPocetakRada(Date pocetakRada) {
+        this.pocetakRada = pocetakRada;
+    }
+
+    public boolean isJeZaposlen() {
         return jeZaposlen;
     }
 
-    public void setZaposlen(boolean jeZaposlen) {
+    public void setJeZaposlen(boolean jeZaposlen) {
         this.jeZaposlen = jeZaposlen;
     }
     
