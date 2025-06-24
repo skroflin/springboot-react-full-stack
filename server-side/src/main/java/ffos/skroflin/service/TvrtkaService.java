@@ -9,6 +9,7 @@ import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.Tvrtka;
 import ffos.skroflin.model.dto.TvrtkaDTO;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,6 +26,7 @@ public class TvrtkaService extends MainService{
         return session.get(Tvrtka.class, sifra);
     }
     
+    @PreAuthorize("hasRole('admin')")
     public Tvrtka post(TvrtkaDTO o){
         Odjel odjel = session.get(Odjel.class, o.odjelSifra());
         Djelatnik djelatnik = session.get(Djelatnik.class, o.djelatnikSifra());
@@ -35,6 +37,7 @@ public class TvrtkaService extends MainService{
         return t;
     }
     
+    @PreAuthorize("hasRole('admin')")
     public void put(TvrtkaDTO o, int sifra){
         session.beginTransaction();
         Odjel odjel = (Odjel) session.get(Odjel.class, o.odjelSifra());
@@ -49,12 +52,14 @@ public class TvrtkaService extends MainService{
         session.getTransaction().commit();
     }
     
+    @PreAuthorize("hasRole('admin')")
     public void delete(int sifra){
         session.beginTransaction();
         session.remove(session.get(Tvrtka.class, sifra));
-        session.beginTransaction().commit();
+        session.getTransaction().commit();
     }
     
+    @PreAuthorize("hasRole('admin')")
     public void softDelete(int sifra){
         session.beginTransaction();
         Tvrtka t = session.get(Tvrtka.class, sifra);

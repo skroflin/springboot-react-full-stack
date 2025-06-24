@@ -7,6 +7,7 @@ package ffos.skroflin.service;
 import ffos.skroflin.model.Djelatnik;
 import ffos.skroflin.model.dto.DjelatnikDTO;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,6 +25,7 @@ public class DjelatnikService extends MainService {
         return session.get(Djelatnik.class, sifra);
     }
 
+    @PreAuthorize("hasRole('admin')")
     public Djelatnik post(DjelatnikDTO o) {
         Djelatnik d = new Djelatnik(o.imeDjelatnika(), o.prezimeDjelatnika(), o.placaDjelatnika(), o.datumRodenja(), o.pocetakRada(), o.jeZaposlen());
         session.beginTransaction();
@@ -32,6 +34,7 @@ public class DjelatnikService extends MainService {
         return d;
     }
 
+    @PreAuthorize("hasRole('admin')")
     public void put(DjelatnikDTO o, int sifra) {
         session.beginTransaction();
         Djelatnik d = (Djelatnik) session.get(Djelatnik.class, sifra);
@@ -45,6 +48,7 @@ public class DjelatnikService extends MainService {
         session.beginTransaction().commit();
     }
 
+    @PreAuthorize("hasRole('admin')")
     public void softDelete(int sifra) {
         session.beginTransaction();
         Djelatnik d = session.get(Djelatnik.class, sifra);

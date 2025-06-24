@@ -13,7 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record KorisnikRegistracijaDTO(
         @Schema(example = "skroflin" ) String korisnickoIme,
         @Schema(example = "lozinka123") String lozinka,
-        @Schema(example = "skroflin@gmail.com") String email
+        @Schema(example = "skroflin@gmail.com") String email,
+        @Schema(example = "true") boolean aktivan
         ) {
     
 }

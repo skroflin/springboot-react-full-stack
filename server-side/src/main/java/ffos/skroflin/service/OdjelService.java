@@ -7,6 +7,7 @@ package ffos.skroflin.service;
 import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.dto.OdjelDTO;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,6 +25,7 @@ public class OdjelService extends MainService {
         return session.get(Odjel.class, sifra);
     }
 
+    @PreAuthorize("hasRole('admin')")
     public Odjel post(OdjelDTO o) {
         Odjel od = new Odjel(o.nazivOdjela(), o.lokacijaOdjela(), o.jeAktivan());
         session.beginTransaction();
@@ -32,6 +34,7 @@ public class OdjelService extends MainService {
         return od;
     }
 
+    @PreAuthorize("hasRole('admin')")
     public void put(OdjelDTO o, int sifra) {
         session.beginTransaction();
         Odjel od = (Odjel) session.get(Odjel.class, sifra);
@@ -42,6 +45,7 @@ public class OdjelService extends MainService {
         session.getTransaction().commit();
     }
 
+    @PreAuthorize("hasRole('admin')")
     public void softDelete(int sifra) {
         session.beginTransaction();
         Odjel o = session.get(Odjel.class, sifra);
