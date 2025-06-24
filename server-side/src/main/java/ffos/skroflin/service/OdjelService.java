@@ -20,19 +20,19 @@ public class OdjelService extends MainService {
         return session.createQuery("from odjel", Odjel.class).list();
     }
 
-    public Odjel getBySifra(int sifra){
+    public Odjel getBySifra(int sifra) {
         return session.get(Odjel.class, sifra);
     }
-    
-    public Odjel post(OdjelDTO o){
+
+    public Odjel post(OdjelDTO o) {
         Odjel od = new Odjel(o.nazivOdjela(), o.lokacijaOdjela(), o.jeAktivan());
         session.beginTransaction();
         session.persist(od);
         session.getTransaction().commit();
         return od;
     }
-    
-    public void put(OdjelDTO o, int sifra){
+
+    public void put(OdjelDTO o, int sifra) {
         session.beginTransaction();
         Odjel od = (Odjel) session.get(Odjel.class, sifra);
         od.setNazivOdjela(o.nazivOdjela());
@@ -40,5 +40,13 @@ public class OdjelService extends MainService {
         od.setJeAktivan(o.jeAktivan());
         session.persist(od);
         session.getTransaction().commit();
+    }
+
+    public void softDelete(int sifra) {
+        session.beginTransaction();
+        Odjel o = session.get(Odjel.class, sifra);
+        o.setJeAktivan(false);
+        session.merge(o);
+        session.getTransaction();
     }
 }

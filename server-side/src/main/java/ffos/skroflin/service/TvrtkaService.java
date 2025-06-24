@@ -54,4 +54,19 @@ public class TvrtkaService extends MainService{
         session.remove(session.get(Tvrtka.class, sifra));
         session.beginTransaction().commit();
     }
+    
+    public void softDelete(int sifra){
+        session.beginTransaction();
+        Tvrtka t = session.get(Tvrtka.class, sifra);
+        t.setUStjecaju(false);
+        session.merge(t);
+        session.getTransaction().commit();
+    }
+    
+    public List<Tvrtka> getAktivneTvrtke(boolean aktivan){
+        return session.createQuery(
+                "from tvrtka t where t.aktivan = :uvjet", Tvrtka.class)
+                .setParameter("uvjet", aktivan)
+                .list();
+    }
 }
