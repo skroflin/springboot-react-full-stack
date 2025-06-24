@@ -59,4 +59,12 @@ public class DjelatnikService extends MainService {
                 .setParameter("zaposlen", zaposlen)
                 .list();
     }
+    
+    public List<Djelatnik> getByImePrezime(String uvjet){
+        return session.createQuery(
+                "from Djelatnik d " + " where lower(d.imeDjelatnika) like lower(:uvjet) "
+                + " or lower(d.prezimeDjelatnika) like lower(:uvjet)", Djelatnik.class)
+                .setParameter("uvjet", "%" + uvjet + "%")
+                .list();
+    }
 }
