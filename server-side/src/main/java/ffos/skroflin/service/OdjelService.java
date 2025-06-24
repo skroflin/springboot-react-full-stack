@@ -5,8 +5,10 @@
 package ffos.skroflin.service;
 
 import ffos.skroflin.model.Odjel;
-import ffos.skroflin.model.dto.OdjelDTO;
+import ffos.skroflin.model.dto.odjel.OdjelDTO;
+import ffos.skroflin.model.dto.odjel.OdjelOdgovorDTO;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +19,26 @@ import org.springframework.stereotype.Service;
 @Service
 public class OdjelService extends MainService {
 
-    public List<Odjel> getAll() {
-        return session.createQuery("from odjel", Odjel.class).list();
+    private OdjelOdgovorDTO convertToResponseDTO(Odjel odjel){
+        return new OdjelOdgovorDTO(odjel.getSifra(), odjel.getNazivOdjela(), odjel.getLokacijaOdjela(), odjel.isJeAktivan());
+    }
+    
+    private Odjel convertToEntity(OdjelDTO dto){
+        return new Odjel(dto.nazivOdjela(), dto.lokacijaOdjela(), dto.jeAktivan());
+    }
+    
+    private void updateEntityFromDto(Odjel odjel, OdjelDTO dto){
+        odjel.setNazivOdjela(dto.nazivOdjela());
+        odjel.setLokacijaOdjela(dto.lokacijaOdjela());
+        odjel.setJeAktivan(dto.jeAktivan());
+    }
+    
+    public List<OdjelOdgovorDTO> getAll() {
+        List<Odjel> odjeli = session.createQuery(
+                "from odjel", Odjel.class).list();
+        return odjeli.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     public Odjel getBySifra(int sifra) {
