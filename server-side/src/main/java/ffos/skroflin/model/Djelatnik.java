@@ -7,8 +7,6 @@ package ffos.skroflin.model;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -27,19 +25,18 @@ public class Djelatnik extends Entitet{
     private BigDecimal placaDjelatnika;
     @Column(name = "datum_rodenja")
     private Date datumRodenja;
-    @ManyToOne
-    @JoinColumn(name = "odjel_sifra", nullable = false)
-    private Odjel odjel;
+    @Column(columnDefinition = "bit", name = "zaposlen")
+    private boolean jeZaposlen;
 
     public Djelatnik() {
     }
 
-    public Djelatnik(String imeDjelatnika, String prezimeDjelatnika, BigDecimal placaDjelatnika, Date datumRodenja, Odjel odjel) {
+    public Djelatnik(String imeDjelatnika, String prezimeDjelatnika, BigDecimal placaDjelatnika, Date datumRodenja, boolean jeZaposlen) {
         this.imeDjelatnika = imeDjelatnika;
         this.prezimeDjelatnika = prezimeDjelatnika;
         this.placaDjelatnika = placaDjelatnika;
         this.datumRodenja = datumRodenja;
-        this.odjel = odjel;
+        this.jeZaposlen = jeZaposlen;
     }
 
     public String getImeDjelatnika() {
@@ -74,12 +71,12 @@ public class Djelatnik extends Entitet{
         this.datumRodenja = datumRodenja;
     }
 
-    public Odjel getOdjel() {
-        return odjel;
+    public boolean isZaposlen() {
+        return jeZaposlen;
     }
 
-    public void setOdjel(Odjel odjel) {
-        this.odjel = odjel;
+    public void setZaposlen(boolean jeZaposlen) {
+        this.jeZaposlen = jeZaposlen;
     }
     
 }

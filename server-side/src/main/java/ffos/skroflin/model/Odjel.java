@@ -19,13 +19,16 @@ public class Odjel extends Entitet{
     private String nazivOdjela;
     @Column(name = "lokacija_odjela", nullable = false)
     private String lokacijaOdjela;
+    @Column(columnDefinition = "bit", name = "aktivan")
+    private boolean jeAktivan;
 
     public Odjel() {
     }
 
-    public Odjel(String nazivOdjela, String lokacijaOdjela) {
+    public Odjel(String nazivOdjela, String lokacijaOdjela, boolean jeAktivan) {
         this.nazivOdjela = nazivOdjela;
         this.lokacijaOdjela = lokacijaOdjela;
+        this.jeAktivan = jeAktivan;
     }
 
     public String getNazivOdjela() {
@@ -42,6 +45,14 @@ public class Odjel extends Entitet{
 
     public void setLokacijaOdjela(String lokacijaOdjela) {
         this.lokacijaOdjela = lokacijaOdjela;
+    }
+
+    public boolean isJeAktivan() {
+        return jeAktivan;
+    }
+
+    public void setJeAktivan(boolean jeAktivan) {
+        this.jeAktivan = jeAktivan;
     }
     
 }

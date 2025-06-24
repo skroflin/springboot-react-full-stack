@@ -27,7 +27,7 @@ public class Tvrtka extends Entitet{
     @JoinColumn(name = "odjel_sifra", nullable = false)
     private Odjel odjel;
     @ManyToOne
-    @JoinColumn(name = "djelatnik_sifra", nullable = false)
+    @JoinColumn(name = "djelatnik_sifra")
     private Djelatnik djelatnik;
 
     public Tvrtka() {
