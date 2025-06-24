@@ -5,7 +5,8 @@
 package ffos.skroflin.service;
 
 import ffos.skroflin.model.Djelatnik;
-import ffos.skroflin.model.dto.DjelatnikDTO;
+import ffos.skroflin.model.dto.djelatnik.DjelatnikDTO;
+import ffos.skroflin.model.dto.djelatnik.DjelatnikOdgovorDTO;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class DjelatnikService extends MainService {
 
+    private DjelatnikOdgovorDTO convertToResponse(Djelatnik djelatnik){
+        return new DjelatnikOdgovorDTO(djelatnik.getSifra(), djelatnik.getImeDjelatnika(), djelatnik.getPrezimeDjelatnika(), djelatnik.getPlacaDjelatnika(), djelatnik.getPocetakRada(), djelatnik.isJeZaposlen());
+    }
+    
+    private void updateEntityFromDto(Djelatnik djelatnik, DjelatnikDTO dto){
+        djelatnik.setImeDjelatnika(dto.imeDjelatnika());
+        djelatnik.setPrezimeDjelatnika(dto.prezimeDjelatnika());
+        djelatnik.setPlacaDjelatnika(dto.placaDjelatnika());
+        djelatnik.setPocetakRada(dto.pocetakRada());
+        djelatnik.setJeZaposlen(dto.jeZaposlen());
+    }
+    
     public List<Djelatnik> getAll() {
         return session.createQuery("from djelatnik", Djelatnik.class).list();
     }
