@@ -69,7 +69,7 @@ public class OdjelService extends MainService {
         Odjel od = (Odjel) session.get(Odjel.class, sifra);
         if (od == null) {
             session.getTransaction().rollback();
-            throw new NoResultException("Odjel s šifrom" + " " + sifra + " " + "ne postoji!");
+            throw new NoResultException("Odjel sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
         if (!od.getNazivOdjela().equals(o.nazivOdjela())) {
             Long count = session.createQuery(

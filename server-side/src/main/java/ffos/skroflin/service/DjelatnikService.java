@@ -7,7 +7,12 @@ package ffos.skroflin.service;
 import ffos.skroflin.model.Djelatnik;
 import ffos.skroflin.model.dto.djelatnik.DjelatnikDTO;
 import ffos.skroflin.model.dto.djelatnik.DjelatnikOdgovorDTO;
+import ffos.skroflin.model.dto.djelatnik.PlacaOdgovorDTO;
+import jakarta.persistence.NoResultException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +23,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class DjelatnikService extends MainService {
 
-    private DjelatnikOdgovorDTO convertToResponse(Djelatnik djelatnik){
+    private DjelatnikOdgovorDTO convertToResponseDTO(Djelatnik djelatnik){
         return new DjelatnikOdgovorDTO(djelatnik.getSifra(), djelatnik.getImeDjelatnika(), djelatnik.getPrezimeDjelatnika(), djelatnik.getPlacaDjelatnika(), djelatnik.getPocetakRada(), djelatnik.isJeZaposlen());
+    }
+    
+    private Djelatnik convertToEntity(DjelatnikDTO dto) {
+        return new Djelatnik(dto.imeDjelatnika(), dto.prezimeDjelatnika(), dto.placaDjelatnika(), dto.datumRodenja(), dto.pocetakRada(), dto.jeZaposlen());
     }
     
     private void updateEntityFromDto(Djelatnik djelatnik, DjelatnikDTO dto){
@@ -30,35 +39,40 @@ public class DjelatnikService extends MainService {
         djelatnik.setJeZaposlen(dto.jeZaposlen());
     }
     
-    public List<Djelatnik> getAll() {
-        return session.createQuery("from djelatnik", Djelatnik.class).list();
+    public List<DjelatnikOdgovorDTO> getAll() {
+        List<Djelatnik> djelatnici = session.createQuery(
+                "from djelatnik", Djelatnik.class).list();
+        return djelatnici.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Djelatnik getBySifra(int sifra) {
-        return session.get(Djelatnik.class, sifra);
+    public DjelatnikOdgovorDTO getBySifra(int sifra) {
+        Djelatnik djelatnik = session.get(Djelatnik.class, sifra);
+        return convertToResponseDTO(djelatnik);
     }
 
     @PreAuthorize("hasRole('admin')")
-    public Djelatnik post(DjelatnikDTO o) {
-        Djelatnik d = new Djelatnik(o.imeDjelatnika(), o.prezimeDjelatnika(), o.placaDjelatnika(), o.datumRodenja(), o.pocetakRada(), o.jeZaposlen());
+    public DjelatnikOdgovorDTO post(DjelatnikDTO o) {
+        Djelatnik djelatnik = convertToEntity(o);
         session.beginTransaction();
-        session.persist(d);
+        session.persist(djelatnik);
         session.getTransaction().commit();
-        return d;
+        return convertToResponseDTO(djelatnik);
     }
 
     @PreAuthorize("hasRole('admin')")
-    public void put(DjelatnikDTO o, int sifra) {
+    public DjelatnikOdgovorDTO put(DjelatnikDTO o, int sifra) {
         session.beginTransaction();
-        Djelatnik d = (Djelatnik) session.get(Djelatnik.class, sifra);
-        d.setImeDjelatnika(o.imeDjelatnika());
-        d.setPrezimeDjelatnika(o.prezimeDjelatnika());
-        d.setPlacaDjelatnika(o.placaDjelatnika());
-        d.setDatumRodenja(o.datumRodenja());
-        d.setPocetakRada(o.pocetakRada());
-        d.setJeZaposlen(o.jeZaposlen());
-        session.persist(d);
-        session.beginTransaction().commit();
+        Djelatnik dj = (Djelatnik) session.get(Djelatnik.class, sifra);
+        if (dj == null) {
+            session.getTransaction().rollback();
+            throw new NoResultException("Djelatnik sa šifrom" + " " + sifra + " " + "ne postoji!");
+        }
+        updateEntityFromDto(dj, o);
+        session.persist(dj);
+        session.getTransaction().commit();
+        return convertToResponseDTO(dj);
     }
 
     @PreAuthorize("hasRole('admin')")
@@ -70,18 +84,68 @@ public class DjelatnikService extends MainService {
         session.getTransaction().commit();
     }
 
-    public List<Djelatnik> getAllZaposleni(boolean zaposlen) {
-        return session.createQuery(
-                "from djelatnik d where d.zaposlen = :uvjet", Djelatnik.class)
+    public List<DjelatnikOdgovorDTO> getAllZaposleni(boolean zaposlen) {
+        List<Djelatnik> djelatnici = session.createQuery(
+                "from Djelatnik d where d.zaposlen = :zaposlen", Djelatnik.class)
                 .setParameter("zaposlen", zaposlen)
                 .list();
+        return djelatnici.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
     
-    public List<Djelatnik> getByImePrezime(String uvjet){
-        return session.createQuery(
-                "from Djelatnik d " + " where lower(d.imeDjelatnika) like lower(:uvjet) "
+    public List<DjelatnikOdgovorDTO> getByImePrezime(String uvjet){
+        List<Djelatnik> djelatnici = session.createQuery(
+                "from Djelatnik d "
+                + " where lower(d.imeDjelatnika) like lower(:uvjet) "
                 + " or lower(d.prezimeDjelatnika) like lower(:uvjet)", Djelatnik.class)
                 .setParameter("uvjet", "%" + uvjet + "%")
                 .list();
+        return djelatnici.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+    
+    public PlacaOdgovorDTO izracunajPlacu(int sifra, BigDecimal brutoOsnovica){
+        if (brutoOsnovica == null || brutoOsnovica.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Bruto osnovica mora biti veća od 0!");
+        }
+        Djelatnik dj = session.get(Djelatnik.class, sifra);
+        if (dj == null) {
+            throw new IllegalArgumentException("Djelatnik sa šifrom" + " " + sifra + " " + "ne postoji!");
+        }
+        
+        final int scale = 2;
+        BigDecimal stopaMirovinsko1Stup = new BigDecimal("0.15");
+        BigDecimal stopaMirovinsko2Stup = new BigDecimal("0.05");
+        BigDecimal ukupnaStopaMirovinsko = new BigDecimal("0.20");
+        
+        BigDecimal mirovinskoStup1 = brutoOsnovica.multiply(stopaMirovinsko1Stup).setScale(scale, RoundingMode.HALF_UP);
+        BigDecimal mirovinskoStup2 = brutoOsnovica.multiply(stopaMirovinsko2Stup).setScale(scale, RoundingMode.HALF_UP);
+        BigDecimal ukupniDoprinosiIzPlace = brutoOsnovica.multiply(ukupnaStopaMirovinsko).setScale(scale, RoundingMode.HALF_UP);
+        BigDecimal poreznaOsnovica = brutoOsnovica.subtract(ukupniDoprinosiIzPlace).setScale(scale, RoundingMode.HALF_UP);
+        
+        BigDecimal stopaPorezaNaNizi = new BigDecimal("0.20");
+        BigDecimal porezNaDohodak = poreznaOsnovica.multiply(stopaPorezaNaNizi).setScale(scale, RoundingMode.HALF_UP);
+        
+        BigDecimal stopaPrirez = new BigDecimal("0.15");
+        BigDecimal prirez = porezNaDohodak.multiply(stopaPrirez).setScale(scale, RoundingMode.HALF_UP);
+        BigDecimal ukupniPorezPrirez = porezNaDohodak.add(prirez).setScale(scale, RoundingMode.HALF_UP);
+        
+        BigDecimal netoPlaca = poreznaOsnovica.subtract(ukupniPorezPrirez).setScale(scale, RoundingMode.HALF_UP);
+        
+        BigDecimal stopaZdravstveno = new BigDecimal("0.165");
+        BigDecimal zdravstvenoOsiguranje = brutoOsnovica.multiply(stopaZdravstveno).setScale(scale, RoundingMode.HALF_UP);
+        
+        return new PlacaOdgovorDTO(
+                sifra,
+                brutoOsnovica,
+                mirovinskoStup1,
+                mirovinskoStup2,
+                zdravstvenoOsiguranje,
+                poreznaOsnovica,
+                ukupniPorezPrirez,
+                netoPlaca
+        );
     }
 }
