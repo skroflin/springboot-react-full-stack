@@ -21,7 +21,7 @@ import jakarta.persistence.UniqueConstraint;
 @AttributeOverride(name = "sifra", column = @Column(name = "korisnik_sifra"))
 @Table(uniqueConstraints = {
     @UniqueConstraint(columnNames = "korisnicko_ime", name = "uq_korisnicko_ime"),
-    @UniqueConstraint(columnNames = "korisnicki_email", name = "uq_korisnicki_email")
+    @UniqueConstraint(columnNames = "email", name = "uq_korisnicki_email")
 })
 public class Korisnik extends Entitet{
     @Column(name = "korisnicko_ime", nullable = false)

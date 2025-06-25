@@ -43,7 +43,7 @@ public class KorisnikService extends MainService{
     
     public KorisnikOdgovorDTO prijavaKorisnika(KorisnikPrijavaDTO o){
         Korisnik korisnik = session.createQuery(
-                "from korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan =: true", Korisnik.class)
+                "from korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan = true", Korisnik.class)
                 .setParameter("korisnickoIme", o.korisnickoIme())
                 .getSingleResult();
         if (!bCryptPasswordEncoder.matches(o.lozinka(), korisnik.getLozinka())) {

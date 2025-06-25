@@ -7,7 +7,7 @@ package ffos.skroflin.service;
 import ffos.skroflin.model.Djelatnik;
 import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.Tvrtka;
-import ffos.skroflin.model.dto.TvrtkaDTO;
+import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

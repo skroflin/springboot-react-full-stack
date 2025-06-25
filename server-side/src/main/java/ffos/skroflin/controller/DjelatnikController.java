@@ -6,8 +6,10 @@ package ffos.skroflin.controller;
 
 import ffos.skroflin.model.dto.djelatnik.DjelatnikDTO;
 import ffos.skroflin.model.dto.djelatnik.DjelatnikOdgovorDTO;
+import ffos.skroflin.model.dto.djelatnik.PlacaOdgovorDTO;
 import ffos.skroflin.service.DjelatnikService;
 import jakarta.persistence.NoResultException;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -132,6 +134,30 @@ public class DjelatnikController {
             }
             djelatnikService.softDelete(sifra);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (NoResultException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+        }
+    }
+    
+    @GetMapping("/izracunajPlacu/{sifra}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PlacaOdgovorDTO> izracunajPlacu(
+            @PathVariable int sifra,
+            @RequestParam BigDecimal brutoOsnovica
+    ){
+        try {
+            if (sifra <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            }
+            if (brutoOsnovica == null || brutoOsnovica.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bruto osnovica ne smije biti manja od 0!");
+            }
+            PlacaOdgovorDTO placa = djelatnikService.izracunajPlacu(sifra, brutoOsnovica);
+            return new ResponseEntity<>(placa, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
