@@ -34,8 +34,8 @@ public class KorisnikService extends MainService{
         noviKorisnik.setKorisnickoIme(o.korisnickoIme());
         noviKorisnik.setLozinka(bCryptPasswordEncoder.encode(o.lozinka()));
         noviKorisnik.setEmail(o.email());
-        noviKorisnik.setAktivan(true);
-        noviKorisnik.setUloga(Uloga.user);
+        noviKorisnik.setAktivan(o.aktivan());
+        noviKorisnik.setUloga(o.uloga());
         session.persist(noviKorisnik);
         session.getTransaction().commit();
         return mapToResponseDTO(noviKorisnik);

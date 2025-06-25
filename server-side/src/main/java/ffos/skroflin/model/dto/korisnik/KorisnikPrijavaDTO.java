@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author svenk
  */
 public record KorisnikPrijavaDTO(
+        @Schema(example = "1") int sifra,
         @Schema(example = "skroflin") String korisnickoIme,
         @Schema(example = "lozinka123") String lozinka
         ) {
