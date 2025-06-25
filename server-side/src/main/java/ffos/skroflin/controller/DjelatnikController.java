@@ -4,9 +4,9 @@
  */
 package ffos.skroflin.controller;
 
-import ffos.skroflin.model.dto.odjel.OdjelDTO;
-import ffos.skroflin.model.dto.odjel.OdjelOdgovorDTO;
-import ffos.skroflin.service.OdjelService;
+import ffos.skroflin.model.dto.djelatnik.DjelatnikDTO;
+import ffos.skroflin.model.dto.djelatnik.DjelatnikOdgovorDTO;
+import ffos.skroflin.service.DjelatnikService;
 import jakarta.persistence.NoResultException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -27,63 +27,65 @@ import org.springframework.web.server.ResponseStatusException;
  * @author svenk
  */
 @RestController
-@RequestMapping("/api/skroflin/odjel")
-public class OdjelController {
+@RequestMapping("/api/skroflin/djelatnik")
+public class DjelatnikController {
+    private final DjelatnikService djelatnikService;
 
-    private final OdjelService odjelService;
-
-    public OdjelController(OdjelService odjelService) {
-        this.odjelService = odjelService;
+    public DjelatnikController(DjelatnikService djelatnikService) {
+        this.djelatnikService = djelatnikService;
     }
-
+    
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<OdjelOdgovorDTO>> getAll() {
+    public ResponseEntity<List<DjelatnikOdgovorDTO>> getAll(){
         try {
-            return new ResponseEntity<>(odjelService.getAll(), HttpStatus.OK);
+            return new ResponseEntity<>(djelatnikService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
         }
     }
-
+    
     @GetMapping("/getBySifra/{sifra}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<OdjelOdgovorDTO> getBySifra(
+    @PreAuthorize("isAuthenticated")
+    public ResponseEntity<DjelatnikOdgovorDTO> getBySifra(
             @RequestParam int sifra
-    ) {
+    ){
         try {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-            OdjelOdgovorDTO odjel = odjelService.getBySifra(sifra);
-            if (odjel == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Odjel s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
+            DjelatnikOdgovorDTO djelatnik = djelatnikService.getBySifra(sifra);
+            if (djelatnik == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnik s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
             }
-            return new ResponseEntity<>(odjel, HttpStatus.OK);
+            return new ResponseEntity<>(djelatnik, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
         }
     }
-
+    
     @PostMapping("/post")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<OdjelOdgovorDTO> post(
-            @RequestBody(required = true) OdjelDTO dto
-    ) {
+    public ResponseEntity<DjelatnikOdgovorDTO> post(
+            @RequestBody(required = true) DjelatnikDTO dto
+    ){
         try {
             if (dto == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nisu uneseni traženi podaci!");
             }
-            if (dto.nazivOdjela() == null || dto.nazivOdjela().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv odjela je obavezan!");
+            if (dto.imeDjelatnika() == null || dto.imeDjelatnika().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ime djelatnik je obavezno!");
             }
-            if (dto.lokacijaOdjela() == null || dto.lokacijaOdjela().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lokacija odjela je obavezna!");
+            if (dto.prezimeDjelatnika() == null || dto.prezimeDjelatnika().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prezime djelatnik je obavezno!");
             }
-            OdjelOdgovorDTO kreiraniOdjel = odjelService.post(dto);
-            return new ResponseEntity<>(kreiraniOdjel, HttpStatus.OK);
+            if (dto.pocetakRada() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Početak rada djelatnika je obavezno!");
+            }
+            DjelatnikOdgovorDTO unesenDjelatnik = djelatnikService.post(dto);
+            return new ResponseEntity<>(unesenDjelatnik, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (NoResultException e) {
@@ -95,17 +97,17 @@ public class OdjelController {
     
     @PutMapping("/put/{sifra}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<OdjelOdgovorDTO> put(
+    public ResponseEntity<DjelatnikOdgovorDTO> put(
             @RequestParam int sifra,
-            @RequestBody(required = true) OdjelDTO dto
+            @RequestBody(required = true) DjelatnikDTO dto
     ){
         try {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-
-            OdjelOdgovorDTO azuriraniOdjel = odjelService.put(dto, sifra);
-            return new ResponseEntity<>(azuriraniOdjel, HttpStatus.OK);
+            
+            DjelatnikOdgovorDTO azuriraniDjelatnik = djelatnikService.put(dto, sifra);
+            return new ResponseEntity<>(azuriraniDjelatnik, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
@@ -128,7 +130,7 @@ public class OdjelController {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-            odjelService.softDelete(sifra);
+            djelatnikService.softDelete(sifra);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
