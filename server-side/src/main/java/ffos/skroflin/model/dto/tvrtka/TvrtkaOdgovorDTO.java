@@ -4,10 +4,20 @@
  */
 package ffos.skroflin.model.dto.tvrtka;
 
+import ffos.skroflin.model.Djelatnik;
+import ffos.skroflin.model.Odjel;
+
 /**
  *
  * @author svenk
  */
-public class TvrtkaOdgovorDTO {
+public record TvrtkaOdgovorDTO(
+        int sifra,
+        String nazivTvrtke,
+        String sjedisteTvrtke,
+        boolean uStjecaju,
+        Odjel odjel,
+        Djelatnik djelatnik
+        ) {
     
 }

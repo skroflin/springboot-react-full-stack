@@ -8,7 +8,9 @@ import ffos.skroflin.model.Djelatnik;
 import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.Tvrtka;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
+import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -18,25 +20,65 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TvrtkaService extends MainService{
-    public List<Tvrtka> getAll(){
-        return session.createQuery("from tvrtka", Tvrtka.class).list();
+    
+    private TvrtkaOdgovorDTO convertToResponseDTO(Tvrtka tvrtka){
+        return new TvrtkaOdgovorDTO(
+                tvrtka.getSifra(), 
+                tvrtka.getNazivTvrtke(), 
+                tvrtka.getSjedisteTvrtke(), 
+                tvrtka.isUStjecaju(), 
+                tvrtka.getOdjel(), 
+                tvrtka.getDjelatnik()
+        );
     }
     
-    public Tvrtka getBySifra(int sifra){
-        return session.get(Tvrtka.class, sifra);
+    private Tvrtka convertToEntity(TvrtkaDTO dto){
+        return new Tvrtka(dto.nazivTvrtke(), dto.sjedisteTvrtke(), dto.uStjecaju(), dto.odjel(), dto.djelatnik());
+    }
+    
+    private void updateEntityFromDto(Tvrtka tvrtka, TvrtkaDTO dto){
+        tvrtka.setNazivTvrtke(dto.nazivTvrtke());
+        tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
+        tvrtka.setUStjecaju(dto.uStjecaju());
+        tvrtka.setOdjel(dto.odjel());
+        tvrtka.setDjelatnik(dto.djelatnik());
+    }
+    
+    public List<TvrtkaOdgovorDTO> getAll(){
+        List<Tvrtka> tvrtke = session.createQuery(
+                "from tvrtka", Tvrtka.class).list();
+        return tvrtke.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+    
+    public TvrtkaOdgovorDTO getBySifra(int sifra){
+        Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
+        return convertToResponseDTO(tvrtka);
     }
     
     @PreAuthorize("hasRole('admin')")
-    public Tvrtka post(TvrtkaDTO o){
-        Odjel odjel = session.get(Odjel.class, o.odjelSifra());
-        Djelatnik djelatnik = session.get(Djelatnik.class, o.djelatnikSifra());
-        Tvrtka t = new Tvrtka(o.nazivTvrtke(), o.sjedisteTvrtke(), o.uStjecaju(), odjel, djelatnik);
-        session.beginTransaction();
-        session.persist(t);
-        session.getTransaction().commit();
-        return t;
+    public TvrtkaOdgovorDTO post(TvrtkaDTO o){
+        try {
+            Long count = session.createQuery(
+                    "select count(*) from tvrtka t where o.nazivTvrtke = :naziv", Long.class)
+                    .setParameter("naziv", o.nazivTvrtke())
+                    .uniqueResult();
+            if (count > 0) {
+                session.getTransaction().rollback();
+                throw new IllegalArgumentException("Tvrtka s nazivom" + " " + o.nazivTvrtke() + " " + "već postoji!");
+            }
+            Tvrtka tvrtka = convertToEntity(o);
+            session.beginTransaction();
+            session.persist(tvrtka);
+            session.getTransaction().commit();
+            return convertToResponseDTO(tvrtka);
+        } catch (Exception e) {
+            throw new RuntimeException("Greška prilikom stvaranja tvrtke" + " " + e.getMessage(), e);
+        }
     }
     
+    /*
     @PreAuthorize("hasRole('admin')")
     public void put(TvrtkaDTO o, int sifra){
         session.beginTransaction();
@@ -51,6 +93,7 @@ public class TvrtkaService extends MainService{
         session.persist(t);
         session.getTransaction().commit();
     }
+    */
     
     @PreAuthorize("hasRole('admin')")
     public void delete(int sifra){

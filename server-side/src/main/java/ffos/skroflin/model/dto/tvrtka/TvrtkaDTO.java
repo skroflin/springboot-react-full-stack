@@ -4,6 +4,8 @@
  */
 package ffos.skroflin.model.dto.tvrtka;
 
+import ffos.skroflin.model.Djelatnik;
+import ffos.skroflin.model.Odjel;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -14,8 +16,8 @@ public record TvrtkaDTO(
         @Schema(example = "Filozofski fakultet Osijek") String nazivTvrtke,
         @Schema(example = "31000, Osijek, Hrvatska") String sjedisteTvrtke,
         @Schema(example = "false") boolean uStjecaju,
-        @Schema(example = "1") int odjelSifra,
-        @Schema(example = "1") int djelatnikSifra
+        @Schema(example = "1") Odjel odjel,
+        @Schema(example = "1") Djelatnik djelatnik
         ) {
     
 }
