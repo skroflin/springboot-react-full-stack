@@ -9,6 +9,7 @@ import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.Tvrtka;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
+import jakarta.persistence.NoResultException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,22 +79,29 @@ public class TvrtkaService extends MainService{
         }
     }
     
-    /*
     @PreAuthorize("hasRole('admin')")
-    public void put(TvrtkaDTO o, int sifra){
+    public TvrtkaOdgovorDTO put(TvrtkaDTO o, int sifra){
         session.beginTransaction();
-        Odjel odjel = (Odjel) session.get(Odjel.class, o.odjelSifra());
-        Djelatnik djelatnik = (Djelatnik) session.get(Djelatnik.class, o.djelatnikSifra());
         Tvrtka t = (Tvrtka) session.get(Tvrtka.class, sifra);
-        t.setNazivTvrtke(o.nazivTvrtke());
-        t.setSjedisteTvrtke(o.sjedisteTvrtke());
-        t.setUStjecaju(o.uStjecaju());
-        t.setOdjel(odjel);
-        t.setDjelatnik(djelatnik);
+        if (t == null) {
+            session.getTransaction().rollback();
+            throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
+        }
+        if (!t.getNazivTvrtke().equals(o.nazivTvrtke())) {
+            Long count = session.createQuery(
+                    "select count(*) from tvrtka t where t.nazivTvrtke = :naziv", Long.class)
+                    .setParameter("naziv", o.nazivTvrtke())
+                    .uniqueResult();
+            if (count > 0) {
+                session.getTransaction().rollback();
+                throw new IllegalArgumentException("Odjel s nazivom" + " " + o.nazivTvrtke() + " " + "već postoji!");
+            }
+        }
+        updateEntityFromDto(t, o);
         session.persist(t);
         session.getTransaction().commit();
+        return convertToResponseDTO(t);
     }
-    */
     
     @PreAuthorize("hasRole('admin')")
     public void delete(int sifra){
