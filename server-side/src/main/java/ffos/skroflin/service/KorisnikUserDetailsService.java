@@ -36,7 +36,7 @@ public class KorisnikUserDetailsService extends MainService implements UserDetai
                             + " " + korisnickoIme + " " + "ne postoji!");
         }
         
-        GrantedAuthority authority = new SimpleGrantedAuthority("role_" + korisnik.getUloga().name());
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + korisnik.getUloga().name());
         return new User(
                 korisnik.getKorisnickoIme(),
                 korisnik.getLozinka(),

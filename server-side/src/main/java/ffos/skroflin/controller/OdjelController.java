@@ -83,7 +83,7 @@ public class OdjelController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lokacija odjela je obavezna!");
             }
             OdjelOdgovorDTO kreiraniOdjel = odjelService.post(dto);
-            return new ResponseEntity<>(kreiraniOdjel, HttpStatus.OK);
+            return new ResponseEntity<>(kreiraniOdjel, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (NoResultException e) {

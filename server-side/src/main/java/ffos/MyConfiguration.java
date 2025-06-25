@@ -4,10 +4,13 @@
  */
 package ffos;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +40,18 @@ public class MyConfiguration {
             .termsOfService("https://sokrat.ffos.hr/ff-info/kolegiji.php?action=show&id=1900")
         .license(mitLicense);
     
-    return new OpenAPI().info(info).servers(List.of(devServer));
+    final String securitySchemename = "bearerAuth";
+    
+    return new OpenAPI()
+            .info(info)
+            .servers(List.of(devServer))
+            .addSecurityItem(new SecurityRequirement().addList(securitySchemename))
+            .components(new Components()
+                    .addSecuritySchemes(securitySchemename, 
+                            new SecurityScheme()
+                                    .name(securitySchemename)
+                                    .type(SecurityScheme.Type.HTTP)
+                                    .scheme("bearer")
+                                    .bearerFormat("JWT")));
   }
 }
