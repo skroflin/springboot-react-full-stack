@@ -4,8 +4,6 @@
  */
 package ffos.skroflin.model.dto.tvrtka;
 
-import ffos.skroflin.model.Djelatnik;
-import ffos.skroflin.model.Odjel;
 
 /**
  *
@@ -16,8 +14,8 @@ public record TvrtkaOdgovorDTO(
         String nazivTvrtke,
         String sjedisteTvrtke,
         boolean uStjecaju,
-        Odjel odjel,
-        Djelatnik djelatnik
+        Integer odjelSifra,
+        Integer djelatnikSifra
         ) {
     
 }
