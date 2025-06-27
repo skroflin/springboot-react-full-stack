@@ -11,9 +11,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author svenk
  */
 public record OdjelDTO(
-        @Schema(example = "Development") String nazivOdjela,
-        @Schema(example = "Ul. Lorenza Jagera 9") String lokacijaOdjela,
-        @Schema(example = "true") boolean jeAktivan
-        ) {
-    
+        @Schema(example = "Development")
+        String nazivOdjela,
+        @Schema(example = "Ul. Lorenza Jagera 9")
+        String lokacijaOdjela,
+        @Schema(example = "true")
+        boolean jeAktivan,
+        @Schema(example = "1")
+        Integer tvrtkaSifra) {
+
 }

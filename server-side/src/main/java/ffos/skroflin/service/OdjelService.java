@@ -5,6 +5,7 @@
 package ffos.skroflin.service;
 
 import ffos.skroflin.model.Odjel;
+import ffos.skroflin.model.Tvrtka;
 import ffos.skroflin.model.dto.odjel.OdjelDTO;
 import ffos.skroflin.model.dto.odjel.OdjelOdgovorDTO;
 import jakarta.persistence.NoResultException;
@@ -21,17 +22,44 @@ import org.springframework.stereotype.Service;
 public class OdjelService extends MainService {
 
     private OdjelOdgovorDTO convertToResponseDTO(Odjel odjel){
-        return new OdjelOdgovorDTO(odjel.getSifra(), odjel.getNazivOdjela(), odjel.getLokacijaOdjela(), odjel.isJeAktivan());
+        Integer sifraTvrtka = (odjel.getTvrtka() != null) ? odjel.getTvrtka().getSifra() : null;
+        return new OdjelOdgovorDTO(
+                odjel.getSifra(), 
+                odjel.getNazivOdjela(), 
+                odjel.getLokacijaOdjela(), 
+                odjel.isJeAktivan(),
+                sifraTvrtka
+        );
     }
     
     private Odjel convertToEntity(OdjelDTO dto){
-        return new Odjel(dto.nazivOdjela(), dto.lokacijaOdjela(), dto.jeAktivan());
+        Odjel odjel = new Odjel();
+        odjel.setNazivOdjela(dto.nazivOdjela());
+        odjel.setLokacijaOdjela(dto.lokacijaOdjela());
+        odjel.setJeAktivan(dto.jeAktivan());
+        if (dto.tvrtkaSifra() != null) {
+            Tvrtka tvrtka = session.get(Tvrtka.class, dto.tvrtkaSifra());
+            if (tvrtka == null) {
+                throw new IllegalArgumentException("Tvrtka sa šifrom" + " " + dto.tvrtkaSifra() + " " + "ne postoji!");
+            }
+            odjel.setTvrtka(tvrtka);
+        }
+        return odjel;
     }
     
     private void updateEntityFromDto(Odjel odjel, OdjelDTO dto){
         odjel.setNazivOdjela(dto.nazivOdjela());
         odjel.setLokacijaOdjela(dto.lokacijaOdjela());
         odjel.setJeAktivan(dto.jeAktivan());
+        if (dto.tvrtkaSifra() != null) {
+            Tvrtka tvrtka = session.get(Tvrtka.class, dto.tvrtkaSifra());
+            if (tvrtka == null) {
+                throw new IllegalArgumentException("Tvrtka sa šifrom" + " " + dto.tvrtkaSifra() + " " + "ne postoji!");
+            }
+            odjel.setTvrtka(tvrtka);
+        } else {
+            odjel.setTvrtka(null);
+        }
     }
     
     public List<OdjelOdgovorDTO> getAll() {

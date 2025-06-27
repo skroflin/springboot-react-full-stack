@@ -12,7 +12,7 @@ public record OdjelOdgovorDTO(
         int sifra,
         String nazivOdjela,
         String lokacijaOdjela,
-        boolean jeAktivan
-        ) {
-    
+        boolean jeAktivan,
+        Integer tvrtkaSifra) {
+
 }

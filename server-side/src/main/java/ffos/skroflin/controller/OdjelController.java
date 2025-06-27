@@ -7,6 +7,7 @@ package ffos.skroflin.controller;
 import ffos.skroflin.model.dto.odjel.OdjelDTO;
 import ffos.skroflin.model.dto.odjel.OdjelOdgovorDTO;
 import ffos.skroflin.service.OdjelService;
+import ffos.skroflin.service.TvrtkaService;
 import jakarta.persistence.NoResultException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -31,9 +32,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class OdjelController {
 
     private final OdjelService odjelService;
+    private final TvrtkaService tvrtkaService;
 
-    public OdjelController(OdjelService odjelService) {
+    public OdjelController(OdjelService odjelService, TvrtkaService tvrtkaService) {
         this.odjelService = odjelService;
+        this.tvrtkaService = tvrtkaService;
     }
 
     @GetMapping("/get")
@@ -82,6 +85,13 @@ public class OdjelController {
             if (dto.lokacijaOdjela() == null || dto.lokacijaOdjela().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lokacija odjela je obavezna!");
             }
+            if (dto.tvrtkaSifra() != null) {
+                try {
+                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
             OdjelOdgovorDTO kreiraniOdjel = odjelService.post(dto);
             return new ResponseEntity<>(kreiraniOdjel, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
@@ -103,7 +113,19 @@ public class OdjelController {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-
+            if (dto.nazivOdjela() == null || dto.nazivOdjela().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv odjela je obavezan!");
+            }
+            if (dto.lokacijaOdjela() == null || dto.lokacijaOdjela().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lokacija odjela je obavezna!");
+            }
+            if (dto.tvrtkaSifra() != null) {
+                try {
+                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
             OdjelOdgovorDTO azuriraniOdjel = odjelService.put(dto, sifra);
             return new ResponseEntity<>(azuriraniOdjel, HttpStatus.OK);
         } catch (NoResultException e) {

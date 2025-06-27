@@ -7,8 +7,6 @@ package ffos.skroflin.model;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 /**
  *
@@ -23,18 +21,14 @@ public class Tvrtka extends Entitet{
     private String sjedisteTvrtke;
     @Column(columnDefinition = "bit", name = "u_stjecaju")
     private boolean uStjecaju;
-    @ManyToOne
-    @JoinColumn(name = "odjel_sifra", nullable = false)
-    private Odjel odjel;
 
     public Tvrtka() {
     }
 
-    public Tvrtka(String nazivTvrtke, String sjedisteTvrtke, boolean uStjecaju, Odjel odjel) {
+    public Tvrtka(String nazivTvrtke, String sjedisteTvrtke, boolean uStjecaju) {
         this.nazivTvrtke = nazivTvrtke;
         this.sjedisteTvrtke = sjedisteTvrtke;
         this.uStjecaju = uStjecaju;
-        this.odjel = odjel;
     }
 
     public String getNazivTvrtke() {
@@ -59,14 +53,6 @@ public class Tvrtka extends Entitet{
 
     public void setUStjecaju(boolean uStjecaju) {
         this.uStjecaju = uStjecaju;
-    }
-
-    public Odjel getOdjel() {
-        return odjel;
-    }
-
-    public void setOdjel(Odjel odjel) {
-        this.odjel = odjel;
     }
     
 }

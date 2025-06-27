@@ -6,7 +6,6 @@ package ffos.skroflin.controller;
 
 import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
-import ffos.skroflin.service.DjelatnikService;
 import ffos.skroflin.service.OdjelService;
 import ffos.skroflin.service.TvrtkaService;
 import jakarta.persistence.NoResultException;
@@ -32,11 +31,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class TvrtkaController {
 
     private final TvrtkaService tvrtkaService;
-    private final OdjelService odjelService;
 
-    public TvrtkaController(TvrtkaService tvrtkaService, OdjelService odjelService) {
+    public TvrtkaController(TvrtkaService tvrtkaService) {
         this.tvrtkaService = tvrtkaService;
-        this.odjelService = odjelService;
     }
 
     @GetMapping("/get")
@@ -85,13 +82,6 @@ public class TvrtkaController {
             if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
             }
-            if (dto.odjelSifra() != null) {
-                try {
-                    odjelService.getBySifra(dto.odjelSifra());
-                } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
-                }
-            }
             TvrtkaOdgovorDTO kreiranaTvrtka = tvrtkaService.post(dto);
             return new ResponseEntity<>(kreiranaTvrtka, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
@@ -121,13 +111,6 @@ public class TvrtkaController {
             }
             if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
-            }
-            if (dto.odjelSifra() != null) {
-                try {
-                    odjelService.getBySifra(dto.odjelSifra());
-                } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
-                }
             }
             TvrtkaOdgovorDTO azuriranaTvrtka = tvrtkaService.put(dto, sifra);
             return new ResponseEntity<>(azuriranaTvrtka, HttpStatus.OK);

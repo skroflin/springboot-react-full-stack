@@ -23,14 +23,12 @@ import org.springframework.stereotype.Service;
 public class TvrtkaService extends MainService{
     
     private TvrtkaOdgovorDTO convertToResponseDTO(Tvrtka tvrtka){
-        Integer sifraOdjel = (tvrtka.getOdjel() != null) ? tvrtka.getOdjel().getSifra() : null;
         
         return new TvrtkaOdgovorDTO(
                 tvrtka.getSifra(), 
                 tvrtka.getNazivTvrtke(), 
                 tvrtka.getSjedisteTvrtke(), 
-                tvrtka.isUStjecaju(), 
-                sifraOdjel
+                tvrtka.isUStjecaju()
         );
     }
     
@@ -39,13 +37,6 @@ public class TvrtkaService extends MainService{
         tvrtka.setNazivTvrtke(dto.nazivTvrtke());
         tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
         tvrtka.setUStjecaju(dto.uStjecaju());
-        if (dto.odjelSifra() != null) {
-            Odjel odjel = session.get(Odjel.class, dto.odjelSifra());
-            if (odjel == null) {
-                throw new IllegalArgumentException("Odjel sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
-            }
-            tvrtka.setOdjel(odjel);
-        }
         return tvrtka;
     }
     
@@ -53,15 +44,6 @@ public class TvrtkaService extends MainService{
         tvrtka.setNazivTvrtke(dto.nazivTvrtke());
         tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
         tvrtka.setUStjecaju(dto.uStjecaju());
-        if (dto.odjelSifra() != null) {
-            Odjel odjel = session.get(Odjel.class, dto.odjelSifra());
-            if (odjel == null) {
-                throw new IllegalArgumentException("Odjel sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
-            }
-            tvrtka.setOdjel(odjel);
-        } else {
-            tvrtka.setOdjel(null);
-        }
     }
     
     public List<TvrtkaOdgovorDTO> getAll(){
