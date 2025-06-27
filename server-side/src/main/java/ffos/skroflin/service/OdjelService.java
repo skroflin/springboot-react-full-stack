@@ -8,7 +8,6 @@ import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.dto.odjel.OdjelDTO;
 import ffos.skroflin.model.dto.odjel.OdjelOdgovorDTO;
 import jakarta.persistence.NoResultException;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;

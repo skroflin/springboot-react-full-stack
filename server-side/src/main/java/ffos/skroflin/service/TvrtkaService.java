@@ -21,17 +21,7 @@ import org.springframework.stereotype.Service;
  * @author svenk
  */
 @Service
-public class TvrtkaService{
-    
-    private final EntityManager entityManager;
-    private final OdjelService odjelService;
-    private final DjelatnikService djelatnikService;
-
-    public TvrtkaService(EntityManager entityManager, OdjelService odjelService, DjelatnikService djelatnikService) {
-        this.entityManager = entityManager;
-        this.odjelService = odjelService;
-        this.djelatnikService = djelatnikService;
-    }
+public class TvrtkaService extends MainService{
     
     private TvrtkaOdgovorDTO convertToResponseDTO(Tvrtka tvrtka){
         Integer sifraOdjel = (tvrtka.getOdjel() != null) ? tvrtka.getOdjel().getSifra() : null;
@@ -53,14 +43,14 @@ public class TvrtkaService{
         tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
         tvrtka.setUStjecaju(dto.uStjecaju());
         if (dto.odjelSifra() != null) {
-            Odjel odjel = entityManager.find(Odjel.class, dto.odjelSifra());
+            Odjel odjel = session.get(Odjel.class, dto.odjelSifra());
             if (odjel == null) {
                 throw new IllegalArgumentException("Odjel sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
             }
             tvrtka.setOdjel(odjel);
         }
         if (dto.djelatnikSifra() != null) {
-            Djelatnik djelatnik = entityManager.find(Djelatnik.class, dto.djelatnikSifra());
+            Djelatnik djelatnik = session.get(Djelatnik.class, dto.djelatnikSifra());
             if (djelatnik == null) {
                 throw new IllegalArgumentException("Djelatniks sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
             }
@@ -74,7 +64,7 @@ public class TvrtkaService{
         tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
         tvrtka.setUStjecaju(dto.uStjecaju());
         if (dto.odjelSifra() != null) {
-            Odjel odjel = entityManager.find(Odjel.class, dto.odjelSifra());
+            Odjel odjel = session.get(Odjel.class, dto.odjelSifra());
             if (odjel == null) {
                 throw new IllegalArgumentException("Odjel sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
             }
@@ -84,7 +74,7 @@ public class TvrtkaService{
         }
         
         if (dto.djelatnikSifra() != null) {
-            Djelatnik djelatnik = entityManager.find(Djelatnik.class, dto.djelatnikSifra());
+            Djelatnik djelatnik = session.get(Djelatnik.class, dto.djelatnikSifra());
             if (djelatnik == null) {
                 throw new IllegalArgumentException("Djelatniks sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
             }
@@ -95,32 +85,33 @@ public class TvrtkaService{
     }
     
     public List<TvrtkaOdgovorDTO> getAll(){
-        List<Tvrtka> tvrtke = entityManager.createQuery(
-                "from tvrtka", Tvrtka.class).getResultList();
+        List<Tvrtka> tvrtke = session.createQuery(
+                "from tvrtka", Tvrtka.class).list();
         return tvrtke.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
     
     public TvrtkaOdgovorDTO getBySifra(int sifra){
-        Tvrtka tvrtka = entityManager.find(Tvrtka.class, sifra);
+        Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         return convertToResponseDTO(tvrtka);
     }
     
     @PreAuthorize("hasRole('admin')")
     public TvrtkaOdgovorDTO post(TvrtkaDTO o){
         try {
-            Long count = entityManager.createQuery(
-                    "select count(*) from tvrtka t where o.nazivTvrtke = :naziv", Long.class)
+            Long count = session.createQuery(
+                    "select count(*) from tvrtka t where t.nazivTvrtke = :naziv", Long.class)
                     .setParameter("naziv", o.nazivTvrtke())
                     .getSingleResult();
             if (count > 0) {
-                entityManager.getTransaction().rollback();
+                session.getTransaction().rollback();
                 throw new IllegalArgumentException("Tvrtka s nazivom" + " " + o.nazivTvrtke() + " " + "već postoji!");
             }
             Tvrtka tvrtka = convertToEntity(o);
-            entityManager.persist(tvrtka);
-            entityManager.flush();
+            session.beginTransaction();
+            session.persist(tvrtka);
+            session.getTransaction().commit();
             return convertToResponseDTO(tvrtka);
         } catch (Exception e) {
             throw new RuntimeException("Greška prilikom stvaranja tvrtke" + " " + e.getMessage(), e);
@@ -129,12 +120,12 @@ public class TvrtkaService{
     
     @PreAuthorize("hasRole('admin')")
     public TvrtkaOdgovorDTO put(TvrtkaDTO o, int sifra){
-        Tvrtka t = entityManager.find(Tvrtka.class, sifra);
+        Tvrtka t = session.get(Tvrtka.class, sifra);
         if (t == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
         if (!t.getNazivTvrtke().equals(o.nazivTvrtke())) {
-            Long count = entityManager.createQuery(
+            Long count = session.createQuery(
                     "select count(*) from tvrtka t where t.nazivTvrtke = :naziv", Long.class)
                     .setParameter("naziv", o.nazivTvrtke())
                     .getSingleResult();
@@ -143,22 +134,24 @@ public class TvrtkaService{
             }
         }
         updateEntityFromDto(t, o);
-        entityManager.flush();
+        session.beginTransaction();session.beginTransaction(); 
+       session.persist(t);
+        session.getTransaction().commit();
         return convertToResponseDTO(t);
     }
     
     @PreAuthorize("hasRole('admin')")
     public void delete(int sifra){
-        Tvrtka tvrtka = entityManager.find(Tvrtka.class, sifra);
+        Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         if (tvrtka == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
-        entityManager.remove(tvrtka);
+        session.remove(tvrtka);
     }
     
     @PreAuthorize("hasRole('admin')")
     public void softDelete(int sifra){
-        Tvrtka tvrtka = entityManager.find(Tvrtka.class, sifra);
+        Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         if (tvrtka == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
@@ -166,7 +159,7 @@ public class TvrtkaService{
     }
     
     public List<TvrtkaOdgovorDTO> getAktivneTvrtke(boolean aktivan){
-        List<Tvrtka> tvrtke = entityManager.createQuery(
+        List<Tvrtka> tvrtke = session.createQuery(
                 "from tvrtka t where t.aktivan = :uvjet", Tvrtka.class)
                 .setParameter("uvjet", aktivan)
                 .getResultList();
