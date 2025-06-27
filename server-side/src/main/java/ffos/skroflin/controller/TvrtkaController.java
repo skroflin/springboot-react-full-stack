@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/skroflin/tvrtka")
 public class TvrtkaController {
+
     private final TvrtkaService tvrtkaService;
     private final OdjelService odjelService;
     private final DjelatnikService djelatnikService;
@@ -39,23 +41,21 @@ public class TvrtkaController {
         this.djelatnikService = djelatnikService;
     }
 
-    
-    
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated")
-    public ResponseEntity<List<TvrtkaOdgovorDTO>> getAll(){
+    public ResponseEntity<List<TvrtkaOdgovorDTO>> getAll() {
         try {
             return new ResponseEntity<>(tvrtkaService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
         }
     }
-    
+
     @GetMapping("/getBySifra/{sifra}")
     @PreAuthorize("isAuthenticated")
     public ResponseEntity<TvrtkaOdgovorDTO> getBySifra(
             @RequestParam int sifra
-    ){
+    ) {
         try {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
@@ -71,12 +71,12 @@ public class TvrtkaController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
         }
     }
-    
+
     @PostMapping("/post")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<TvrtkaOdgovorDTO> post(
             @RequestBody(required = true) TvrtkaDTO dto
-    ){
+    ) {
         try {
             if (dto == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nisu uneseni traženi podaci!");
@@ -87,14 +87,14 @@ public class TvrtkaController {
             if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
             }
-            if (dto.odjelSifra()!= null) {
+            if (dto.odjelSifra() != null) {
                 try {
                     odjelService.getBySifra(dto.odjelSifra());
                 } catch (Exception e) {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
                 }
             }
-            if (dto.djelatnikSifra()!= null) {
+            if (dto.djelatnikSifra() != null) {
                 try {
                     djelatnikService.getBySifra(dto.djelatnikSifra());
                 } catch (Exception e) {
@@ -109,6 +109,74 @@ public class TvrtkaController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping("/put/{sifra}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<TvrtkaOdgovorDTO> put(
+            @RequestParam int sifra,
+            @RequestBody(required = true) TvrtkaDTO dto
+    ) {
+        try {
+            if (sifra <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            }
+            if (dto == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nisu uneseni traženi podaci!");
+            }
+            if (dto.nazivTvrtke() == null || dto.nazivTvrtke().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv tvrtke je obavezan!");
+            }
+            if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
+            }
+            if (dto.odjelSifra() != null) {
+                try {
+                    odjelService.getBySifra(dto.odjelSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
+            if (dto.djelatnikSifra() != null) {
+                try {
+                    djelatnikService.getBySifra(dto.djelatnikSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
+            TvrtkaOdgovorDTO azuriranaTvrtka = tvrtkaService.put(dto, sifra);
+            return new ResponseEntity<>(azuriranaTvrtka, HttpStatus.OK);
+        } catch (NoResultException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Greška prilikom ažuriranja" + " " + e.getMessage(),
+                    e
+            );
+        }
+    }
+    
+    @PutMapping("softDelete/{sifra}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<Void> softDelete(
+            @RequestParam int sifra
+    ){
+        try {
+            if (sifra <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            }
+            tvrtkaService.softDelete(sifra);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (NoResultException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
         }
     }
 }
