@@ -26,19 +26,15 @@ public class Tvrtka extends Entitet{
     @ManyToOne
     @JoinColumn(name = "odjel_sifra", nullable = false)
     private Odjel odjel;
-    @ManyToOne
-    @JoinColumn(name = "djelatnik_sifra")
-    private Djelatnik djelatnik;
 
     public Tvrtka() {
     }
 
-    public Tvrtka(String nazivTvrtke, String sjedisteTvrtke, boolean uStjecaju, Odjel odjel, Djelatnik djelatnik) {
+    public Tvrtka(String nazivTvrtke, String sjedisteTvrtke, boolean uStjecaju, Odjel odjel) {
         this.nazivTvrtke = nazivTvrtke;
         this.sjedisteTvrtke = sjedisteTvrtke;
         this.uStjecaju = uStjecaju;
         this.odjel = odjel;
-        this.djelatnik = djelatnik;
     }
 
     public String getNazivTvrtke() {
@@ -72,14 +68,5 @@ public class Tvrtka extends Entitet{
     public void setOdjel(Odjel odjel) {
         this.odjel = odjel;
     }
-
-    public Djelatnik getDjelatnik() {
-        return djelatnik;
-    }
-
-    public void setDjelatnik(Djelatnik djelatnik) {
-        this.djelatnik = djelatnik;
-    }
-    
     
 }

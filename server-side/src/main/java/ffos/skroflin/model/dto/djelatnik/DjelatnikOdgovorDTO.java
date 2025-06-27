@@ -18,7 +18,9 @@ public record DjelatnikOdgovorDTO(
         String prezimeDjelatnika,
         BigDecimal placaDjelatnika,
         Date pocetakRada,
-        boolean jeZaposlen
+        boolean jeZaposlen,
+        Integer odjelSifra,
+        Integer tvrtkaSifra
         ) {
     
 }

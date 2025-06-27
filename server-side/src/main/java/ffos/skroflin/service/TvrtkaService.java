@@ -9,7 +9,6 @@ import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.Tvrtka;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,15 +24,13 @@ public class TvrtkaService extends MainService{
     
     private TvrtkaOdgovorDTO convertToResponseDTO(Tvrtka tvrtka){
         Integer sifraOdjel = (tvrtka.getOdjel() != null) ? tvrtka.getOdjel().getSifra() : null;
-        Integer sifraDjelatnik = (tvrtka.getDjelatnik()!= null) ? tvrtka.getDjelatnik().getSifra() : null;
         
         return new TvrtkaOdgovorDTO(
                 tvrtka.getSifra(), 
                 tvrtka.getNazivTvrtke(), 
                 tvrtka.getSjedisteTvrtke(), 
                 tvrtka.isUStjecaju(), 
-                sifraOdjel, 
-                sifraDjelatnik
+                sifraOdjel
         );
     }
     
@@ -49,13 +46,6 @@ public class TvrtkaService extends MainService{
             }
             tvrtka.setOdjel(odjel);
         }
-        if (dto.djelatnikSifra() != null) {
-            Djelatnik djelatnik = session.get(Djelatnik.class, dto.djelatnikSifra());
-            if (djelatnik == null) {
-                throw new IllegalArgumentException("Djelatniks sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
-            }
-            tvrtka.setDjelatnik(djelatnik);
-        }
         return tvrtka;
     }
     
@@ -69,16 +59,6 @@ public class TvrtkaService extends MainService{
                 throw new IllegalArgumentException("Odjel sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
             }
             tvrtka.setOdjel(odjel);
-        } else {
-            tvrtka.setOdjel(null);
-        }
-        
-        if (dto.djelatnikSifra() != null) {
-            Djelatnik djelatnik = session.get(Djelatnik.class, dto.djelatnikSifra());
-            if (djelatnik == null) {
-                throw new IllegalArgumentException("Djelatniks sa šifrom" + " " + dto.odjelSifra() + " " + "ne postoji!");
-            }
-            tvrtka.setDjelatnik(djelatnik);
         } else {
             tvrtka.setOdjel(null);
         }
@@ -120,7 +100,7 @@ public class TvrtkaService extends MainService{
     
     @PreAuthorize("hasRole('admin')")
     public TvrtkaOdgovorDTO put(TvrtkaDTO o, int sifra){
-        Tvrtka t = session.get(Tvrtka.class, sifra);
+        Tvrtka t = (Tvrtka) session.get(Tvrtka.class, sifra);
         if (t == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
@@ -134,8 +114,8 @@ public class TvrtkaService extends MainService{
             }
         }
         updateEntityFromDto(t, o);
-        session.beginTransaction();session.beginTransaction(); 
-       session.persist(t);
+        session.beginTransaction();
+        session.persist(t);
         session.getTransaction().commit();
         return convertToResponseDTO(t);
     }

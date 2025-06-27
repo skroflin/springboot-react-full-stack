@@ -7,6 +7,8 @@ package ffos.skroflin.model;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -16,7 +18,8 @@ import java.util.Date;
  */
 @Entity(name = "djelatnik")
 @AttributeOverride(name = "sifra", column = @Column(name = "djelatnik_sifra"))
-public class Djelatnik extends Entitet{
+public class Djelatnik extends Entitet {
+
     @Column(name = "ime_djelatnika", nullable = false)
     private String imeDjelatnika;
     @Column(name = "prezime_djelatnika", nullable = false)
@@ -29,17 +32,25 @@ public class Djelatnik extends Entitet{
     private Date pocetakRada;
     @Column(columnDefinition = "bit", name = "zaposlen")
     private boolean jeZaposlen;
+    @ManyToOne
+    @JoinColumn(name = "odjel_sifra", nullable = false)
+    private Odjel odjel;
+    @ManyToOne
+    @JoinColumn(name = "tvrtka_sifra", nullable = false)
+    private Tvrtka tvrtka;
 
     public Djelatnik() {
     }
 
-    public Djelatnik(String imeDjelatnika, String prezimeDjelatnika, BigDecimal placaDjelatnika, Date datumRodenja, Date pocetakRada, boolean jeZaposlen) {
+    public Djelatnik(String imeDjelatnika, String prezimeDjelatnika, BigDecimal placaDjelatnika, Date datumRodenja, Date pocetakRada, boolean jeZaposlen, Odjel odjel, Tvrtka tvrtka) {
         this.imeDjelatnika = imeDjelatnika;
         this.prezimeDjelatnika = prezimeDjelatnika;
         this.placaDjelatnika = placaDjelatnika;
         this.datumRodenja = datumRodenja;
         this.pocetakRada = pocetakRada;
         this.jeZaposlen = jeZaposlen;
+        this.odjel = odjel;
+        this.tvrtka = tvrtka;
     }
 
     public String getImeDjelatnika() {
@@ -89,5 +100,21 @@ public class Djelatnik extends Entitet{
     public void setJeZaposlen(boolean jeZaposlen) {
         this.jeZaposlen = jeZaposlen;
     }
-    
+
+    public Odjel getOdjel() {
+        return odjel;
+    }
+
+    public void setOdjel(Odjel odjel) {
+        this.odjel = odjel;
+    }
+
+    public Tvrtka getTvrtka() {
+        return tvrtka;
+    }
+
+    public void setTvrtka(Tvrtka tvrtka) {
+        this.tvrtka = tvrtka;
+    }
+
 }

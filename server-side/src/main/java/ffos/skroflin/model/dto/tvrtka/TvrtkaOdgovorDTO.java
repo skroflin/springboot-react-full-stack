@@ -14,8 +14,7 @@ public record TvrtkaOdgovorDTO(
         String nazivTvrtke,
         String sjedisteTvrtke,
         boolean uStjecaju,
-        Integer odjelSifra,
-        Integer djelatnikSifra
+        Integer odjelSifra
         ) {
     
 }

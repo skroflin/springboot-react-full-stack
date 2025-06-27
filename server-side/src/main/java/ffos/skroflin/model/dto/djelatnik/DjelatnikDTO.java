@@ -13,12 +13,21 @@ import java.util.Date;
  * @author svenk
  */
 public record DjelatnikDTO(
-        @Schema(example = "Sven") String imeDjelatnika,
-        @Schema(example = "Kroflin") String prezimeDjelatnika,
-        @Schema(example = "1050.65") BigDecimal placaDjelatnika,
-        @Schema(example = "2002-03-05") Date datumRodenja,
-        @Schema(example = "2026-06-25") Date pocetakRada,
-        @Schema(example = "true") boolean jeZaposlen
-        ) {
-    
+        @Schema(example = "Sven")
+        String imeDjelatnika,
+        @Schema(example = "Kroflin")
+        String prezimeDjelatnika,
+        @Schema(example = "1050.65")
+        BigDecimal placaDjelatnika,
+        @Schema(example = "2002-03-05")
+        Date datumRodenja,
+        @Schema(example = "2026-06-25")
+        Date pocetakRada,
+        @Schema(example = "true")
+        boolean jeZaposlen,
+        @Schema(example = "1")
+        Integer odjelSifra,
+        @Schema(example = "1")
+        Integer tvrtkaSifra) {
+
 }

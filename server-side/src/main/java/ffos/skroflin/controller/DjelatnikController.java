@@ -8,6 +8,8 @@ import ffos.skroflin.model.dto.djelatnik.DjelatnikDTO;
 import ffos.skroflin.model.dto.djelatnik.DjelatnikOdgovorDTO;
 import ffos.skroflin.model.dto.djelatnik.PlacaOdgovorDTO;
 import ffos.skroflin.service.DjelatnikService;
+import ffos.skroflin.service.OdjelService;
+import ffos.skroflin.service.TvrtkaService;
 import jakarta.persistence.NoResultException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,9 +34,13 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/skroflin/djelatnik")
 public class DjelatnikController {
     private final DjelatnikService djelatnikService;
+    private final OdjelService odjelService;
+    private final TvrtkaService tvrtkaService;
 
-    public DjelatnikController(DjelatnikService djelatnikService) {
+    public DjelatnikController(DjelatnikService djelatnikService, OdjelService odjelService, TvrtkaService tvrtkaService) {
         this.djelatnikService = djelatnikService;
+        this.odjelService = odjelService;
+        this.tvrtkaService = tvrtkaService;
     }
     
     @GetMapping("/get")
@@ -86,6 +92,20 @@ public class DjelatnikController {
             if (dto.pocetakRada() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Početak rada djelatnika je obavezno!");
             }
+            if (dto.odjelSifra() != null) {
+                try {
+                    odjelService.getBySifra(dto.odjelSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
+            if (dto.tvrtkaSifra() != null) {
+                try {
+                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
             DjelatnikOdgovorDTO unesenDjelatnik = djelatnikService.post(dto);
             return new ResponseEntity<>(unesenDjelatnik, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -107,7 +127,29 @@ public class DjelatnikController {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-            
+            if (dto.imeDjelatnika() == null || dto.imeDjelatnika().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ime djelatnik je obavezno!");
+            }
+            if (dto.prezimeDjelatnika() == null || dto.prezimeDjelatnika().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prezime djelatnik je obavezno!");
+            }
+            if (dto.pocetakRada() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Početak rada djelatnika je obavezno!");
+            }
+            if (dto.odjelSifra() != null) {
+                try {
+                    odjelService.getBySifra(dto.odjelSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
+            if (dto.tvrtkaSifra() != null) {
+                try {
+                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                } catch (Exception e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                }
+            }
             DjelatnikOdgovorDTO azuriraniDjelatnik = djelatnikService.put(dto, sifra);
             return new ResponseEntity<>(azuriraniDjelatnik, HttpStatus.OK);
         } catch (NoResultException e) {

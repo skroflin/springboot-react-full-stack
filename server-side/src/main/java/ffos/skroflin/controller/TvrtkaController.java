@@ -33,12 +33,10 @@ public class TvrtkaController {
 
     private final TvrtkaService tvrtkaService;
     private final OdjelService odjelService;
-    private final DjelatnikService djelatnikService;
 
-    public TvrtkaController(TvrtkaService tvrtkaService, OdjelService odjelService, DjelatnikService djelatnikService) {
+    public TvrtkaController(TvrtkaService tvrtkaService, OdjelService odjelService) {
         this.tvrtkaService = tvrtkaService;
         this.odjelService = odjelService;
-        this.djelatnikService = djelatnikService;
     }
 
     @GetMapping("/get")
@@ -94,13 +92,6 @@ public class TvrtkaController {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
                 }
             }
-            if (dto.djelatnikSifra() != null) {
-                try {
-                    djelatnikService.getBySifra(dto.djelatnikSifra());
-                } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
-                }
-            }
             TvrtkaOdgovorDTO kreiranaTvrtka = tvrtkaService.post(dto);
             return new ResponseEntity<>(kreiranaTvrtka, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
@@ -134,13 +125,6 @@ public class TvrtkaController {
             if (dto.odjelSifra() != null) {
                 try {
                     odjelService.getBySifra(dto.odjelSifra());
-                } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
-                }
-            }
-            if (dto.djelatnikSifra() != null) {
-                try {
-                    djelatnikService.getBySifra(dto.djelatnikSifra());
                 } catch (Exception e) {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
                 }
