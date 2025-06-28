@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +33,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final KorisnikUserDetailsService userDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
 
+    private static final List<String> AUTH_WHITELIST = Arrays.asList(
+            "/api/skroflin/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "swagger-ui.html",
+            "/authenticate"
+    );
+    
     public JwtRequestFilter(KorisnikUserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil) {
         this.userDetailsService = userDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
@@ -40,6 +49,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        
+        String requestUri = request.getRequestURI();
+        if (AUTH_WHITELIST.stream().anyMatch(uri -> requestUri.startsWith(uri.replace("/**", "")))) {
+            chain.doFilter(request, response);
+            return;
+        }
+        
         final String authorizationHeader = request.getHeader("Authorization");
         String username = null;
         String jwt = null;
