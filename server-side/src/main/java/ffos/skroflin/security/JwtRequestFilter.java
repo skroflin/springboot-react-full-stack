@@ -34,8 +34,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
 
     private static final List<String> AUTH_WHITELIST = Arrays.asList(
-            "/api/skroflin/**",
-            "/v3/api-docs/**",
+            "/api/skroflin/prijava",
+            "/v3/api-docs/registracija",
             "/swagger-ui/**",
             "swagger-ui.html",
             "/authenticate"
@@ -60,7 +60,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String username = null;
         String jwt = null;
         
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer" + " ")) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             try {
                 username = jwtTokenUtil.extractUsername(jwt);

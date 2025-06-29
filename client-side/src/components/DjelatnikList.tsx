@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import type { DjelatnikOdgovorDTO } from "../types/Djelatnik";
 
-export function DjelatnikList() {
+interface DjelatnikListProps {
+    authToken: string
+}
+
+export function DjelatnikList({ authToken }: DjelatnikListProps) {
     const [djelatnici, setDjelatnici] = useState<DjelatnikOdgovorDTO[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
@@ -11,9 +15,10 @@ export function DjelatnikList() {
             setLoading(true)
             setError(null)
             try {
-                const response = await fetch('/api/skroflin/djelatnik/get', {
+                const response = await fetch('http://localhost:8080/api/skroflin/djelatnik/get', {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
                     }
                 })
 
@@ -35,7 +40,13 @@ export function DjelatnikList() {
                 setLoading(false)
             }
         }
-        fetchDjelatnici()
+        if (authToken) {
+            fetchDjelatnici()
+        } else {
+            setDjelatnici([])
+            setLoading(false)
+            setError('Niste prijavljeni!')
+        }
     }, [])
 
     if (loading) {
