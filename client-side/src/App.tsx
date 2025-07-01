@@ -1,54 +1,79 @@
-import React, { useState } from 'react'
-import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
-import { Login } from './components/Login'
-import { HomePage } from './pages/HomePage'
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Login } from './components/Login';
+import { HomePage } from './pages/HomePage';
+import { DjelatnikList } from './components/DjelatnikList';
+import { OdjelList } from './components/OdjelList';
+import { TvrtkaList } from './components/TvrtkaList';
+import Navbar from './components/Navbar';
 
-const AuthWrapper: React.FC = () => {
-  const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('jwtToken'))
+const App: React.FC = () => {
+  const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('jwtToken'));
+  const [username, setUsername] = useState<string | null>(localStorage.getItem('username'));
+  const location = useLocation();
+  const isAuthenticated = !!authToken;
 
-  const handleLoginSuccess = (token: string) => {
-    setAuthToken(token)
-  }
+  const handleLoginSuccess = (token: string, userIdentifier: string) => {
+    setAuthToken(token);
+    setUsername(userIdentifier);
+    localStorage.setItem('jwtToken', token);
+    localStorage.setItem('username', userIdentifier);
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem('jwtToken')
-    setAuthToken(null)
-  }
+    setAuthToken(null);
+    setUsername(null);
+    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('username');
+  };
 
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={<Login onLoginSuccess={handleLoginSuccess} />} />
-      <Route
-        path='/djelatnik'
-        element={
-          authToken ? (
-            <HomePage authToken={authToken} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      {
-        <Route
-          path='/'
-          element={authToken ? <Navigate to="djelatnik" replace /> : <Navigate to="/login" replace />}
-        />
-      }
-      <Route path='*' element={<h1 className='text-center mt-20 text-4xl text-gray-700'>404 - Stranica nije pronađena</h1>} />
-    </Routes >
-  )
-}
-
-function App() {
-  return (
-    <Router>
-      <div className='App p-4'>
-        <AuthWrapper />
+    <>
+      <Navbar username={username} isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+      <div className="pt-16 px-4 pb-4 bg-gray-50 min-h-screen">
+        <Routes>
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/home" replace /> : <Login onLoginSuccess={handleLoginSuccess} />}
+          />
+          <Route
+            path="/home"
+            element={
+              isAuthenticated
+                ? <HomePage authToken={authToken} username={username} />
+                : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/djelatnici"
+            element={
+              isAuthenticated
+                ? <DjelatnikList authToken={authToken!} />
+                : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/odjeli"
+            element={
+              isAuthenticated
+                ? <OdjelList authToken={authToken!} />
+                : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/tvrtke"
+            element={
+              isAuthenticated
+                ? <TvrtkaList authToken={authToken!} />
+                : <Navigate to="/login" replace />
+            }
+          />
+          <Route path="/" element={<Navigate to={isAuthenticated ? "/home" : "/login"} replace />} />
+          <Route path="*" element={<h1 className="text-center mt-20 text-4xl text-gray-700">404 - Stranica nije pronađena</h1>} />
+        </Routes>
       </div>
-    </Router>
-  )
-}
+    </>
+  );
+};
 
-export default App
+export default App;

@@ -1,12 +1,12 @@
 export interface TvrtkaOdgovorDTO {
     sifra: number,
     nazivTvrtke: string,
-    lokacijaTvrtke: string,
+    sjedisteTvrtke: string,
     uStjecaju: boolean
 }
 
 export interface TvrtkaDTO {
     nazivTvrtke: string,
-    lokacijaTvrtke: string,
+    sjedisteTvrtke: string,
     uStjecaju: boolean
 }
