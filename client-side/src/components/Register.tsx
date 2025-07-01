@@ -55,7 +55,7 @@ export function Register() {
     };
 
     return (
-        <div className="flex w-full h-screen bg-gradient-to-br from-gray-900 to-gray-700 justify-between items-center">
+        <div className="flex w-full h-screen bg-gradient-to-br from-blue-900 to-blue-700 justify-between items-center">
             <div className="text-white mx-20">
                 <h1 className="text-6xl font-bold mb-4 justify-start">
                     Registrirajte se
@@ -111,7 +111,7 @@ export function Register() {
                     <div className="flex items-center justify-between">
                         <button
                             type="submit"
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
                         >
                             Registriraj se
                         </button>
