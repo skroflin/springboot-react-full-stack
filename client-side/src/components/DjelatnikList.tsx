@@ -59,19 +59,19 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
     }, [authToken]);
 
     if (loading) {
-        return <div className="text-center p-4">Učitavam djelatnike...</div>;
+        return <div className="flex items-center justify-center min-h-[60vh]"><div className="text-center p-4">Učitavam djelatnike...</div></div>;
     }
 
     if (error) {
-        return <div className="text-center p-4 text-red-600">Greška: {error}</div>;
+        return <div className="flex items-center justify-center min-h-[60vh]"><div className="text-center p-4 text-red-600">Greška: {error}</div></div>;
     }
 
     if (djelatnici.length === 0 && !loading && !error) {
-        return <p className="text-gray-600">Nema pronađenih djelatnika (ili niste prijavljeni).</p>;
+        return <div className="flex items-center justify-center min-h-[60vh]"><p className="text-gray-600">Nema pronađenih djelatnika (ili niste prijavljeni).</p></div>;
     }
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="w-full max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-800 mb-6">Popis Djelatnika</h1>
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">

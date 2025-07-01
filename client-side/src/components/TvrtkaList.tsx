@@ -71,7 +71,7 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
     }
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="w-full max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-800 mb-6">Popis Tvrtki</h1>
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">

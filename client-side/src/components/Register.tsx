@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-interface LoginProps {
-    onLoginSuccess: (token: string, username: string) => void;
-}
-
-export function Login({ onLoginSuccess }: LoginProps) {
+export function Register() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setSuccessMessage(null);
+
+        if (password !== confirmPassword) {
+            setError('Lozinke se ne podudaraju!');
+            return;
+        }
 
         try {
-            const response = await fetch('http://localhost:8080/api/skroflin/korisnik/prijava', {
+            const response = await fetch('http://localhost:8080/api/skroflin/korisnik/registracija', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -25,7 +29,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
             });
 
             if (!response.ok) {
-                let errorMessage = 'Greška pri prijavi.';
+                let errorMessage = 'Greška pri registraciji.';
                 try {
                     const errorData = await response.json();
                     errorMessage = errorData.message || errorData.error || response.statusText;
@@ -35,13 +39,13 @@ export function Login({ onLoginSuccess }: LoginProps) {
                 throw new Error(errorMessage);
             }
 
-            const data = await response.json();
-            const jwtToken = data.jwt;
-            const loggedInUsername = data.korisnickoIme ?? '';
-            onLoginSuccess(jwtToken, loggedInUsername);
-            navigate('/djelatnici');
+            setSuccessMessage('Registracija uspješna! Preusmjeravam na stranicu za prijavu...');
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
+
         } catch (err) {
-            console.error('Greška pri prijavi:', err);
+            console.error('Greška pri registraciji:', err);
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -51,18 +55,19 @@ export function Login({ onLoginSuccess }: LoginProps) {
     };
 
     return (
-        <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex justify-between items-center">
+        <div className="flex w-full h-screen bg-gradient-to-br from-gray-900 to-gray-700 justify-between items-center">
             <div className="text-white mx-20">
                 <h1 className="text-6xl font-bold mb-4 justify-start">
-                    Dobrodošli
+                    Registrirajte se
                 </h1>
-                <p className="text-xl text-gray-3">
-                    Prijavite se u Vaš račun!
+                <p className="text-xl text-gray-300">
+                    Stvorite novi račun!
                 </p>
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg mr-20 w-96">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Prijava</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Registracija</h2>
                 {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+                {successMessage && <p className="text-green-500 text-sm mb-4 text-center">{successMessage}</p>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
@@ -77,8 +82,8 @@ export function Login({ onLoginSuccess }: LoginProps) {
                             required
                         />
                     </div>
-                    <div className="mb-6">
-                        <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
+                    <div className="mb-4">
+                        <label htmlFor="password" className="block text-700 text-sm font-bold mb-2">
                             Lozinka:
                         </label>
                         <input
@@ -86,7 +91,20 @@ export function Login({ onLoginSuccess }: LoginProps) {
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-bold mb-2">
+                            Potvrdi lozinku:
+                        </label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>
@@ -95,15 +113,15 @@ export function Login({ onLoginSuccess }: LoginProps) {
                             type="submit"
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
                         >
-                            Prijavi se
+                            Registriraj se
                         </button>
                     </div>
                 </form>
                 <div className="mt-6 text-center">
                     <p className="text-gray-600 text-sm">
-                        Nemate račun?{' '}
-                        <Link to="/register" className="font-bold text-blue-600 hover:text-blue-800 transition-colors duration-200">
-                            Registrirajte se ovdje.
+                        Već imate račun?{' '}
+                        <Link to="/login" className="font-bold text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                            Prijavite se ovdje.
                         </Link>
                     </p>
                 </div>
