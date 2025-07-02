@@ -67,7 +67,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg mr-20 w-96">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Prijava</h2>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className='mt-6 pt-4 border-t border-gray-400'>
                     <div className="mb-4">
                         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
                             Korisničko ime:

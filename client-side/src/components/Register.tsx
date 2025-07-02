@@ -9,6 +9,7 @@ export function Register() {
     const [email, setEmail] = useState('');
     const [uloga, setUloga] = useState('user');
     const [aktivan, setAktivan] = useState(true);
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +17,6 @@ export function Register() {
 
         if (password !== confirmPassword) {
             toast.error('Lozinke se ne podudaraju!');
-            return;
         }
 
         try {
@@ -33,14 +33,13 @@ export function Register() {
                     aktivan: aktivan
                 }),
             });
-
             if (!response.ok) {
-                let errorMessage = 'Greška pri registraciji.';
+                let errorMessage: string = 'Greška pri registraciji.';
                 try {
                     const errorData = await response.json();
-                    errorMessage = errorData.message || errorData.error || response.statusText;
+                    errorMessage = errorData.message || errorData.error || `HTTP greška: ${response.status} ${response.statusText}`;
                 } catch (jsonError) {
-                    errorMessage = `HTTP greška: ${response.status} ${response.statusText}. Odgovor nije bio JSON.`;
+                    errorMessage = `HTTP greška: ${response.status} ${response.statusText || 'Nepoznata greška'}. Odgovor nije bio JSON.`;
                 }
                 throw new Error(errorMessage);
             }
@@ -72,7 +71,7 @@ export function Register() {
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg mr-20 w-96">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Registracija</h2>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className='mt-6 pt-4 border-t border-gray-400'>
                     <div className="mb-4">
                         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
                             Korisničko ime:
@@ -136,8 +135,8 @@ export function Register() {
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
+                            <option value="user">Korisnik</option>
+                            <option value="admin">Administrator</option>
                         </select>
                     </div>
                     <div className="mb-6 flex items-center">
@@ -149,11 +148,10 @@ export function Register() {
                             className="mr-2 leading-tight"
                         />
                         <label htmlFor="aktivan" className="text-sm text-gray-700">
-                            Aktivan korisnik
+                            Želim biti aktivan korisnik
                         </label>
                     </div>
-
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-400">
                         <button
                             type="submit"
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
