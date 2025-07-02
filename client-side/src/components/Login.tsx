@@ -24,22 +24,27 @@ export function Login({ onLoginSuccess }: LoginProps) {
             });
 
             if (!response.ok) {
-                let errorMessage = 'Greška pri prijavi.';
+                let errorMessage: string;
                 try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorData.error || response.statusText;
-                } catch (jsonError) {
-                    errorMessage = `HTTP greška: ${response.status} ${response.statusText}. Odgovor nije bio JSON.`;
+                    errorMessage = await response.text();
+                    if (!errorMessage) {
+                        errorMessage = 'Netočno korisničko ime ili lozinka.';
+                    }
+                } catch (readError) {
+                    errorMessage = `HTTP greška: ${response.status} ${response.statusText}.`;
                 }
+
                 throw new Error(errorMessage);
             }
 
             const data = await response.json();
             const jwtToken = data.jwt;
             const loggedInUsername = data.korisnickoIme ?? '';
+
             onLoginSuccess(jwtToken, loggedInUsername);
             toast.success('Prijava uspješna!');
             navigate('/djelatnici');
+
         } catch (err) {
             console.error('Greška pri prijavi:', err);
             if (err instanceof Error) {
@@ -51,7 +56,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
     };
 
     return (
-        <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex justify-between items-center">
+        <div className="w-screen h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex justify-between items-center">
             <div className="text-white mx-20">
                 <h1 className="text-6xl font-bold mb-4 justify-start">
                     Dobrodošli

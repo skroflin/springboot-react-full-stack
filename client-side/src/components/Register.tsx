@@ -6,6 +6,9 @@ export function Register() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [email, setEmail] = useState('');
+    const [uloga, setUloga] = useState('user');
+    const [aktivan, setAktivan] = useState(true);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -22,7 +25,13 @@ export function Register() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ korisnickoIme: username, lozinka: password }),
+                body: JSON.stringify({
+                    korisnickoIme: username,
+                    lozinka: password,
+                    email: email,
+                    uloga: uloga,
+                    aktivan: aktivan
+                }),
             });
 
             if (!response.ok) {
@@ -52,7 +61,7 @@ export function Register() {
     };
 
     return (
-        <div className="flex w-full h-screen bg-gradient-to-br from-blue-900 to-blue-700 justify-between items-center">
+        <div className="w-screen h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex justify-between items-center">
             <div className="text-white mx-20">
                 <h1 className="text-6xl font-bold mb-4 justify-start">
                     Registrirajte se
@@ -78,7 +87,20 @@ export function Register() {
                         />
                     </div>
                     <div className="mb-4">
-                        <label htmlFor="password" className="block text-700 text-sm font-bold mb-2">
+                        <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
+                            Email:
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
                             Lozinka:
                         </label>
                         <input
@@ -103,6 +125,34 @@ export function Register() {
                             required
                         />
                     </div>
+                    <div className="mb-4">
+                        <label htmlFor="uloga" className="block text-gray-700 text-sm font-bold mb-2">
+                            Uloga:
+                        </label>
+                        <select
+                            id="uloga"
+                            value={uloga}
+                            onChange={(e) => setUloga(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                        >
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div className="mb-6 flex items-center">
+                        <input
+                            type="checkbox"
+                            id="aktivan"
+                            checked={aktivan}
+                            onChange={(e) => setAktivan(e.target.checked)}
+                            className="mr-2 leading-tight"
+                        />
+                        <label htmlFor="aktivan" className="text-sm text-gray-700">
+                            Aktivan korisnik
+                        </label>
+                    </div>
+
                     <div className="flex items-center justify-between">
                         <button
                             type="submit"
