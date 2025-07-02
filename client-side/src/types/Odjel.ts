@@ -2,6 +2,7 @@ export interface OdjelOdgovorDTO {
     sifra: number,
     nazivOdjela: string,
     lokacijaOdjela: string,
+    aktivan: boolean,
     tvrtkaSifra: number | null
 }
 

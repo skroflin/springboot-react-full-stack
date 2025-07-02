@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface LoginProps {
     onLoginSuccess: (token: string, username: string) => void;
@@ -8,12 +9,10 @@ interface LoginProps {
 export function Login({ onLoginSuccess }: LoginProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
 
         try {
             const response = await fetch('http://localhost:8080/api/skroflin/korisnik/prijava', {
@@ -39,13 +38,14 @@ export function Login({ onLoginSuccess }: LoginProps) {
             const jwtToken = data.jwt;
             const loggedInUsername = data.korisnickoIme ?? '';
             onLoginSuccess(jwtToken, loggedInUsername);
+            toast.success('Prijava uspješna!');
             navigate('/djelatnici');
         } catch (err) {
             console.error('Greška pri prijavi:', err);
             if (err instanceof Error) {
-                setError(err.message);
+                toast.error(`Greška pri prijavi: ${err.message}`);
             } else {
-                setError('Došlo je do neočekivane greške.');
+                toast.error('Došlo je do neočekivane greške pri prijavi.');
             }
         }
     };
@@ -62,7 +62,6 @@ export function Login({ onLoginSuccess }: LoginProps) {
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg mr-20 w-96">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Prijava</h2>
-                {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">

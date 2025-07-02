@@ -1,99 +1,141 @@
 import React, { useState, useEffect } from 'react';
-import type { TvrtkaDTO } from '../types/Tvrtka';
+import { toast } from 'react-toastify';
+import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash } from 'react-icons/fa';
+import type { TvrtkaOdgovorDTO } from '../types/Tvrtka';
 
 interface TvrtkaListProps {
     authToken: string;
 }
 
 export function TvrtkaList({ authToken }: TvrtkaListProps) {
-    const [tvrtke, setTvrtke] = useState<TvrtkaDTO[]>([]);
+    const [tvrtke, setTvrtke] = useState<TvrtkaOdgovorDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchTvrtke = async () => {
-            setLoading(true);
-            setError(null);
-
-            if (!authToken) {
-                setLoading(false);
-                setError("Niste prijavljeni ili token nije dostupan.");
-                setTvrtke([]);
-                return;
-            }
-
             try {
                 const response = await fetch('http://localhost:8080/api/skroflin/tvrtka/get', {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`,
-                    },
+                    headers: { 'Authorization': `Bearer ${authToken}` },
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`HTTP greška: ${response.status} - ${errorData.message || response.statusText}`);
+                    throw new Error(`HTTP greška: ${response.status}`);
                 }
 
-                const data: TvrtkaDTO[] = await response.json();
+                const data: TvrtkaOdgovorDTO[] = await response.json();
                 setTvrtke(data);
             } catch (err) {
-                console.error("Greška pri dohvatu tvrtki:", err);
+                console.error('Greška pri dohvatu tvrtki:', err);
                 if (err instanceof Error) {
                     setError(err.message);
+                    toast.error(`Greška pri dohvatu tvrtki: ${err.message}`);
                 } else {
-                    setError("Nepoznata greška pri dohvatu tvrtki.");
+                    setError('Došlo je do neočekivane greške.');
+                    toast.error('Došlo je do neočekivane greške pri dohvatu tvrtki.');
                 }
             } finally {
                 setLoading(false);
             }
         };
 
-        if (authToken) {
-            fetchTvrtke();
-        } else {
-            setTvrtke([]);
-            setLoading(false);
-            setError("Za prikaz tvrtki potrebno je biti prijavljen.");
-        }
+        fetchTvrtke();
     }, [authToken]);
 
+    const handleDelete = async (sifra: number) => {
+        if (!window.confirm('Jeste li sigurni da želite obrisati ovu tvrtku?')) {
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${sifra}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${authToken}` },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP greška: ${response.status}`);
+            }
+
+            setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== sifra));
+            toast.success('Tvrtka uspješno obrisana (logički)!');
+        } catch (err) {
+            console.error('Greška pri logičkom brisanju tvrtke:', err);
+            if (err instanceof Error) {
+                toast.error(`Greška pri brisanju: ${err.message}`);
+            } else {
+                toast.error('Došlo je do neočekivane greške pri brisanju tvrtke.');
+            }
+        }
+    };
+
+    const handleEdit = (tvrtka: TvrtkaOdgovorDTO) => {
+        toast.info(`Uređivanje tvrtke: ${tvrtka.nazivTvrtke}`);
+        console.log('Uredi tvrtku:', tvrtka);
+    };
+
     if (loading) {
-        return <div className="text-center p-4">Učitavam tvrtke...</div>;
+        return <div className="text-center text-lg mt-8 text-gray-600">Učitavanje tvrtki...</div>;
     }
 
     if (error) {
-        return <div className="text-center p-4 text-red-600">Greška: {error}</div>;
+        return <div className="text-center text-red-600 text-lg mt-8">Greška: {error}</div>;
     }
 
-    if (tvrtke.length === 0 && !loading && !error) {
-        return <p className="text-gray-600">Nema pronađenih tvrtki (ili niste prijavljeni).</p>;
+    if (tvrtke.length === 0) {
+        return <div className="text-center text-lg mt-8 text-gray-600">Nema pronađenih tvrtki.</div>;
     }
 
     return (
-        <div className="w-full max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Popis Tvrtki</h1>
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-                    <thead className="bg-gray-100 border-b border-gray-200">
-                        <tr>
-                            <th className="py-3 px-6 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Naziv</th>
-                            <th className="py-3 px-6 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Lokacija</th>
-                            <th className="py-3 px-6 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Stječaj</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {tvrtke.map((tvrtka, index) => (
-                            <tr key={tvrtka.nazivTvrtke + tvrtka.sjedisteTvrtke + String(tvrtka.uStjecaju) + index} className="hover:bg-gray-50">
-                                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">{tvrtka.nazivTvrtke}</td>
-                                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">{tvrtka.sjedisteTvrtke}</td>
-                                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">
-                                    {tvrtka.uStjecaju ? 'Da' : 'Ne'}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        <div className="container mx-auto p-4">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">Popis tvrtki</h1>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tvrtke.map((tvrtka) => (
+                    <div
+                        key={tvrtka.sifra}
+                        className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col justify-between"
+                    >
+                        <div>
+                            <div className="flex items-center justify-center mb-4">
+                                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-4xl">
+                                    <FaBuilding />
+                                </div>
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
+                                {tvrtka.nazivTvrtke}
+                            </h2>
+
+                            {tvrtka.sjedisteTvrtke && (
+                                <p className="text-md text-gray-700 text-center mb-1 flex items-center justify-center">
+                                    <FaMapMarkerAlt className="mr-2 text-red-500" /> Sjedište: {tvrtka.sjedisteTvrtke}
+                                </p>
+                            )}
+                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${tvrtka.uStjecaju ? 'text-red-600' : 'text-green-600'}`}>
+                                {tvrtka.uStjecaju ? <FaTimesCircle className="mr-2" /> : <FaCheckCircle className="mr-2" />}
+                                {tvrtka.uStjecaju ? 'U stečaju' : 'Aktivna'}
+                            </p>
+                        </div>
+
+                        <div className="flex justify-around mt-6 pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => handleEdit(tvrtka)}
+                                className="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
+                                title="Uredi tvrtku"
+                            >
+                                <FaEdit className="mr-1" /> Uredi
+                            </button>
+                            <button
+                                onClick={() => handleDelete(tvrtka.sifra)}
+                                className="text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
+                                title="Obriši tvrtku"
+                            >
+                                <FaTrash className="mr-1" /> Obriši
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

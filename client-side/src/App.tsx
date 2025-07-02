@@ -7,6 +7,8 @@ import { DjelatnikList } from './components/DjelatnikList';
 import { OdjelList } from './components/OdjelList';
 import { TvrtkaList } from './components/TvrtkaList';
 import Navbar from './components/Navbar';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/ReactToastify.css'
 
 const App: React.FC = () => {
   const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('jwtToken'));
@@ -14,7 +16,6 @@ const App: React.FC = () => {
   const location = useLocation();
   const isAuthenticated = !!authToken;
 
-  // Odredimo je li trenutna stranica login ili register
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   const handleLoginSuccess = (token: string, userIdentifier: string) => {
@@ -98,6 +99,7 @@ const App: React.FC = () => {
             <Route path="*" element={<div className="text-center text-4xl text-gray-700">404 - Stranica nije pronađena</div>} />
           </Routes>
         </div>
+        <ToastContainer />
       </div>
     </>
   );

@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export function Register() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
-        setSuccessMessage(null);
 
         if (password !== confirmPassword) {
-            setError('Lozinke se ne podudaraju!');
+            toast.error('Lozinke se ne podudaraju!');
             return;
         }
 
@@ -39,7 +36,7 @@ export function Register() {
                 throw new Error(errorMessage);
             }
 
-            setSuccessMessage('Registracija uspješna! Preusmjeravam na stranicu za prijavu...');
+            toast.success('Registracija uspješna! Preusmjeravam na stranicu za prijavu...');
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
@@ -47,9 +44,9 @@ export function Register() {
         } catch (err) {
             console.error('Greška pri registraciji:', err);
             if (err instanceof Error) {
-                setError(err.message);
+                toast.error(`Greška pri registraciji: ${err.message}`);
             } else {
-                setError('Došlo je do neočekivane greške.');
+                toast.error('Došlo je do neočekivane greške pri registraciji.');
             }
         }
     };
@@ -66,8 +63,6 @@ export function Register() {
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg mr-20 w-96">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Registracija</h2>
-                {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-                {successMessage && <p className="text-green-500 text-sm mb-4 text-center">{successMessage}</p>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
