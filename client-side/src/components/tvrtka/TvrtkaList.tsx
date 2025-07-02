@@ -108,7 +108,7 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                             </h2>
 
                             {tvrtka.sjedisteTvrtke && (
-                                <p className="text-md text-gray-700 text-center mb-1 flex items-center justify-center">
+                                <p className="text-md text-gray-700 text-center mb-1 flex items-center justify-center mt-2 pt-2 border-t border-gray-500">
                                     <FaMapMarkerAlt className="mr-2 text-red-500" /> Sjedište: {tvrtka.sjedisteTvrtke}
                                 </p>
                             )}

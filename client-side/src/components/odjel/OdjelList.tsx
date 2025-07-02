@@ -114,7 +114,7 @@ export function OdjelList({ authToken }: OdjelListProps) {
                             <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center text-gray-500 text-4xl">
                                 <FaBuilding />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
+                            <h2 className="text-2xl font-bold text-gray-900 text-center mb-3 mt-2 pt-2 border-t border-gray-500">
                                 {odjel.nazivOdjela}
                             </h2>
                             {odjel.lokacijaOdjela && (
