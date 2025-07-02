@@ -43,7 +43,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
             onLoginSuccess(jwtToken, loggedInUsername);
             toast.success('Prijava uspješna!');
-            navigate('/djelatnici');
+            navigate('/home');
 
         } catch (err) {
             console.error('Greška pri prijavi:', err);
@@ -61,7 +61,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                 <h1 className="text-6xl font-bold mb-4 justify-start">
                     Dobrodošli
                 </h1>
-                <p className="text-xl text-gray-3">
+                <p className="text-xl text-gray-3 mt-2 pt-6 border-t border-gray-400">
                     Prijavite se u Vaš račun!
                 </p>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash } from 'react-icons/fa';
-import type { TvrtkaOdgovorDTO } from '../types/Tvrtka';
+import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
 
 interface TvrtkaListProps {
     authToken: string;

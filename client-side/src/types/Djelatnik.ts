@@ -20,3 +20,14 @@ export interface DjelatnikDTO {
     odjelSifra: number | null,
     tvrtkaSifra: number | null
 }
+
+export interface PlacaOdgovorDTO {
+    sifraDjelatnika: number;
+    brutoPlaca: string;
+    mirovinsko1Stup: string;
+    mirovinsko2Stup: string;
+    zdravstvenoOsiguranje: string;
+    poreznaOsnovica: string;
+    ukupniPorezPrirezi: string;
+    netoPlaca: string;
+}

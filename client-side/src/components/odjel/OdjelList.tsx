@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash } from 'react-icons/fa';
-import type { OdjelOdgovorDTO } from '../types/Odjel';
-import type { TvrtkaOdgovorDTO } from '../types/Tvrtka';
+import type { OdjelOdgovorDTO } from '../../types/Odjel';
+import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
 
 interface OdjelListProps {
     authToken: string;

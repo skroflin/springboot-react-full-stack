@@ -65,7 +65,7 @@ export function Register() {
                 <h1 className="text-6xl font-bold mb-4 justify-start">
                     Registrirajte se
                 </h1>
-                <p className="text-xl text-gray-300">
+                <p className="text-xl text-gray-300 mt-2 pt-6 border-t border-gray-400">
                     Stvorite novi račun!
                 </p>
             </div>
