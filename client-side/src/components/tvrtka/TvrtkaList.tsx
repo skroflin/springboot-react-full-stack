@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaClock } from 'react-icons/fa';
 import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
 
 interface TvrtkaListProps {
@@ -11,6 +11,10 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
     const [tvrtke, setTvrtke] = useState<TvrtkaOdgovorDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [showDeactivateModal, setShowDeactivateModal] = useState<boolean>(false);
+    const [tvrtkaToDeactivateSifra, setTvrtkaToDeactivateSifra] = useState<number | null>(null);
+    const [tvrtkaToDeactivateNaziv, setTvrtkaToDeactivateNaziv] = useState<string | null>(null);
+
 
     useEffect(() => {
         const fetchTvrtke = async () => {
@@ -42,12 +46,19 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
         fetchTvrtke();
     }, [authToken]);
 
-    const handleDelete = async (sifra: number) => {
-        if (!window.confirm('Jeste li sigurni da želite obrisati ovu tvrtku?')) {
-            return;
-        }
+    const handleDeactivateClick = (sifra: number, naziv: string) => {
+        setTvrtkaToDeactivateSifra(sifra);
+        setTvrtkaToDeactivateNaziv(naziv);
+        setShowDeactivateModal(true);
+    };
+
+    const confirmDeactivation = async () => {
+        if (tvrtkaToDeactivateSifra === null) return;
+
+        setShowDeactivateModal(false);
+
         try {
-            const response = await fetch(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${sifra}`, {
+            const response = await fetch(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${tvrtkaToDeactivateSifra}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${authToken}` },
             });
@@ -57,17 +68,27 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                 throw new Error(errorData.message || `HTTP greška: ${response.status}`);
             }
 
-            setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== sifra));
-            toast.success('Tvrtka uspješno obrisana (logički)!');
+            setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== tvrtkaToDeactivateSifra));
+            toast.success('Tvrtka uspješno deaktivirana!');
         } catch (err) {
-            console.error('Greška pri logičkom brisanju tvrtke:', err);
+            console.error('Greška pri deaktivaciji tvrtke:', err);
             if (err instanceof Error) {
-                toast.error(`Greška pri brisanju: ${err.message}`);
+                toast.error(`Greška pri deaktivaciji: ${err.message}`);
             } else {
-                toast.error('Došlo je do neočekivane greške pri brisanju tvrtke.');
+                toast.error('Došlo je do neočekivane greške pri deaktivaciji tvrtke.');
             }
+        } finally {
+            setTvrtkaToDeactivateSifra(null);
+            setTvrtkaToDeactivateNaziv(null);
         }
     };
+
+    const cancelDeactivation = () => {
+        setShowDeactivateModal(false);
+        setTvrtkaToDeactivateSifra(null);
+        setTvrtkaToDeactivateNaziv(null);
+    };
+
 
     const handleEdit = (tvrtka: TvrtkaOdgovorDTO) => {
         toast.info(`Uređivanje tvrtke: ${tvrtka.nazivTvrtke}`);
@@ -127,16 +148,42 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                                 <FaEdit className="mr-1" /> Uredi
                             </button>
                             <button
-                                onClick={() => handleDelete(tvrtka.sifra)}
-                                className="text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
-                                title="Obriši tvrtku"
+                                onClick={() => handleDeactivateClick(tvrtka.sifra, tvrtka.nazivTvrtke)}
+                                className="text-yellow-600 hover:text-yellow-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
+                                title="Deaktiviraj tvrtku"
                             >
-                                <FaTrash className="mr-1" /> Obriši
+                                <FaClock className="mr-1" /> Deaktiviraj
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
+
+            {showDeactivateModal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-8 max-w-sm mx-auto">
+                        <h2 className="text-xl font-bold mb-4 text-gray-800">Potvrda deaktivacije</h2>
+                        <p className="text-gray-700 mb-6">
+                            Jeste li sigurni da želite deaktivirati tvrtku <span className="font-semibold">"{tvrtkaToDeactivateNaziv}"</span>?
+                            Ovom radnjom deaktivirate tvrtku.
+                        </p>
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                onClick={cancelDeactivation}
+                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors"
+                            >
+                                Odustani
+                            </button>
+                            <button
+                                onClick={confirmDeactivation}
+                                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors"
+                            >
+                                Deaktiviraj
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
