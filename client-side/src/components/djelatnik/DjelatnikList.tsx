@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
-import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaBirthdayCake, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCity } from 'react-icons/fa';
+import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaBirthdayCake, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCity, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 
 import type { DjelatnikOdgovorDTO, PlacaOdgovorDTO } from '../../types/Djelatnik';
 import type { OdjelOdgovorDTO } from '../../types/Odjel';
@@ -42,6 +42,9 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
     const [odjelMap, setOdjelMap] = useState<Map<number, string>>(new Map());
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage] = useState<number>(5);
 
     const navigate = useNavigate();
 
@@ -223,6 +226,30 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         }
     };
 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentDjelatnici = djelatnici.slice(indexOfFirstItem, indexOfLastItem);
+
+    const totalPages = Math.ceil(djelatnici.length / itemsPerPage);
+
+    const paginate = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+        setSelectedDjelatnik(null);
+        setPlacaData(null);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            paginate(currentPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            paginate(currentPage - 1);
+        }
+    };
+
     if (loading) {
         return <div className="text-center text-lg mt-8 text-gray-600">Učitavanje podataka...</div>;
     }
@@ -283,7 +310,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                 </div>
 
                 <ul className="space-y-3">
-                    {djelatnici.map((djelatnik) => (
+                    {currentDjelatnici.map((djelatnik) => (
                         <li
                             key={djelatnik.sifra}
                             className={`p-4 border rounded-lg cursor-pointer flex justify-between items-center
@@ -307,6 +334,26 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                         </li>
                     ))}
                 </ul>
+
+                <div className="flex justify-center mt-6 space-x-2">
+                    <button
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    >
+                        <FaArrowLeft className="mr-2" /> Prethodna
+                    </button>
+                    <span className="px-4 py-2 text-gray-700 font-semibold">
+                        Stranica {currentPage} od {totalPages}
+                    </span>
+                    <button
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    >
+                        Sljedeća <FaArrowRight className="ml-2" />
+                    </button>
+                </div>
             </div>
 
             <div className="w-full md:w-1/2 pl-0 md:pl-4 bg-white p-6 rounded-lg shadow-md md:border-l border-gray-200">
@@ -374,15 +421,15 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                             <h4 className="text-lg font-semibold mb-3 text-gray-700">Podaci o djelatniku:</h4>
                             <p className="text-md text-gray-700 mb-1 flex items-center">
                                 <FaUser className="mr-2 text-gray-500" />
-                                <span className="font-semibold">Ime i Prezime:</span> {selectedDjelatnik.imeDjelatnika} {selectedDjelatnik.prezimeDjelatnika}
+                                <span className="font-semibold mr-1">Ime i Prezime:</span> {selectedDjelatnik.imeDjelatnika} {selectedDjelatnik.prezimeDjelatnika}
                             </p>
                             <p className="text-md text-gray-700 mb-1 flex items-center">
                                 <FaBriefcase className="mr-2 text-blue-500" />
-                                <span className="font-semibold">Plaća djelatnika:</span> {selectedDjelatnik.placaDjelatnika.toFixed(2)} EUR
+                                <span className="font-semibold mr-1">Plaća djelatnika:</span> {selectedDjelatnik.placaDjelatnika.toFixed(2)} EUR
                             </p>
                             <p className="text-md text-gray-700 mb-1 flex items-center">
                                 <FaBuilding className="mr-2 text-purple-500" />
-                                <span className="font-semibold">Odjel:</span> {
+                                <span className="font-semibold mr-1">Odjel:</span> {
                                     selectedDjelatnik.odjelSifra !== null
                                         ? odjelMap.get(selectedDjelatnik.odjelSifra) || 'Nije dodijeljeno'
                                         : 'Nije dodijeljeno'
@@ -390,7 +437,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                             </p>
                             <p className="text-md text-gray-700 mb-1 flex items-center">
                                 <FaCity className="mr-2 text-red-500" />
-                                <span className="font-semibold">Tvrtka:</span> {
+                                <span className="font-semibold mr-1">Tvrtka:</span> {
                                     selectedDjelatnik.tvrtkaSifra !== null
                                         ? tvrtkaMap.get(selectedDjelatnik.tvrtkaSifra) || 'Nije dodijeljeno'
                                         : 'Nije dodijeljeno'
@@ -399,20 +446,20 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                             {selectedDjelatnik.datumRodenja && (
                                 <p className="text-md text-gray-700 mb-1 flex items-center">
                                     <FaBirthdayCake className="mr-2 text-pink-500" />
-                                    <span className="font-semibold">Datum rođenja:</span> {
+                                    <span className="font-semibold mr-1">Datum rođenja:</span> {
                                         format(new Date(selectedDjelatnik.datumRodenja), 'dd.MM.yyyy', { locale: hr })
                                     }
                                 </p>
                             )}
                             <p className="text-md text-gray-700 mb-1 flex items-center">
                                 <FaCalendarAlt className="mr-2 text-gray-500" />
-                                <span className="font-semibold">Početak rada:</span> {
+                                <span className="font-semibold mr-1">Početak rada:</span> {
                                     format(new Date(selectedDjelatnik.pocetakRada), 'dd.MM.yyyy', { locale: hr })
                                 }
                             </p>
                             <p className={`text-md text-gray-700 flex items-center ${selectedDjelatnik.jeZaposlen ? 'text-green-600' : 'text-red-600'}`}>
                                 {selectedDjelatnik.jeZaposlen ? <FaCheckCircle className="mr-2" /> : <FaTimesCircle className="mr-2" />}
-                                <span className="font-semibold">Status zaposlenja:</span> {selectedDjelatnik.jeZaposlen ? 'Zaposlen' : 'Nije zaposlen'}
+                                <span className="font-semibold mr-1">Status zaposlenja:</span> {selectedDjelatnik.jeZaposlen ? 'Zaposlen' : 'Nije zaposlen'}
                             </p>
                         </div>
 

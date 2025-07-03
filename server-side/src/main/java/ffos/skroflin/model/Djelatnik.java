@@ -4,11 +4,14 @@
  */
 package ffos.skroflin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -16,7 +19,8 @@ import java.util.Date;
  *
  * @author svenk
  */
-@Entity(name = "djelatnik")
+@Entity
+@Table(name = "djelatnik")
 @AttributeOverride(name = "sifra", column = @Column(name = "djelatnik_sifra"))
 public class Djelatnik extends Entitet {
 
@@ -32,11 +36,13 @@ public class Djelatnik extends Entitet {
     private Date pocetakRada;
     @Column(columnDefinition = "bit", name = "zaposlen")
     private boolean jeZaposlen;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "odjel_sifra", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Odjel odjel;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tvrtka_sifra", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Tvrtka tvrtka;
 
     public Djelatnik() {

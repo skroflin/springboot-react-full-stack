@@ -7,12 +7,14 @@ package ffos.skroflin.model;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  *
  * @author svenk
  */
-@Entity(name = "tvrtka")
+@Entity
+@Table(name = "tvrtka")
 @AttributeOverride(name = "sifra", column = @Column(name = "tvrtka_sifra"))
 public class Tvrtka extends Entitet{
     @Column(name = "naziv_tvrtke", nullable = false)

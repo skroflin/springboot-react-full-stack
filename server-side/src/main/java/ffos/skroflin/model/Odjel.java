@@ -4,17 +4,21 @@
  */
 package ffos.skroflin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  *
  * @author svenk
  */
-@Entity(name = "odjel")
+@Entity
+@Table(name = "odjel")
 @AttributeOverride(name = "sifra", column = @Column(name = "odjel_sifra"))
 public class Odjel extends Entitet{
     @Column(name = "naziv_odjela", nullable = false)
@@ -23,8 +27,9 @@ public class Odjel extends Entitet{
     private String lokacijaOdjela;
     @Column(columnDefinition = "bit", name = "aktivan")
     private boolean jeAktivan;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tvrtka_sifra", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Tvrtka tvrtka;
 
     public Odjel() {
@@ -68,7 +73,5 @@ public class Odjel extends Entitet{
     public void setTvrtka(Tvrtka tvrtka) {
         this.tvrtka = tvrtka;
     }
-
-    
     
 }

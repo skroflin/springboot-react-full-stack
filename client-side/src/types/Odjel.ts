@@ -2,13 +2,13 @@ export interface OdjelOdgovorDTO {
     sifra: number,
     nazivOdjela: string,
     lokacijaOdjela: string,
-    aktivan: boolean,
+    jeAktivan: boolean,
     tvrtkaSifra: number | null
 }
 
 export interface OdjelDTO {
     nazivOdjela: string,
     lokacijaOdjela: string,
-    aktivan: boolean,
+    jeAktivan: boolean,
     tvrtkaSifra: number | null
 }

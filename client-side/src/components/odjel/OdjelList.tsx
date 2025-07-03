@@ -122,9 +122,9 @@ export function OdjelList({ authToken }: OdjelListProps) {
                                     <FaMapMarkerAlt className="mr-2 text-blue-600" /> Lokacija: {odjel.lokacijaOdjela}
                                 </p>
                             )}
-                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${odjel.aktivan ? 'text-green-600' : 'text-red-600'}`}>
-                                {odjel.aktivan ? <FaCheckCircle className="mr-2" /> : <FaTimesCircle className="mr-2" />}
-                                {odjel.aktivan ? 'Aktivan' : 'Neaktivan'}
+                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${odjel.jeAktivan ? 'text-green-600' : 'text-red-600'}`}>
+                                {odjel.jeAktivan ? <FaCheckCircle className="mr-2" /> : <FaTimesCircle className="mr-2" />}
+                                {odjel.jeAktivan ? 'Aktivan' : 'Neaktivan'}
                             </p>
 
                             <p className="text-sm text-gray-600 text-center mb-1 flex items-center justify-center">

@@ -48,7 +48,7 @@ public class TvrtkaService extends MainService{
     
     public List<TvrtkaOdgovorDTO> getAll(){
         List<Tvrtka> tvrtke = session.createQuery(
-                "from tvrtka", Tvrtka.class).list();
+                "from Tvrtka", Tvrtka.class).list();
         return tvrtke.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class TvrtkaService extends MainService{
     public TvrtkaOdgovorDTO post(TvrtkaDTO o){
         try {
             Long count = session.createQuery(
-                    "select count(*) from tvrtka t where t.nazivTvrtke = :naziv", Long.class)
+                    "select count(*) from Tvrtka t where t.nazivTvrtke = :naziv", Long.class)
                     .setParameter("naziv", o.nazivTvrtke())
                     .getSingleResult();
             if (count > 0) {
@@ -88,7 +88,7 @@ public class TvrtkaService extends MainService{
         }
         if (!t.getNazivTvrtke().equals(o.nazivTvrtke())) {
             Long count = session.createQuery(
-                    "select count(*) from tvrtka t where t.nazivTvrtke = :naziv", Long.class)
+                    "select count(*) from Tvrtka t where t.nazivTvrtke = :naziv", Long.class)
                     .setParameter("naziv", o.nazivTvrtke())
                     .getSingleResult();
             if (count > 0) {
