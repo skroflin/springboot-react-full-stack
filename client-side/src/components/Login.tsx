@@ -56,7 +56,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
     };
 
     return (
-        <div className="w-screen h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex justify-between items-center">
+        <div className="w-screen h-screen bg-gradient-to-br from-gray-900 to-blue-700 flex justify-between items-center">
             <div className="text-white mx-20">
                 <h1 className="text-6xl font-bold mb-4 justify-start">
                     Dobrodošli

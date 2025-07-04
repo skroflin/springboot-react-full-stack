@@ -60,7 +60,7 @@ export function Register() {
     };
 
     return (
-        <div className="w-screen h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex justify-between items-center">
+        <div className="w-screen h-screen bg-gradient-to-br from-blue-900 to-gray-700 flex justify-between items-center">
             <div className="text-white mx-20">
                 <h1 className="text-6xl font-bold mb-4 justify-start">
                     Registrirajte se
