@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OdjelService extends MainService {
         
+    @Transactional
     private OdjelOdgovorDTO convertToResponseDTO(Odjel odjel){
         if (odjel == null) {
             return null;
@@ -27,7 +28,8 @@ public class OdjelService extends MainService {
                 sifraTvrtka
         );
     }
-            
+         
+    @Transactional
     private Odjel convertToEntity(OdjelDTO dto){
         Odjel odjel = new Odjel();
         odjel.setNazivOdjela(dto.nazivOdjela());
@@ -45,6 +47,7 @@ public class OdjelService extends MainService {
         return odjel;
     }
             
+    @Transactional
     private void updateEntityFromDto(Odjel odjel, OdjelDTO dto){
         odjel.setNazivOdjela(dto.nazivOdjela());
         odjel.setLokacijaOdjela(dto.lokacijaOdjela());
@@ -92,7 +95,6 @@ public class OdjelService extends MainService {
         }
     }
             
-    @PreAuthorize("hasRole('admin')")
     @Transactional
     public OdjelOdgovorDTO post(OdjelDTO o) {
         try {
@@ -114,7 +116,6 @@ public class OdjelService extends MainService {
         }
     }
         
-    @PreAuthorize("hasRole('admin')")
     @Transactional
     public OdjelOdgovorDTO put(OdjelDTO o, int sifra) {
         try {
@@ -143,7 +144,7 @@ public class OdjelService extends MainService {
         }
     }
         
-    @PreAuthorize("hasRole('admin')")
+    
     @Transactional
     public void softDelete(int sifra) {
         try {

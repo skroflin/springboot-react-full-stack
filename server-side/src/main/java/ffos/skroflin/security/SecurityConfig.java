@@ -90,8 +90,11 @@ public class SecurityConfig {
                 
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 
+                .requestMatchers(HttpMethod.PUT, "/api/skroflin/tvrtka/softDelete**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/skroflin/tvrtka").hasRole("ADMIN")
+                
                 .requestMatchers("/api/skroflin/**").authenticated()
-                .anyRequest().authenticated() 
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

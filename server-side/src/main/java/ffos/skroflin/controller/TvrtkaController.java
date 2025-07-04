@@ -6,7 +6,6 @@ package ffos.skroflin.controller;
 
 import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
-import ffos.skroflin.service.OdjelService;
 import ffos.skroflin.service.TvrtkaService;
 import jakarta.persistence.NoResultException;
 import java.util.List;
@@ -37,7 +36,7 @@ public class TvrtkaController {
     }
 
     @GetMapping("/get")
-    @PreAuthorize("isAuthenticated")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<TvrtkaOdgovorDTO>> getAll() {
         try {
             return new ResponseEntity<>(tvrtkaService.getAll(), HttpStatus.OK);
@@ -46,8 +45,8 @@ public class TvrtkaController {
         }
     }
 
-    @GetMapping("/getBySifra/{sifra}")
-    @PreAuthorize("isAuthenticated")
+    @GetMapping("/getBySifra")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TvrtkaOdgovorDTO> getBySifra(
             @RequestParam int sifra
     ) {
@@ -68,7 +67,7 @@ public class TvrtkaController {
     }
 
     @PostMapping("/post")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TvrtkaOdgovorDTO> post(
             @RequestBody(required = true) TvrtkaDTO dto
     ) {
@@ -93,8 +92,8 @@ public class TvrtkaController {
         }
     }
 
-    @PutMapping("/put/{sifra}")
-    @PreAuthorize("hasRole('admin')")
+    @PutMapping("/put")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TvrtkaOdgovorDTO> put(
             @RequestParam int sifra,
             @RequestBody(required = true) TvrtkaDTO dto
@@ -127,8 +126,8 @@ public class TvrtkaController {
         }
     }
     
-    @PutMapping("softDelete/{sifra}")
-    @PreAuthorize("hasRole('admin')")
+    @PutMapping("/softDelete")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> softDelete(
             @RequestParam int sifra
     ){

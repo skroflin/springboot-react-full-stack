@@ -6,6 +6,7 @@ package ffos.skroflin.service;
 
 import ffos.skroflin.model.Korisnik;
 import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
 import java.util.Collections;
 import org.hibernate.Session;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class KorisnikUserDetailsService extends MainService implements UserDetailsService{
+    
+    @Transactional
     @Override
     public UserDetails loadUserByUsername(String korisnickoIme) throws UsernameNotFoundException {
         Korisnik korisnik = null;

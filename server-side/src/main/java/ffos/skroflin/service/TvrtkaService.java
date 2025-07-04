@@ -65,7 +65,6 @@ public class TvrtkaService extends MainService{
     }
     
     @Transactional
-    @PreAuthorize("hasRole('admin')")
     public TvrtkaOdgovorDTO post(TvrtkaDTO o){
         try {
             Long count = session.createQuery(
@@ -87,7 +86,6 @@ public class TvrtkaService extends MainService{
     }
     
     @Transactional
-    @PreAuthorize("hasRole('admin')")
     public TvrtkaOdgovorDTO put(TvrtkaDTO o, int sifra){
         Tvrtka t = (Tvrtka) session.get(Tvrtka.class, sifra);
         if (t == null) {
@@ -110,7 +108,6 @@ public class TvrtkaService extends MainService{
     }
     
     @Transactional
-    @PreAuthorize("hasRole('admin')")
     public void delete(int sifra){
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         if (tvrtka == null) {
@@ -120,7 +117,6 @@ public class TvrtkaService extends MainService{
     }
     
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public void softDelete(int sifra){
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         if (tvrtka == null) {

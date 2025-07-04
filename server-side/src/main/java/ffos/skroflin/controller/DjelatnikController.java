@@ -53,8 +53,8 @@ public class DjelatnikController {
         }
     }
     
-    @GetMapping("/getBySifra/{sifra}")
-    @PreAuthorize("isAuthenticated")
+    @GetMapping("/getBySifra")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<DjelatnikOdgovorDTO> getBySifra(
             @RequestParam int sifra
     ){
@@ -75,7 +75,7 @@ public class DjelatnikController {
     }
     
     @PostMapping("/post")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DjelatnikOdgovorDTO> post(
             @RequestBody(required = true) DjelatnikDTO dto
     ){
@@ -117,8 +117,8 @@ public class DjelatnikController {
         }
     }
     
-    @PutMapping("/put/{sifra}")
-    @PreAuthorize("hasRole('admin')")
+    @PutMapping("/put")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DjelatnikOdgovorDTO> put(
             @RequestParam int sifra,
             @RequestBody(required = true) DjelatnikDTO dto
@@ -165,8 +165,8 @@ public class DjelatnikController {
         }
     }
     
-    @PutMapping("/softDelete/{sifra}")
-    @PreAuthorize("hasRole('admin')")
+    @PutMapping("/softDelete")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> softDelete(
             @PathVariable int sifra
     ){

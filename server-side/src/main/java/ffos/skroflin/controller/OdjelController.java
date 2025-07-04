@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,7 +48,7 @@ public class OdjelController {
         }
     }
 
-    @GetMapping("/getBySifra/{sifra}")
+    @GetMapping("/getBySifra")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OdjelOdgovorDTO> getBySifra(
             @RequestParam int sifra
@@ -71,7 +70,7 @@ public class OdjelController {
     }
 
     @PostMapping("/post")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OdjelOdgovorDTO> post(
             @RequestBody(required = true) OdjelDTO dto
     ) {
@@ -103,8 +102,8 @@ public class OdjelController {
         }
     }
     
-    @PutMapping("/put/{sifra}")
-    @PreAuthorize("hasRole('admin')")
+    @PutMapping("/put")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OdjelOdgovorDTO> put(
             @RequestParam int sifra,
             @RequestBody(required = true) OdjelDTO dto
@@ -141,10 +140,10 @@ public class OdjelController {
         }
     }
     
-    @PutMapping("/softDelete/{sifra}")
-    @PreAuthorize("hasRole('admin')")
+    @PutMapping("/softDelete")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> softDelete(
-            @PathVariable int sifra
+            @RequestParam int sifra
     ){
         try {
             if (sifra <= 0) {

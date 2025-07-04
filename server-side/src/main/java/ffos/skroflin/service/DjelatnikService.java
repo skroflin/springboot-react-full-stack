@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DjelatnikService extends MainService {
     
+    @Transactional
     private DjelatnikOdgovorDTO convertToResponseDTO(Djelatnik djelatnik) {
         if (djelatnik == null) {
             return null;
@@ -36,6 +37,7 @@ public class DjelatnikService extends MainService {
         );
     }
 
+    @Transactional
     private Djelatnik convertToEntity(DjelatnikDTO dto) {
         Djelatnik djelatnik = new Djelatnik();
         djelatnik.setImeDjelatnika(dto.imeDjelatnika());
@@ -64,6 +66,7 @@ public class DjelatnikService extends MainService {
         return djelatnik;
     }
 
+    @Transactional
     private void updateEntityFromDto(Djelatnik djelatnik, DjelatnikDTO dto) {
         djelatnik.setImeDjelatnika(dto.imeDjelatnika());
         djelatnik.setPrezimeDjelatnika(dto.prezimeDjelatnika());
@@ -125,7 +128,6 @@ public class DjelatnikService extends MainService {
         }
     }
 
-    @PreAuthorize("hasRole('admin')")
     @Transactional
     public DjelatnikOdgovorDTO post(DjelatnikDTO o) {
         try {
@@ -138,7 +140,6 @@ public class DjelatnikService extends MainService {
         }
     }
 
-    @PreAuthorize("hasRole('admin')")
     @Transactional
     public DjelatnikOdgovorDTO put(DjelatnikDTO o, int sifra) {
         try {
@@ -155,7 +156,6 @@ public class DjelatnikService extends MainService {
         }
     }
 
-    @PreAuthorize("hasRole('admin')")
     @Transactional
     public void softDelete(int sifra) {
         try {
