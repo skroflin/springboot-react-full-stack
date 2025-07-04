@@ -35,27 +35,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String username = null;
         String jwt = null;
 
-        // --- LOGOVI ZA DEBUGGING ---
         System.out.println("\n--- JWT Filter Processing Request ---");
         System.out.println("Request URI: " + request.getRequestURI());
-        System.out.println("Authorization Header: " + (authorizationHeader != null ? authorizationHeader.substring(0, Math.min(authorizationHeader.length(), 50)) + "..." : "null")); // Ispis prvih 50 znakova
-        // --- KRAJ LOGOVA ---
+        System.out.println("Authorization Header: " + (authorizationHeader != null ? authorizationHeader.substring(0, Math.min(authorizationHeader.length(), 50)) + "..." : "null"));
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             try {
                 username = jwtTokenUtil.extractUsername(jwt);
-                // --- LOGOVI ZA DEBUGGING ---
                 System.out.println("Extracted Username from Token: " + username);
-                // --- KRAJ LOGOVA ---
             } catch (ExpiredJwtException e) {
                 System.err.println("JWT Token has expired for " + request.getRequestURI() + ": " + e.getMessage());
             } catch (SignatureException e) {
                 System.err.println("Invalid JWT Signature for " + request.getRequestURI() + ": " + e.getMessage());
-                e.printStackTrace(); // VAŽNO: Ispis stoga greške
+                e.printStackTrace();
             } catch (Exception e) {
                 System.err.println("Error extracting JWT for " + request.getRequestURI() + ": " + e.getMessage());
-                e.printStackTrace(); // VAŽNO: Ispis stoga greške
+                e.printStackTrace();
             }
         } else {
             System.out.println("Authorization Header missing or invalid for " + request.getRequestURI());
@@ -64,10 +60,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             
-            // --- LOGOVI ZA DEBUGGING ---
             System.out.println("Loaded UserDetails Username: " + userDetails.getUsername());
             System.out.println("Loaded UserDetails Authorities: " + userDetails.getAuthorities());
-            // --- KRAJ LOGOVA ---
 
             if (jwtTokenUtil.validateToken(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken =
@@ -75,9 +69,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                // --- LOGOVI ZA DEBUGGING ---
                 System.out.println("Authentication successful for user: " + username);
-                // --- KRAJ LOGOVA ---
             } else {
                 System.err.println("JWT Token validation failed after userDetails load for: " + username);
             }
