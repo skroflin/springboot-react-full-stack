@@ -1,206 +1,184 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import axios from 'axios';
+import { TvrtkaDeaktivacijaModal } from './TvrtkaDeaktivacijaModal';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaClock } from 'react-icons/fa';
-import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
 
 interface TvrtkaListProps {
     authToken: string;
 }
 
+interface Tvrtka {
+    sifra: number;
+    nazivTvrtke: string;
+    sjedisteTvrtke: string;
+    uStjecaju: boolean;
+}
+
 export function TvrtkaList({ authToken }: TvrtkaListProps) {
-    const [tvrtke, setTvrtke] = useState<TvrtkaOdgovorDTO[]>([]);
+    const [tvrtke, setTvrtke] = useState<Tvrtka[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [showDeactivateModal, setShowDeactivateModal] = useState<boolean>(false);
-    const [tvrtkaToDeactivateSifra, setTvrtkaToDeactivateSifra] = useState<number | null>(null);
-    const [tvrtkaToDeactivateNaziv, setTvrtkaToDeactivateNaziv] = useState<string | null>(null);
 
+    const [showDeaktivacijaModal, setShowDeaktivacijaModal] = useState<boolean>(false);
+    const [selectedTvrtkaSifra, setSelectedTvrtkaSifra] = useState<number | null>(null);
 
-    useEffect(() => {
-        const fetchTvrtke = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/api/skroflin/tvrtka/get', {
-                    headers: { 'Authorization': `Bearer ${authToken}` },
-                });
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage] = useState<number>(6);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP greška: ${response.status}`);
-                }
-
-                const data: TvrtkaOdgovorDTO[] = await response.json();
-                setTvrtke(data);
-            } catch (err) {
-                console.error('Greška pri dohvatu tvrtki:', err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                    toast.error(`Greška pri dohvatu tvrtki: ${err.message}`);
-                } else {
-                    setError('Došlo je do neočekivane greške.');
-                    toast.error('Došlo je do neočekivane greške pri dohvatu tvrtki.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTvrtke();
-    }, [authToken]);
-
-    const handleDeactivateClick = (sifra: number, naziv: string) => {
-        setTvrtkaToDeactivateSifra(sifra);
-        setTvrtkaToDeactivateNaziv(naziv);
-        setShowDeactivateModal(true);
-    };
-
-    const confirmDeactivation = async () => {
-        if (tvrtkaToDeactivateSifra === null) return;
-
-        setShowDeactivateModal(false);
-
+    const fetchTvrtke = useCallback(async () => {
+        setLoading(true);
+        setError(null);
         try {
-            console.log('Attempting to deactivate tvrtka:', tvrtkaToDeactivateSifra);
-            console.log('Auth Token:', authToken);
-            console.log('Request Headers:', { 'Authorization': `Bearer ${authToken}` });
-            const response = await fetch(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${tvrtkaToDeactivateSifra}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${authToken}` },
-            });
-
-            if (response.ok) {
-                if (response.status === 204) {
-                    setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== tvrtkaToDeactivateSifra));
-                    toast.success('Tvrtka uspješno deaktivirana!');
-                } else {
-                    const data = await response.json();
-                    console.log('Odgovor s API-ja:', data);
-
-                    setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== tvrtkaToDeactivateSifra));
-                    toast.success('Tvrtka uspješno deaktivirana!');
-                }
-            } else {
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP greška: ${response.status} - ${response.statusText}`);
-                } else {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP greška: ${response.status} - ${response.statusText}. Odgovor: ${errorText.substring(0, 100)}...`);
-                }
+            if (!authToken) {
+                throw new Error('Auth Token is missing!');
             }
-        } catch (err) {
-            console.error('Greška pri deaktivaciji tvrtke:', err);
-            if (err instanceof Error) {
-                toast.error(`Greška pri deaktivaciji: ${err.message}`);
+
+            const headers = {
+                Authorization: `Bearer ${authToken}`,
+            };
+
+            const response = await axios.get<Tvrtka[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers });
+            setTvrtke(response.data);
+        } catch (err: any) {
+            if (err.response) {
+                setError(err.response.data.message || "Greška prilikom dohvaćanja tvrtki.");
+                toast.error(err.response.data.message || "Greška prilikom dohvaćanja tvrtki.");
+            } else if (err.request) {
+                setError("Nema odgovora sa servera. Provjerite mrežnu vezu.");
+                toast.error("Nema odgovora sa servera. Provjerite mrežnu vezu.");
             } else {
-                toast.error('Došlo je do neočekivane greške pri deaktivaciji tvrtke.');
+                setError(err.message || "Nepoznata greška.");
+                toast.error(err.message || "Nepoznata greška.");
             }
         } finally {
-            setTvrtkaToDeactivateSifra(null);
-            setTvrtkaToDeactivateNaziv(null);
+            setLoading(false);
+        }
+    }, [authToken]);
+
+    useEffect(() => {
+        fetchTvrtke();
+    }, [fetchTvrtke]);
+
+    const handleShowDeaktivacijaModal = (sifra: number) => {
+        setSelectedTvrtkaSifra(sifra);
+        setShowDeaktivacijaModal(true);
+    };
+
+    const handleHideDeaktivacijaModal = () => {
+        setShowDeaktivacijaModal(false);
+        setSelectedTvrtkaSifra(null);
+    };
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentTvrtke = tvrtke.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(tvrtke.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            handlePageChange(currentPage + 1);
         }
     };
 
-    const cancelDeactivation = () => {
-        setShowDeactivateModal(false);
-        setTvrtkaToDeactivateSifra(null);
-        setTvrtkaToDeactivateNaziv(null);
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            handlePageChange(currentPage - 1);
+        }
     };
-
-
-    const handleEdit = (tvrtka: TvrtkaOdgovorDTO) => {
-        toast.info(`Uređivanje tvrtke: ${tvrtka.nazivTvrtke}`);
-        console.log('Uredi tvrtku:', tvrtka);
-    };
-
-    if (loading) {
-        return <div className="text-center text-lg mt-8 text-gray-600">Učitavanje tvrtki...</div>;
-    }
-
-    if (error) {
-        return <div className="text-center text-red-600 text-lg mt-8">Greška: {error}</div>;
-    }
-
-    if (tvrtke.length === 0) {
-        return <div className="text-center text-lg mt-8 text-gray-600">Nema pronađenih tvrtki.</div>;
-    }
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">Popis tvrtki</h1>
+        <div className="container mx-auto p-4 mt-8">
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">Popis Tvrtki</h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tvrtke.map((tvrtka) => (
-                    <div
-                        key={tvrtka.sifra}
-                        className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col justify-between"
-                    >
-                        <div>
-                            <div className="flex items-center justify-center mb-4">
-                                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-4xl">
-                                    <FaBuilding />
-                                </div>
-                            </div>
-
-                            <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
-                                {tvrtka.nazivTvrtke}
-                            </h2>
-
-                            {tvrtka.sjedisteTvrtke && (
-                                <p className="text-md text-gray-700 text-center mb-1 flex items-center justify-center mt-2 pt-2 border-t border-gray-500">
-                                    <FaMapMarkerAlt className="mr-2 text-red-500" /> Sjedište: {tvrtka.sjedisteTvrtke}
-                                </p>
-                            )}
-                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${tvrtka.uStjecaju ? 'text-red-600' : 'text-green-600'}`}>
-                                {tvrtka.uStjecaju ? <FaTimesCircle className="mr-2" /> : <FaCheckCircle className="mr-2" />}
-                                {tvrtka.uStjecaju ? 'U stečaju' : 'Aktivna'}
-                            </p>
-                        </div>
-
-                        <div className="flex justify-around mt-6 pt-4 border-t border-gray-100">
-                            <button
-                                onClick={() => handleEdit(tvrtka)}
-                                className="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
-                                title="Uredi tvrtku"
-                            >
-                                <FaEdit className="mr-1" /> Uredi
-                            </button>
-                            <button
-                                onClick={() => handleDeactivateClick(tvrtka.sifra, tvrtka.nazivTvrtke)}
-                                className="text-yellow-600 hover:text-yellow-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
-                                title="Deaktiviraj tvrtku"
-                            >
-                                <FaClock className="mr-1" /> Deaktiviraj
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {showDeactivateModal && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-xl p-8 max-w-sm mx-auto">
-                        <h2 className="text-xl font-bold mb-4 text-gray-800">Potvrda deaktivacije</h2>
-                        <p className="text-gray-700 mb-6">
-                            Jeste li sigurni da želite deaktivirati tvrtku <span className="font-semibold">"{tvrtkaToDeactivateNaziv}"</span>?
-                            Ovom radnjom deaktivirate tvrtku.
-                        </p>
-                        <div className="flex justify-end space-x-4">
-                            <button
-                                onClick={cancelDeactivation}
-                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors"
-                            >
-                                Odustani
-                            </button>
-                            <button
-                                onClick={confirmDeactivation}
-                                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors"
-                            >
-                                Deaktiviraj
-                            </button>
-                        </div>
-                    </div>
+            {loading && (
+                <div className="flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                    <span className="ml-2 text-gray-700">Učitavam...</span>
                 </div>
             )}
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Greška!</strong>
+                    <span className="block sm:inline"> {error}</span>
+                </div>
+            )}
+
+            {!loading && !error && (
+                <>
+                    {currentTvrtke.length === 0 ? (
+                        <p className="text-center text-gray-600">Nema unesenih tvrtki.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {currentTvrtke.map((tvrtka) => (
+                                <div key={tvrtka.sifra} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{tvrtka.nazivTvrtke}</h3>
+                                        <p className="text-gray-700 mb-1">
+                                            <span className="font-medium">Šifra:</span> {tvrtka.sifra}
+                                        </p>
+                                        <p className="text-gray-700 mb-1">
+                                            <span className="font-medium">Sjedište:</span> {tvrtka.sjedisteTvrtke}
+                                        </p>
+                                        <p className="text-gray-700">
+                                            <span className="font-medium">U stečaju:</span>{' '}
+                                            <span className={tvrtka.uStjecaju ? 'text-red-600 font-bold' : 'text-green-600'}>
+                                                {tvrtka.uStjecaju ? 'Da' : 'Ne'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div className="mt-4">
+                                        <button
+                                            onClick={() => handleShowDeaktivacijaModal(tvrtka.sifra)}
+                                            disabled={tvrtka.uStjecaju}
+                                            className={`w-full px-4 py-2 text-sm rounded-md transition-colors duration-200 ${tvrtka.uStjecaju
+                                                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                                : 'bg-yellow-500 text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-75'
+                                                }`}
+                                        >
+                                            Deaktiviraj
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center mt-8 space-x-2">
+                            <button
+                                onClick={handlePrevPage}
+                                disabled={currentPage === 1}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            >
+                                <FaArrowLeft className="mr-2" /> Prethodna
+                            </button>
+                            <span className="px-4 py-2 text-gray-700 font-semibold">
+                                Stranica {currentPage} od {totalPages}
+                            </span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            >
+                                Sljedeća <FaArrowRight className="ml-2" />
+                            </button>
+                        </div>
+                    )}
+                </>
+            )}
+
+            <TvrtkaDeaktivacijaModal
+                show={showDeaktivacijaModal}
+                onHide={handleHideDeaktivacijaModal}
+                tvrtkaSifra={selectedTvrtkaSifra}
+                onSuccess={fetchTvrtke}
+                authToken={authToken}
+            />
         </div>
     );
 }
