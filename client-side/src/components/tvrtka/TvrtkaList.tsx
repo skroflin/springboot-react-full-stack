@@ -24,7 +24,7 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
     const [selectedTvrtkaSifra, setSelectedTvrtkaSifra] = useState<number | null>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [itemsPerPage] = useState<number>(6);
+    const [itemsPerPage] = useState<number>(4);
 
     const fetchTvrtke = useCallback(async () => {
         setLoading(true);
