@@ -58,18 +58,35 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
         setShowDeactivateModal(false);
 
         try {
+            console.log('Attempting to deactivate tvrtka:', tvrtkaToDeactivateSifra);
+            console.log('Auth Token:', authToken);
+            console.log('Request Headers:', { 'Authorization': `Bearer ${authToken}` });
             const response = await fetch(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${tvrtkaToDeactivateSifra}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${authToken}` },
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP greška: ${response.status}`);
-            }
+            if (response.ok) {
+                if (response.status === 204) {
+                    setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== tvrtkaToDeactivateSifra));
+                    toast.success('Tvrtka uspješno deaktivirana!');
+                } else {
+                    const data = await response.json();
+                    console.log('Odgovor s API-ja:', data);
 
-            setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== tvrtkaToDeactivateSifra));
-            toast.success('Tvrtka uspješno deaktivirana!');
+                    setTvrtke(prevTvrtke => prevTvrtke.filter(t => t.sifra !== tvrtkaToDeactivateSifra));
+                    toast.success('Tvrtka uspješno deaktivirana!');
+                }
+            } else {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP greška: ${response.status} - ${response.statusText}`);
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP greška: ${response.status} - ${response.statusText}. Odgovor: ${errorText.substring(0, 100)}...`);
+                }
+            }
         } catch (err) {
             console.error('Greška pri deaktivaciji tvrtke:', err);
             if (err instanceof Error) {

@@ -10,6 +10,7 @@ import ffos.skroflin.model.Tvrtka;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
 import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +33,7 @@ public class TvrtkaService extends MainService{
         );
     }
     
+    @Transactional
     private Tvrtka convertToEntity(TvrtkaDTO dto){
         Tvrtka tvrtka = new Tvrtka();
         tvrtka.setNazivTvrtke(dto.nazivTvrtke());
@@ -40,12 +42,14 @@ public class TvrtkaService extends MainService{
         return tvrtka;
     }
     
+    @Transactional
     private void updateEntityFromDto(Tvrtka tvrtka, TvrtkaDTO dto){
         tvrtka.setNazivTvrtke(dto.nazivTvrtke());
         tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
         tvrtka.setUStjecaju(dto.uStjecaju());
     }
     
+    @Transactional
     public List<TvrtkaOdgovorDTO> getAll(){
         List<Tvrtka> tvrtke = session.createQuery(
                 "from Tvrtka", Tvrtka.class).list();
@@ -54,11 +58,13 @@ public class TvrtkaService extends MainService{
                 .collect(Collectors.toList());
     }
     
+    @Transactional
     public TvrtkaOdgovorDTO getBySifra(int sifra){
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         return convertToResponseDTO(tvrtka);
     }
     
+    @Transactional
     @PreAuthorize("hasRole('admin')")
     public TvrtkaOdgovorDTO post(TvrtkaDTO o){
         try {
@@ -80,6 +86,7 @@ public class TvrtkaService extends MainService{
         }
     }
     
+    @Transactional
     @PreAuthorize("hasRole('admin')")
     public TvrtkaOdgovorDTO put(TvrtkaDTO o, int sifra){
         Tvrtka t = (Tvrtka) session.get(Tvrtka.class, sifra);
@@ -102,6 +109,7 @@ public class TvrtkaService extends MainService{
         return convertToResponseDTO(t);
     }
     
+    @Transactional
     @PreAuthorize("hasRole('admin')")
     public void delete(int sifra){
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
@@ -111,15 +119,17 @@ public class TvrtkaService extends MainService{
         session.remove(tvrtka);
     }
     
-    @PreAuthorize("hasRole('admin')")
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void softDelete(int sifra){
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         if (tvrtka == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
-        tvrtka.setUStjecaju(false);
+        tvrtka.setUStjecaju(true);
     }
     
+    @Transactional
     public List<TvrtkaOdgovorDTO> getAktivneTvrtke(boolean aktivan){
         List<Tvrtka> tvrtke = session.createQuery(
                 "from tvrtka t where t.aktivan = :uvjet", Tvrtka.class)
