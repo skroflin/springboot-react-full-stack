@@ -158,4 +158,20 @@ public class OdjelService extends MainService {
             throw new RuntimeException("Greška pri brisanju odjela: " + e.getMessage(), e);
         }
     }
+    
+    public List<OdjelOdgovorDTO> getByNaziv(String uvjet){
+        try {
+            List<Odjel> odjeli = session.createQuery(
+                    "SELECT o FROM Odjel LEFT JOIN FETCH o.tvrtka "
+                    + "WHERE LOWER(o.nazivOdjela) LIKE LOWER(:uvjet)",
+                    Odjel.class)
+                    .setParameter("uvjet", "%" + uvjet + "%")
+                    .list();
+            return odjeli.stream()
+                    .map(this::convertToResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Greška pri pretraživanju odjela: " + e.getMessage(), e);
+        }
+    }
 }

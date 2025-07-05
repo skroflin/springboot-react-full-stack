@@ -208,4 +208,25 @@ public class DjelatnikController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
         }
     }
+    
+    @GetMapping("/getByNaziv")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<DjelatnikOdgovorDTO>> getByNaziv(
+            @RequestParam String naziv
+    ) {
+        try {
+            if (naziv == null || naziv.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
+            }
+            List<DjelatnikOdgovorDTO> djelatnici = djelatnikService.getByImePrezime(naziv);
+            if (djelatnici == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnici s navedenim nazivima" + " " + naziv + " " + "ne postoje!");
+            }
+            return new ResponseEntity<>(djelatnici, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+        }
+    }
 }

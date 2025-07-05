@@ -128,11 +128,28 @@ public class TvrtkaService extends MainService{
     @Transactional
     public List<TvrtkaOdgovorDTO> getAktivneTvrtke(boolean aktivan){
         List<Tvrtka> tvrtke = session.createQuery(
-                "from tvrtka t where t.aktivan = :uvjet", Tvrtka.class)
+                "from Tvrtka t where t.uStjecaju = :uvjet", Tvrtka.class)
                 .setParameter("uvjet", aktivan)
                 .getResultList();
         return tvrtke.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
+    }
+    
+    @Transactional
+    public List<TvrtkaOdgovorDTO> getByNaziv(String uvjet){
+        try {
+            List<Tvrtka> tvrtke = session.createQuery(
+                        "SELECT t FROM Tvrtka t " +
+                        "WHERE LOWER (t.nazivTvrtke) LIKE LOWER(:uvjet)",
+                    Tvrtka.class)
+                    .setParameter("uvjet", "%" + uvjet + "%")
+                    .list();
+            return tvrtke.stream()
+                    .map(this::convertToResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Greška pri pretraživanju tvrtki: " + e.getMessage(), e);
+        }
     }
 }

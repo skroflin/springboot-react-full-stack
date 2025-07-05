@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -127,7 +126,7 @@ public class DjelatnikService extends MainService {
             throw new RuntimeException("Greška pri dohvatu djelatnika: " + e.getMessage(), e);
         }
     }
-
+ 
     @Transactional
     public DjelatnikOdgovorDTO post(DjelatnikDTO o) {
         try {

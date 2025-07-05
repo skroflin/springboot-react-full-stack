@@ -145,4 +145,25 @@ public class TvrtkaController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
         }
     }
+    
+    @GetMapping("/getByNaziv")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TvrtkaOdgovorDTO>> getByNaziv(
+            @RequestParam String naziv
+    ) {
+        try {
+            if (naziv == null || naziv.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
+            }
+            List<TvrtkaOdgovorDTO> tvrtke = tvrtkaService.getByNaziv(naziv);
+            if (tvrtke == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtke s navedenim nazivom" + " " + naziv + " " + "ne postoje!");
+            }
+            return new ResponseEntity<>(tvrtke, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+        }
+    }
 }
