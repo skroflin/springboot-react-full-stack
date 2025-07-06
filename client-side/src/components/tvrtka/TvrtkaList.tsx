@@ -3,20 +3,17 @@ import axios from 'axios';
 import { TvrtkaDeaktivacijaModal } from './TvrtkaDeaktivacijaModal';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { TvrtkaSearch } from './TvrtkaSearch';
+
+import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
 
 interface TvrtkaListProps {
     authToken: string;
 }
 
-interface Tvrtka {
-    sifra: number;
-    nazivTvrtke: string;
-    sjedisteTvrtke: string;
-    uStjecaju: boolean;
-}
-
 export function TvrtkaList({ authToken }: TvrtkaListProps) {
-    const [tvrtke, setTvrtke] = useState<Tvrtka[]>([]);
+    const [allTvrtke, setAllTvrtke] = useState<TvrtkaOdgovorDTO[]>([]);
+    const [displayedTvrtke, setDisplayedTvrtke] = useState<TvrtkaOdgovorDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,8 +35,9 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                 Authorization: `Bearer ${authToken}`,
             };
 
-            const response = await axios.get<Tvrtka[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers });
-            setTvrtke(response.data);
+            const response = await axios.get<TvrtkaOdgovorDTO[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers });
+            setAllTvrtke(response.data);
+            setDisplayedTvrtke(response.data);
         } catch (err: any) {
             if (err.response) {
                 setError(err.response.data.message || "Greška prilikom dohvaćanja tvrtki.");
@@ -68,12 +66,23 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
     const handleHideDeaktivacijaModal = () => {
         setShowDeaktivacijaModal(false);
         setSelectedTvrtkaSifra(null);
+        fetchTvrtke();
+    };
+
+    const handleSearchResults = (results: TvrtkaOdgovorDTO[]) => {
+        setDisplayedTvrtke(results);
+        setCurrentPage(1);
+    };
+
+    const handleClearSearch = () => {
+        setDisplayedTvrtke(allTvrtke);
+        setCurrentPage(1);
     };
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentTvrtke = tvrtke.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(tvrtke.length / itemsPerPage);
+    const currentTvrtke = displayedTvrtke.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(displayedTvrtke.length / itemsPerPage);
 
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
@@ -93,7 +102,12 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
 
     return (
         <div className="container mx-auto p-4 mt-8">
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">Popis Tvrtki</h2>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-black-600 w-fit">Popis Tvrtki</h2>
+            <TvrtkaSearch
+                authToken={authToken}
+                onSearchResults={handleSearchResults}
+                onClearSearch={handleClearSearch}
+            />
 
             {loading && (
                 <div className="flex justify-center items-center">
@@ -110,17 +124,20 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
 
             {!loading && !error && (
                 <>
-                    {currentTvrtke.length === 0 ? (
-                        <p className="text-center text-gray-600">Nema unesenih tvrtki.</p>
+                    {displayedTvrtke.length === 0 ? (
+                        <p className="text-center text-gray-600">
+                            {
+                                currentTvrtke.length === 0 && allTvrtke.length > 0
+                                    ? "Nema pronađenih tvrtki koje odgovaraju kriterijima pretraživanja."
+                                    : "Nema unesenih tvrtki."
+                            }
+                        </p>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {currentTvrtke.map((tvrtka) => (
                                 <div key={tvrtka.sifra} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{tvrtka.nazivTvrtke}</h3>
-                                        <p className="text-gray-700 mb-1">
-                                            <span className="font-medium">Šifra:</span> {tvrtka.sifra}
-                                        </p>
+                                        <h3 className="text-l font-semibold text-gray-900 mb-2 border-b border-gray-600">{tvrtka.nazivTvrtke}</h3>
                                         <p className="text-gray-700 mb-1">
                                             <span className="font-medium">Sjedište:</span> {tvrtka.sjedisteTvrtke}
                                         </p>

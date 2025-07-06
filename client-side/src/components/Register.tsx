@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export function Register() {
     const [username, setUsername] = useState('');
@@ -17,42 +18,28 @@ export function Register() {
 
         if (password !== confirmPassword) {
             toast.error('Lozinke se ne podudaraju!');
+            return;
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/skroflin/korisnik/registracija', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    korisnickoIme: username,
-                    lozinka: password,
-                    email: email,
-                    uloga: uloga,
-                    aktivan: aktivan
-                }),
+            await axios.post('http://localhost:8080/api/skroflin/korisnik/registracija', {
+                korisnickoIme: username,
+                lozinka: password,
+                email: email,
+                uloga: uloga,
+                aktivan: aktivan,
             });
-            if (!response.ok) {
-                let errorMessage: string = 'Greška pri registraciji.';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorData.error || `HTTP greška: ${response.status} ${response.statusText}`;
-                } catch (jsonError) {
-                    errorMessage = `HTTP greška: ${response.status} ${response.statusText || 'Nepoznata greška'}. Odgovor nije bio JSON.`;
-                }
-                throw new Error(errorMessage);
-            }
 
             toast.success('Registracija uspješna! Preusmjeravam na stranicu za prijavu...');
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
 
-        } catch (err) {
+        } catch (err: any) {
             console.error('Greška pri registraciji:', err);
-            if (err instanceof Error) {
-                toast.error(`Greška pri registraciji: ${err.message}`);
+            if (axios.isAxiosError(err)) {
+                const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Greška pri registraciji.';
+                toast.error(`Greška pri registraciji: ${errorMessage}`);
             } else {
                 toast.error('Došlo je do neočekivane greške pri registraciji.');
             }

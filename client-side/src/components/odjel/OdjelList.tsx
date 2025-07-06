@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash } from 'react-icons/fa';
 import type { OdjelOdgovorDTO } from '../../types/Odjel';
@@ -14,71 +15,57 @@ export function OdjelList({ authToken }: OdjelListProps) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [odjeliResponse, tvrtkeResponse] = await Promise.all([
-                    fetch('http://localhost:8080/api/skroflin/odjel/get', { headers: { 'Authorization': `Bearer ${authToken}` } }),
-                    fetch('http://localhost:8080/api/skroflin/tvrtka/get', { headers: { 'Authorization': `Bearer ${authToken}` } })
-                ]);
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
 
-                if (!odjeliResponse.ok) {
-                    throw new Error(`HTTP greška pri dohvatu odjela: ${odjeliResponse.status}`);
-                }
-                const odjeliData: OdjelOdgovorDTO[] = await odjeliResponse.json();
-                setOdjeli(odjeliData);
+        try {
+            const headers = { 'Authorization': `Bearer ${authToken}` };
 
-                if (!tvrtkeResponse.ok) {
-                    throw new Error(`HTTP greška pri dohvatu tvrtki: ${tvrtkeResponse.status}`);
-                }
-                const tvrtkeData: TvrtkaOdgovorDTO[] = await tvrtkeResponse.json();
+            const odjeliResponse = await axios.get<OdjelOdgovorDTO[]>('http://localhost:8080/api/skroflin/odjel/get', { headers });
+            setOdjeli(odjeliResponse.data);
 
-                const newTvrtkaMap = new Map<number, string>();
-                tvrtkeData.forEach(tvrtka => {
-                    newTvrtkaMap.set(tvrtka.sifra, tvrtka.nazivTvrtke);
-                });
-                setTvrtkaMap(newTvrtkaMap);
+            const tvrtkeResponse = await axios.get<TvrtkaOdgovorDTO[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers });
+            const newTvrtkaMap = new Map<number, string>();
+            tvrtkeResponse.data.forEach(tvrtka => {
+                newTvrtkaMap.set(tvrtka.sifra, tvrtka.nazivTvrtke);
+            });
+            setTvrtkaMap(newTvrtkaMap);
 
-            } catch (err) {
-                console.error('Greška pri dohvatu podataka za odjele:', err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                    toast.error(`Greška pri dohvatu podataka za odjele: ${err.message}`);
-                } else {
-                    setError('Došlo je do neočekivane greške.');
-                    toast.error('Došlo je do neočekivane greške pri dohvatu podataka za odjele.');
-                }
-            } finally {
-                setLoading(false);
+        } catch (err: any) {
+            console.error('Greška pri dohvatu podataka za odjele:', err);
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka za odjele.');
+                toast.error(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka za odjele.');
+            } else {
+                setError(err.message || 'Došlo je do neočekivane greške.');
+                toast.error(err.message || 'Došlo je do neočekivane greške pri dohvatu podataka za odjele.');
             }
-        };
-
-        fetchData();
+        } finally {
+            setLoading(false);
+        }
     }, [authToken]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleDelete = async (sifra: number) => {
         if (!window.confirm('Jeste li sigurni da želite obrisati ovaj odjel?')) {
             return;
         }
         try {
-            const response = await fetch(`http://localhost:8080/api/skroflin/odjel/softDelete/${sifra}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${authToken}` },
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP greška: ${response.status}`);
-            }
+            const headers = { 'Authorization': `Bearer ${authToken}` };
+            await axios.put(`http://localhost:8080/api/skroflin/odjel/softDelete/${sifra}`, {}, { headers });
 
             setOdjeli(prevOdjeli => prevOdjeli.filter(o => o.sifra !== sifra));
             toast.success('Odjel uspješno obrisan (logički)!');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Greška pri logičkom brisanju odjela:', err);
-            if (err instanceof Error) {
-                toast.error(`Greška pri brisanju: ${err.message}`);
+            if (axios.isAxiosError(err)) {
+                toast.error(err.response?.data?.message || err.message || 'Greška pri brisanju odjela.');
             } else {
-                toast.error('Došlo je do neočekivane greške pri brisanju odjela.');
+                toast.error(err.message || 'Došlo je do neočekivane greške pri brisanju odjela.');
             }
         }
     };
@@ -89,7 +76,12 @@ export function OdjelList({ authToken }: OdjelListProps) {
     };
 
     if (loading) {
-        return <div className="text-center text-lg mt-8 text-gray-600">Učitavanje odjela i tvrtki...</div>;
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <span className="ml-4 text-lg text-gray-600">Učitavanje odjela i tvrtki...</span>
+            </div>
+        );
     }
 
     if (error) {

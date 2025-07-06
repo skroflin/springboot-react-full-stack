@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaBirthdayCake, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCity, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
-import { format } from 'date-fns';
-import { hr } from 'date-fns/locale';
-import { DjelatnikPlacaDetalji } from './DjelatnikPlacaDetalji'; // Prilagodite putanju ako je potrebno
+import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { DjelatnikPlacaDetalji } from './DjelatnikPlacaDetalji';
 
 import type { DjelatnikOdgovorDTO, PlacaOdgovorDTO } from '../../types/Djelatnik';
 import type { OdjelOdgovorDTO } from '../../types/Odjel';
@@ -39,74 +38,59 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            setError(null);
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
 
-            if (!authToken) {
-                toast.error('Niste prijavljeni. Molimo prijavite se.');
-                navigate('/login');
-                setLoading(false);
-                return;
+        if (!authToken) {
+            toast.error('Niste prijavljeni. Molimo prijavite se.');
+            navigate('/login');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const headers = { 'Authorization': `Bearer ${authToken}` };
+
+            const [djelatniciResponse, tvrtkeResponse, odjeliResponse] = await Promise.all([
+                axios.get<DjelatnikOdgovorDTO[]>('http://localhost:8080/api/skroflin/djelatnik/get', { headers }),
+                axios.get<TvrtkaOdgovorDTO[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers }),
+                axios.get<OdjelOdgovorDTO[]>('http://localhost:8080/api/skroflin/odjel/get', { headers })
+            ]);
+
+            setDjelatnici(djelatniciResponse.data);
+
+            const newTvrtkaMap = new Map<number, string>();
+            tvrtkeResponse.data.forEach(tvrtka => {
+                newTvrtkaMap.set(tvrtka.sifra, tvrtka.nazivTvrtke);
+            });
+            setTvrtkaMap(newTvrtkaMap);
+
+            const newOdjelMap = new Map<number, string>();
+            odjeliResponse.data.forEach(odjel => {
+                newOdjelMap.set(odjel.sifra, odjel.nazivOdjela);
+            });
+            setOdjelMap(newOdjelMap);
+
+        } catch (err: any) {
+            console.error('Greška pri dohvatu podataka:', err);
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka.');
+                toast.error(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka.');
+            } else {
+                setError(err.message || 'Došlo je do neočekivane greške.');
+                toast.error(err.message || 'Došlo je do neočekivane greške pri dohvatu podataka.');
             }
-
-            try {
-                const [djelatniciResponse, tvrtkeResponse, odjeliResponse] = await Promise.all([
-                    fetch('http://localhost:8080/api/skroflin/djelatnik/get', { headers: { 'Authorization': `Bearer ${authToken}` } }),
-                    fetch('http://localhost:8080/api/skroflin/tvrtka/get', { headers: { 'Authorization': `Bearer ${authToken}` } }),
-                    fetch('http://localhost:8080/api/skroflin/odjel/get', { headers: { 'Authorization': `Bearer ${authToken}` } })
-                ]);
-
-                if (!djelatniciResponse.ok) {
-                    const errorData = await djelatniciResponse.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP greška pri dohvatu djelatnika: ${djelatniciResponse.status}`);
-                }
-                const djelatniciData: DjelatnikOdgovorDTO[] = await djelatniciResponse.json();
-                setDjelatnici(djelatniciData);
-
-                if (!tvrtkeResponse.ok) {
-                    const errorData = await tvrtkeResponse.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP greška pri dohvatu tvrtki: ${tvrtkeResponse.status}`);
-                }
-                const tvrtkeData: TvrtkaOdgovorDTO[] = await tvrtkeResponse.json();
-
-                if (!odjeliResponse.ok) {
-                    const errorData = await odjeliResponse.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP greška pri dohvatu odjela: ${odjeliResponse.status}`);
-                }
-                const odjeliData: OdjelOdgovorDTO[] = await odjeliResponse.json();
-
-                const newTvrtkaMap = new Map<number, string>();
-                tvrtkeData.forEach(tvrtka => {
-                    newTvrtkaMap.set(tvrtka.sifra, tvrtka.nazivTvrtke);
-                });
-                setTvrtkaMap(newTvrtkaMap);
-
-                const newOdjelMap = new Map<number, string>();
-                odjeliData.forEach(odjel => {
-                    newOdjelMap.set(odjel.sifra, odjel.nazivOdjela);
-                });
-                setOdjelMap(newOdjelMap);
-
-            } catch (err) {
-                console.error('Greška pri dohvatu podataka:', err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                    toast.error(`Greška pri dohvatu podataka: ${err.message}`);
-                } else {
-                    setError('Došlo je do neočekivane greške.');
-                    toast.error('Došlo je do neočekivane greške pri dohvatu podataka.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        } finally {
+            setLoading(false);
+        }
     }, [authToken, navigate]);
 
-    const fetchPlaca = async (sifra: number, brutoOsnovica: string) => {
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const fetchPlaca = useCallback(async (sifra: number, brutoOsnovica: string) => {
         const parsedBruto = parseFloat(brutoOsnovica);
         if (isNaN(parsedBruto) || parsedBruto <= 0) {
             setPlacaData(null);
@@ -120,25 +104,10 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         }
 
         try {
-            const response = await fetch(`http://localhost:8080/api/skroflin/djelatnik/izracunajPlacu/${sifra}?brutoOsnovica=${brutoOsnovica}`, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
+            const headers = { 'Authorization': `Bearer ${authToken}` };
+            const response = await axios.get<PlacaOdgovorDTO>(`http://localhost:8080/api/skroflin/djelatnik/izracunajPlacu/${sifra}?brutoOsnovica=${brutoOsnovica}`, { headers });
 
-            if (!response.ok) {
-                let errorMessage: string = 'Nije uspio izračun plaće.';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorData.error || `HTTP greška: ${response.status} ${response.statusText}`;
-                } catch (jsonError) {
-                    errorMessage = `HTTP greška: ${response.status} ${response.statusText || 'Nepoznata greška'}. Odgovor nije bio JSON.`;
-                }
-                throw new Error(errorMessage);
-            }
-
-            const rawData: PlacaOdgovorDTO = await response.json();
-
+            const rawData = response.data;
             const convertedData = {
                 sifraDjelatnika: rawData.sifraDjelatnika,
                 brutoPlaca: parseFloat(rawData.brutoPlaca),
@@ -150,16 +119,16 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                 netoPlaca: parseFloat(rawData.netoPlaca),
             };
             setPlacaData(convertedData);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Greška pri izračunu plaće:', error);
-            if (error instanceof Error) {
-                toast.error(`Greška pri izračunu plaće: ${error.message}`);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message || 'Greška pri izračunu plaće.');
             } else {
-                toast.error('Došlo je do neočekivane greške pri izračunu plaće.');
+                toast.error(error.message || 'Došlo je do neočekivane greške pri izračunu plaće.');
             }
             setPlacaData(null);
         }
-    };
+    }, [authToken, navigate]);
 
     useEffect(() => {
         if (selectedDjelatnik && brutoOsnovicaInput) {
@@ -167,7 +136,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         } else {
             setPlacaData(null);
         }
-    }, [selectedDjelatnik, brutoOsnovicaInput, authToken]);
+    }, [selectedDjelatnik, brutoOsnovicaInput, fetchPlaca]);
 
     const handleEdit = (djelatnik: DjelatnikOdgovorDTO) => {
         toast.info(`Uređivanje djelatnika: ${djelatnik.imeDjelatnika} ${djelatnik.prezimeDjelatnika}`);
@@ -185,34 +154,19 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         }
 
         try {
-            const response = await fetch(`http://localhost:8080/api/skroflin/djelatnik/softDelete/${sifra}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
-
-            if (!response.ok) {
-                let errorMessage: string = 'Nije uspjelo brisanje djelatnika.';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorData.error || `HTTP greška: ${response.status} ${response.statusText}`;
-                } catch (jsonError) {
-                    errorMessage = `HTTP greška: ${response.status} ${response.statusText || 'Nepoznata greška'}. Odgovor nije bio JSON.`;
-                }
-                throw new Error(errorMessage);
-            }
+            const headers = { 'Authorization': `Bearer ${authToken}` };
+            await axios.put(`http://localhost:8080/api/skroflin/djelatnik/softDelete/${sifra}`, {}, { headers });
 
             toast.success('Djelatnik uspješno obrisan (soft delete)!');
             setDjelatnici(prevDjelatnici => prevDjelatnici.filter(d => d.sifra !== sifra));
             setSelectedDjelatnik(null);
             setPlacaData(null);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Greška pri brisanju djelatnika:', error);
-            if (error instanceof Error) {
-                toast.error(`Greška pri brisanju djelatnika: ${error.message}`);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message || 'Greška pri brisanju djelatnika.');
             } else {
-                toast.error('Došlo je do neočekivane greške pri brisanju djelatnika.');
+                toast.error(error.message || 'Došlo je do neočekivane greške pri brisanju djelatnika.');
             }
         }
     };
@@ -280,7 +234,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
     }
 
     return (
-        <div className="flex flex-col md:flex-row p-4 min-h-screen bg-gray-100">
+        <div className="flex flex-col md:flex-row p-4 min-h-screen">
             <div className="w-full md:w-1/2 pr-0 md:pr-4 mb-4 md:mb-0 bg-white p-6 rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Popis djelatnika</h2>
 
@@ -364,7 +318,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                 </div>
             </div>
 
-            <div className="w-full md:w-1/2 pl-0 md:pl-4 bg-white p-6 rounded-lg shadow-md md:border-l border-gray-200">
+            <div className="w-full md:w-1/2 pl-0 md:pl-4 md:ml-4 bg-white p-6 rounded-lg shadow-md md:border-l border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Detalji plaće</h2>
                 <DjelatnikPlacaDetalji
                     selectedDjelatnik={selectedDjelatnik}

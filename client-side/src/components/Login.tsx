@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from 'axios'; // Uvozimo axios
 
 interface LoginProps {
     onLoginSuccess: (token: string, username: string) => void;
@@ -15,40 +16,23 @@ export function Login({ onLoginSuccess }: LoginProps) {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:8080/api/skroflin/korisnik/prijava', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ korisnickoIme: username, lozinka: password }),
+            const response = await axios.post('http://localhost:8080/api/skroflin/korisnik/prijava', {
+                korisnickoIme: username,
+                lozinka: password,
             });
-
-            if (!response.ok) {
-                let errorMessage: string;
-                try {
-                    errorMessage = await response.text();
-                    if (!errorMessage) {
-                        errorMessage = 'Netočno korisničko ime ili lozinka.';
-                    }
-                } catch (readError) {
-                    errorMessage = `HTTP greška: ${response.status} ${response.statusText}.`;
-                }
-
-                throw new Error(errorMessage);
-            }
-
-            const data = await response.json();
+            const data = response.data;
             const jwtToken = data.jwt;
-            const loggedInUsername = data.korisnickoIme ?? '';
+            const loggedInUsername = data.korisnickoIme ?? ''; // Koristimo nullish coalescing operator
 
             onLoginSuccess(jwtToken, loggedInUsername);
             toast.success('Prijava uspješna!');
             navigate('/home');
 
-        } catch (err) {
+        } catch (err: any) {
             console.error('Greška pri prijavi:', err);
-            if (err instanceof Error) {
-                toast.error(`Greška pri prijavi: ${err.message}`);
+            if (axios.isAxiosError(err)) {
+                const errorMessage = err.response?.data || 'Netočno korisničko ime ili lozinka.';
+                toast.error(`Greška pri prijavi: ${errorMessage}`);
             } else {
                 toast.error('Došlo je do neočekivane greške pri prijavi.');
             }
