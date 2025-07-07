@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
+import { useState } from "react";
+import axios from "axios";
+import { toast } from 'react-toastify'
 
-interface TvrtkaDeaktivacijaModalProps {
+interface DjelatnikDeaktivacijaModalProps {
     show: boolean;
     onHide: () => void;
-    tvrtkaSifra: number | null;
+    djelatnikSifra: number | null;
     onSuccess: () => void;
     authToken: string;
 }
 
-export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, authToken }: TvrtkaDeaktivacijaModalProps) {
+export function DjelatnikDeaktivacijaModal({ show, onHide, djelatnikSifra, onSuccess, authToken }: DjelatnikDeaktivacijaModalProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -19,8 +19,8 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, 
     }
 
     const handleDeactivate = async () => {
-        if (tvrtkaSifra === null) {
-            setError("Nije odabrana tvrtka za deaktivaciju.");
+        if (djelatnikSifra === null) {
+            setError("Nije odabran djelatnik za otkaz.");
             return;
         }
 
@@ -29,32 +29,32 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, 
 
         try {
             if (!authToken) {
-                throw new Error('Auth Token is missing!');
+                throw new Error('Auth token is missing!');
             }
 
             const headers = {
-                Authorization: `Bearer ${authToken}`,
+                Authorization: `Bearer ${authToken}`
             };
 
-            await axios.put(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${tvrtkaSifra}`, null, { headers });
+            await axios.put(`http://localhost:8080/api/skroflin/djelatnik/softDelete?sifra=${djelatnikSifra}`, null, { headers });
 
-            toast.success(`Tvrtka ${tvrtkaSifra} uspješno deaktivirana!`);
+            toast.success(`Djelatnik ${djelatnikSifra} uspješno otpušten!`);
             onSuccess();
             onHide();
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || err.message || "Nepoznata greška prilikom deaktivacije tvrtke.";
             setError(errorMessage);
-            toast.error(`Deaktivacija tvrtke ${tvrtkaSifra} neuspješna: ${errorMessage}`);
+            toast.error(`Otpuštanje djelatnika ${djelatnikSifra} neuspješno: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm justify-center items-center z-50">
             <div className="relative p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div className="flex justify-between items-center pb-3">
-                    <h3 className="text-lg font-semibold text-gray-900">Deaktivacija tvrtke</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">Otpuštanje djelatnika</h3>
                     <button
                         onClick={onHide}
                         className="text-gray-400 hover:text-gray-600 text-2xl font-semibold leading-none outline-none focus:outline-none"
@@ -65,7 +65,7 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, 
 
                 <div className="mb-4">
                     {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-                    <p className="text-gray-700">Jeste li sigurni da želite deaktivirati tvrtku sa šifrom <strong className="font-bold">{tvrtkaSifra}</strong>?</p>
+                    <p className="text-gray-700">Jeste li sigurni da želite otpustiti djelatnika sa šifrom <strong className="font-bold">{djelatnikSifra}</strong>?</p>
                 </div>
 
                 <div className="flex justify-end space-x-3">
@@ -79,12 +79,12 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, 
                     <button
                         onClick={handleDeactivate}
                         disabled={loading}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75-disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? 'Deaktiviram...' : 'Deaktiviraj'}
+                        {loading ? 'Otpuštam...' : 'Otpusti'}
                     </button>
                 </div>
             </div>
         </div>
-    );
+    )
 }

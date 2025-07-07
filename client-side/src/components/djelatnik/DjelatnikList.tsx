@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight, FaTimesCircle } from 'react-icons/fa';
 import { DjelatnikPlacaDetalji } from './DjelatnikPlacaDetalji';
-
+import { DjelatnikDeaktivacijaModal } from './DjelatnikDeaktivacijaModal';
 import type { DjelatnikOdgovorDTO, PlacaOdgovorDTO } from '../../types/Djelatnik';
 import type { OdjelOdgovorDTO } from '../../types/Odjel';
 import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
@@ -32,6 +32,9 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
     const [odjelMap, setOdjelMap] = useState<Map<number, string>>(new Map());
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [showDeaktivacijaModal, setShowDeaktivacijaModal] = useState<boolean>(false);
+    const [selectedDjelatnikSifra, setSelectedDjelatnikSifra] = useState<number | null>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(4);
@@ -89,6 +92,17 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    const handleShowDeaktivacijaModal = (sifra: number) => {
+        setSelectedDjelatnikSifra(sifra);
+        setShowDeaktivacijaModal(true);
+    };
+
+    const handleHideDeaktivacijaModal = () => {
+        setShowDeaktivacijaModal(false);
+        setSelectedDjelatnikSifra(null);
+        fetchData();
+    };
 
     const fetchPlaca = useCallback(async (sifra: number, brutoOsnovica: string) => {
         const parsedBruto = parseFloat(brutoOsnovica);
@@ -277,22 +291,44 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                                 <FaBriefcase className="mr-2 text-blue-500" />
                                 Plaća: {djelatnik.placaDjelatnika.toFixed(2)} EUR
                             </p>
-                            <div className="flex justify-end mt-3 space-x-2">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleEdit(djelatnik); }}
-                                    className="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center text-sm"
-                                    title="Uredi"
-                                >
-                                    <FaEdit className="mr-1" /> Uredi
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleDelete(djelatnik.sifra); }}
-                                    className="text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center text-sm"
-                                    title="Obriši"
-                                >
-                                    <FaTrash className="mr-1" /> Obriši
-                                </button>
+                            <div className="border-t border-gray-700 flex justify-end mt-3 space-x-2">
+                                <div className="border-r border-gray-700">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleEdit(djelatnik); }}
+                                        className="mx-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center text-sm"
+                                        title="Uredi"
+                                    >
+                                        <FaEdit className="mr-1" /> Uredi
+                                    </button>
+                                </div>
+                                <div className="border-r border-gray-700">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(djelatnik.sifra); }}
+                                        className="mx-2 text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center text-sm"
+                                        title="Obriši"
+                                    >
+                                        <FaTrash className="mr-1" /> Obriši
+                                    </button>
+                                </div>
+                                {djelatnik.jeZaposlen && (
+                                    <div>
+                                        <button
+                                            onClick={() => handleShowDeaktivacijaModal(djelatnik.sifra)}
+                                            className="mx-2 text-yellow-600 hover:text-yellow-800 transition-colors duration-200 flex items-center text-sm"
+                                            title="Otpusti"
+                                        >
+                                            <FaTimesCircle className="mr-1" /> Otpusti
+                                        </button>
+                                    </div>
+                                )}
                             </div>
+                            <DjelatnikDeaktivacijaModal
+                                show={showDeaktivacijaModal}
+                                onHide={handleHideDeaktivacijaModal}
+                                djelatnikSifra={selectedDjelatnikSifra}
+                                onSuccess={fetchData}
+                                authToken={authToken}
+                            />
                         </div>
                     ))}
                 </div>
@@ -327,6 +363,6 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                     odjelMap={odjelMap}
                 />
             </div>
-        </div>
+        </div >
     );
 }
