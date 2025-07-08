@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { TvrtkaDeaktivacijaModal } from './TvrtkaDeaktivacijaModal';
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { TvrtkaSearch } from './TvrtkaSearch';
-
+import { TvrtkaDodajObrazac } from './TvrtkaDodajObrazac';
 import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
 
 interface TvrtkaListProps {
@@ -19,6 +19,8 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
 
     const [showDeaktivacijaModal, setShowDeaktivacijaModal] = useState<boolean>(false);
     const [selectedTvrtkaSifra, setSelectedTvrtkaSifra] = useState<number | null>(null);
+
+    const [showAddTvrtkaForm, setShowAddTvrtkaForm] = useState<boolean>(false);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(4);
@@ -103,6 +105,16 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
     return (
         <div className="container mx-auto p-4 mt-8">
             <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-black-600 w-fit">Popis Tvrtki</h2>
+
+            <div className="flex justify-end mb-6">
+                <button
+                    onClick={() => setShowAddTvrtkaForm(true)}
+                    className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
+                >
+                    <FaPlus className="mr-2" /> Dodaj novu tvrtku
+                </button>
+            </div>
+
             <TvrtkaSearch
                 authToken={authToken}
                 onSearchResults={handleSearchResults}
@@ -187,6 +199,17 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                         </div>
                     )}
                 </>
+            )}
+
+            {showAddTvrtkaForm && (
+                <TvrtkaDodajObrazac
+                    authToken={authToken}
+                    onSuccess={() => {
+                        setShowAddTvrtkaForm(false);
+                        fetchTvrtke();
+                    }}
+                    onCancel={() => setShowAddTvrtkaForm(false)}
+                />
             )}
 
             <TvrtkaDeaktivacijaModal

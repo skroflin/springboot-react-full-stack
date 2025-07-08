@@ -355,7 +355,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
             </div>
 
             <div className="w-full md:w-1/2 pl-0 md:pl-4 md:ml-4 bg-white p-6 rounded-lg shadow-md md:border-l border-gray-200">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Detalji plaće</h2>
+                <h2 className="text-2xl font-bold text-gray-800 ml-2 mb-4">Detalji plaće</h2>
                 <DjelatnikPlacaDetalji
                     selectedDjelatnik={selectedDjelatnik}
                     placaData={placaData}
