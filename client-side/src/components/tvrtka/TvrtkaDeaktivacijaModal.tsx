@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
 
 interface TvrtkaDeaktivacijaModalProps {
     show: boolean;
     onHide: () => void;
-    tvrtkaSifra: number | null;
+    tvrtka: TvrtkaOdgovorDTO | null;
     onSuccess: () => void;
     authToken: string;
 }
 
-export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, authToken }: TvrtkaDeaktivacijaModalProps) {
+export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtka, onSuccess, authToken }: TvrtkaDeaktivacijaModalProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    if (!show) {
+    if (!show || !tvrtka) {
         return null;
     }
 
     const handleDeactivate = async () => {
-        if (tvrtkaSifra === null) {
+        if (tvrtka === null || tvrtka.sifra === null) {
             setError("Nije odabrana tvrtka za deaktivaciju.");
             return;
         }
@@ -36,15 +37,15 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, 
                 Authorization: `Bearer ${authToken}`,
             };
 
-            await axios.put(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${tvrtkaSifra}`, null, { headers });
+            await axios.put(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${tvrtka.sifra}`, null, { headers });
 
-            toast.success(`Tvrtka ${tvrtkaSifra} uspješno deaktivirana!`);
+            toast.success(`Tvrtka ${tvrtka.nazivTvrtke} uspješno deaktivirana!`);
             onSuccess();
             onHide();
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || err.message || "Nepoznata greška prilikom deaktivacije tvrtke.";
             setError(errorMessage);
-            toast.error(`Deaktivacija tvrtke ${tvrtkaSifra} neuspješna: ${errorMessage}`);
+            toast.error(`Deaktivacija tvrtke ${tvrtka.nazivTvrtke} neuspješna: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -65,7 +66,7 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtkaSifra, onSuccess, 
 
                 <div className="mb-4">
                     {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-                    <p className="text-gray-700">Jeste li sigurni da želite deaktivirati tvrtku sa šifrom <strong className="font-bold">{tvrtkaSifra}</strong>?</p>
+                    <p className="text-gray-700">Jeste li sigurni da želite deaktivirati tvrtku <strong className="font-bold">{tvrtka.nazivTvrtke}</strong>?</p>
                 </div>
 
                 <div className="flex justify-end space-x-3">

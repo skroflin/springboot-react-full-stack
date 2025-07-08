@@ -151,6 +151,7 @@ export function OdjelList({ authToken }: OdjelListProps) {
 
                         <div className="flex justify-around mt-6 pt-4 border-t border-gray-100">
                             <button
+                                disabled
                                 onClick={() => handleEdit(odjel)}
                                 className="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
                                 title="Uredi odjel"
@@ -158,6 +159,7 @@ export function OdjelList({ authToken }: OdjelListProps) {
                                 <FaEdit className="mr-1" /> Uredi
                             </button>
                             <button
+                                disabled
                                 onClick={() => handleDelete(odjel.sifra)}
                                 className="text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
                                 title="Obriši odjel"

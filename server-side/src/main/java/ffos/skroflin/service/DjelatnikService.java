@@ -166,6 +166,17 @@ public class DjelatnikService extends MainService {
         session.persist(d);
         session.getTransaction().commit();
     }
+    
+    @Transactional
+    public void delete(int sifra){
+        Djelatnik d = session.get(Djelatnik.class, sifra);
+        if (d == null) {
+            throw new NoResultException("Djelatnik sa šifrom" + " " + sifra + " " + "ne postoji!");
+        }
+        session.beginTransaction();
+        session.remove(d);
+        session.getTransaction().commit();
+    }
 
     @Transactional
     public List<DjelatnikOdgovorDTO> getAllZaposleni(boolean zaposlen) {

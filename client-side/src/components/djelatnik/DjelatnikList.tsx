@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight, FaTimesCircle } from 'react-icons/fa';
 import { DjelatnikPlacaDetalji } from './DjelatnikPlacaDetalji';
 import { DjelatnikDeaktivacijaModal } from './DjelatnikDeaktivacijaModal';
+import { DjelatnikBrisanjeModal } from './DjelatnikBrisanjeModal';
 import type { DjelatnikOdgovorDTO, PlacaOdgovorDTO } from '../../types/Djelatnik';
 import type { OdjelOdgovorDTO } from '../../types/Odjel';
 import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
@@ -34,7 +35,10 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
     const [error, setError] = useState<string | null>(null);
 
     const [showDeaktivacijaModal, setShowDeaktivacijaModal] = useState<boolean>(false);
-    const [selectedDjelatnikSifra, setSelectedDjelatnikSifra] = useState<number | null>(null);
+    const [djelatnikForDeaktivacija, setDjelatnikForDeaktivacija] = useState<DjelatnikOdgovorDTO | null>(null);
+
+    const [showBrisanjeModal, setShowBrisanjeModal] = useState<boolean>(false);
+    const [djelatnikForBrisanje, setDjelatnikForBrisanje] = useState<DjelatnikOdgovorDTO | null>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(4);
@@ -93,14 +97,25 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         fetchData();
     }, [fetchData]);
 
-    const handleShowDeaktivacijaModal = (sifra: number) => {
-        setSelectedDjelatnikSifra(sifra);
+    const handleShowDeaktivacijaModal = (djelatnik: DjelatnikOdgovorDTO) => {
+        setDjelatnikForDeaktivacija(djelatnik);
         setShowDeaktivacijaModal(true);
     };
 
     const handleHideDeaktivacijaModal = () => {
         setShowDeaktivacijaModal(false);
-        setSelectedDjelatnikSifra(null);
+        setDjelatnikForDeaktivacija(null);
+        fetchData();
+    };
+
+    const handleShowBrisanjeModal = (djelatnik: DjelatnikOdgovorDTO) => {
+        setDjelatnikForBrisanje(djelatnik);
+        setShowBrisanjeModal(true);
+    };
+
+    const handleHideBrisanjeModal = () => {
+        setShowBrisanjeModal(false);
+        setDjelatnikForBrisanje(null);
         fetchData();
     };
 
@@ -156,33 +171,8 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         toast.info(`Uređivanje djelatnika: ${djelatnik.imeDjelatnika} ${djelatnik.prezimeDjelatnika}`);
     };
 
-    const handleDelete = async (sifra: number) => {
-        if (!window.confirm(`Jeste li sigurni da želite obrisati djelatnika sa šifrom ${sifra}?`)) {
-            return;
-        }
-
-        if (!authToken) {
-            toast.error('Niste prijavljeni.');
-            navigate('/login');
-            return;
-        }
-
-        try {
-            const headers = { 'Authorization': `Bearer ${authToken}` };
-            await axios.put(`http://localhost:8080/api/skroflin/djelatnik/softDelete/${sifra}`, {}, { headers });
-
-            toast.success('Djelatnik uspješno obrisan (soft delete)!');
-            setDjelatnici(prevDjelatnici => prevDjelatnici.filter(d => d.sifra !== sifra));
-            setSelectedDjelatnik(null);
-            setPlacaData(null);
-        } catch (error: any) {
-            console.error('Greška pri brisanju djelatnika:', error);
-            if (axios.isAxiosError(error)) {
-                toast.error(error.response?.data?.message || error.message || 'Greška pri brisanju djelatnika.');
-            } else {
-                toast.error(error.message || 'Došlo je do neočekivane greške pri brisanju djelatnika.');
-            }
-        }
+    const handleDelete = (djelatnik: DjelatnikOdgovorDTO) => {
+        handleShowBrisanjeModal(djelatnik);
     };
 
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -294,6 +284,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                             <div className="border-t border-gray-700 flex justify-end mt-3 space-x-2">
                                 <div className="border-r border-gray-700">
                                     <button
+                                        disabled
                                         onClick={(e) => { e.stopPropagation(); handleEdit(djelatnik); }}
                                         className="mx-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center text-sm"
                                         title="Uredi"
@@ -303,9 +294,9 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                                 </div>
                                 <div>
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); handleDelete(djelatnik.sifra); }}
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(djelatnik); }}
                                         className="mx-2 text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center text-sm"
-                                        title="Obriši"
+                                        title="Obriši Trajno"
                                     >
                                         <FaTrash className="mr-1" /> Obriši
                                     </button>
@@ -313,7 +304,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                                 {djelatnik.jeZaposlen && (
                                     <div className="border-l border-gray-700">
                                         <button
-                                            onClick={() => handleShowDeaktivacijaModal(djelatnik.sifra)}
+                                            onClick={(e) => { e.stopPropagation(); handleShowDeaktivacijaModal(djelatnik); }}
                                             className="mx-2 text-yellow-600 hover:text-yellow-800 transition-colors duration-200 flex items-center text-sm"
                                             title="Otpusti"
                                         >
@@ -322,13 +313,6 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                                     </div>
                                 )}
                             </div>
-                            <DjelatnikDeaktivacijaModal
-                                show={showDeaktivacijaModal}
-                                onHide={handleHideDeaktivacijaModal}
-                                djelatnikSifra={selectedDjelatnikSifra}
-                                onSuccess={fetchData}
-                                authToken={authToken}
-                            />
                         </div>
                     ))}
                 </div>
@@ -363,6 +347,22 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                     odjelMap={odjelMap}
                 />
             </div>
-        </div >
+
+            <DjelatnikDeaktivacijaModal
+                show={showDeaktivacijaModal}
+                onHide={handleHideDeaktivacijaModal}
+                djelatnik={djelatnikForDeaktivacija}
+                onSuccess={fetchData}
+                authToken={authToken}
+            />
+
+            <DjelatnikBrisanjeModal
+                show={showBrisanjeModal}
+                onClose={handleHideBrisanjeModal}
+                djelatnik={djelatnikForBrisanje}
+                onSuccess={fetchData}
+                authToken={authToken}
+            />
+        </div>
     );
 }

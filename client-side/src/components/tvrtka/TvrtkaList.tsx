@@ -18,7 +18,7 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
     const [error, setError] = useState<string | null>(null);
 
     const [showDeaktivacijaModal, setShowDeaktivacijaModal] = useState<boolean>(false);
-    const [selectedTvrtkaSifra, setSelectedTvrtkaSifra] = useState<number | null>(null);
+    const [selectedTvrtka, setSelectedTvrtka] = useState<TvrtkaOdgovorDTO | null>(null);
 
     const [showAddTvrtkaForm, setShowAddTvrtkaForm] = useState<boolean>(false);
 
@@ -41,9 +41,9 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
             setAllTvrtke(response.data);
             setDisplayedTvrtke(response.data);
         } catch (err: any) {
-            if (err.response) {
-                setError(err.response.data.message || "Greška prilikom dohvaćanja tvrtki.");
-                toast.error(err.response.data.message || "Greška prilikom dohvaćanja tvrtki.");
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || "Greška prilikom dohvaćanja tvrtki.");
+                toast.error(err.response?.data?.message || "Greška prilikom dohvaćanja tvrtki.");
             } else if (err.request) {
                 setError("Nema odgovora sa servera. Provjerite mrežnu vezu.");
                 toast.error("Nema odgovora sa servera. Provjerite mrežnu vezu.");
@@ -60,14 +60,14 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
         fetchTvrtke();
     }, [fetchTvrtke]);
 
-    const handleShowDeaktivacijaModal = (sifra: number) => {
-        setSelectedTvrtkaSifra(sifra);
+    const handleShowDeaktivacijaModal = (tvrtka: TvrtkaOdgovorDTO) => {
+        setSelectedTvrtka(tvrtka);
         setShowDeaktivacijaModal(true);
     };
 
     const handleHideDeaktivacijaModal = () => {
         setShowDeaktivacijaModal(false);
-        setSelectedTvrtkaSifra(null);
+        setSelectedTvrtka(null);
         fetchTvrtke();
     };
 
@@ -162,7 +162,7 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                                     </div>
                                     <div className="mt-4">
                                         <button
-                                            onClick={() => handleShowDeaktivacijaModal(tvrtka.sifra)}
+                                            onClick={() => handleShowDeaktivacijaModal(tvrtka)}
                                             disabled={tvrtka.uStjecaju}
                                             className={`w-full px-4 py-2 text-sm rounded-md transition-colors duration-200 ${tvrtka.uStjecaju
                                                 ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
@@ -215,7 +215,7 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
             <TvrtkaDeaktivacijaModal
                 show={showDeaktivacijaModal}
                 onHide={handleHideDeaktivacijaModal}
-                tvrtkaSifra={selectedTvrtkaSifra}
+                tvrtka={selectedTvrtka}
                 onSuccess={fetchTvrtke}
                 authToken={authToken}
             />
