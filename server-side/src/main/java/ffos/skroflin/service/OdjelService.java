@@ -107,8 +107,9 @@ public class OdjelService extends MainService {
             }
             
             Odjel odjel = convertToEntity(o);
+            session.beginTransaction();
             session.persist(odjel);
-            session.flush();
+            session.getTransaction().commit();
             return convertToResponseDTO(odjel);
         } catch (Exception e) {
             throw new RuntimeException("Greška prilikom stvaranja odjela: " + e.getMessage(), e);
@@ -161,7 +162,7 @@ public class OdjelService extends MainService {
     public List<OdjelOdgovorDTO> getByNaziv(String uvjet){
         try {
             List<Odjel> odjeli = session.createQuery(
-                    "SELECT o FROM Odjel LEFT JOIN FETCH o.tvrtka "
+                    "SELECT o FROM Odjel o LEFT JOIN FETCH o.tvrtka "
                     + "WHERE LOWER(o.nazivOdjela) LIKE LOWER(:uvjet)",
                     Odjel.class)
                     .setParameter("uvjet", "%" + uvjet + "%")

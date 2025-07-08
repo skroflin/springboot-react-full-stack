@@ -168,7 +168,7 @@ public class DjelatnikController {
     @PutMapping("/softDelete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> softDelete(
-            @PathVariable int sifra
+            @RequestParam int sifra
     ){
         try {
             if (sifra <= 0) {

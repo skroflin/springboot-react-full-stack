@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash, FaPlus } from 'react-icons/fa'; // Dodali smo FaPlus
 import type { OdjelOdgovorDTO } from '../../types/Odjel';
 import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
+import { OdjelDodajObrazac } from './OdjelDodajObrazac';
 
 interface OdjelListProps {
     authToken: string;
@@ -14,6 +15,8 @@ export function OdjelList({ authToken }: OdjelListProps) {
     const [tvrtkaMap, setTvrtkaMap] = useState<Map<number, string>>(new Map());
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [showAddOdjelForm, setShowAddOdjelForm] = useState<boolean>(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -75,6 +78,15 @@ export function OdjelList({ authToken }: OdjelListProps) {
         console.log('Uredi odjel:', odjel);
     };
 
+    const handleShowAddOdjelForm = () => {
+        setShowAddOdjelForm(true);
+    };
+
+    const handleHideAddOdjelForm = () => {
+        setShowAddOdjelForm(false);
+        fetchData();
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -88,13 +100,22 @@ export function OdjelList({ authToken }: OdjelListProps) {
         return <div className="text-center text-red-600 text-lg mt-8">Greška: {error}</div>;
     }
 
-    if (odjeli.length === 0) {
-        return <div className="text-center text-lg mt-8 text-gray-600">Nema pronađenih odjela.</div>;
-    }
-
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">Popis odjela</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center border-b border-gray-400 w-fit mx-auto pb-2">Popis odjela</h1>
+
+            <div className="flex justify-end mb-6">
+                <button
+                    onClick={handleShowAddOdjelForm}
+                    className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
+                >
+                    <FaPlus className="mr-2" /> Dodaj novi odjel
+                </button>
+            </div>
+
+            {odjeli.length === 0 && (
+                <div className="text-center text-lg mt-8 text-gray-600">Nema pronađenih odjela.</div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
                 {odjeli.map((odjel) => (
@@ -147,6 +168,14 @@ export function OdjelList({ authToken }: OdjelListProps) {
                     </div>
                 ))}
             </div>
+
+            {showAddOdjelForm && (
+                <OdjelDodajObrazac
+                    authToken={authToken}
+                    onSuccess={handleHideAddOdjelForm}
+                    onCancel={handleHideAddOdjelForm}
+                />
+            )}
         </div>
     );
 }

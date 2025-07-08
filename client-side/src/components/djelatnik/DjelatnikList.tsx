@@ -301,7 +301,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                                         <FaEdit className="mr-1" /> Uredi
                                     </button>
                                 </div>
-                                <div className="border-r border-gray-700">
+                                <div>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleDelete(djelatnik.sifra); }}
                                         className="mx-2 text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center text-sm"
@@ -311,7 +311,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                                     </button>
                                 </div>
                                 {djelatnik.jeZaposlen && (
-                                    <div>
+                                    <div className="border-l border-gray-700">
                                         <button
                                             onClick={() => handleShowDeaktivacijaModal(djelatnik.sifra)}
                                             className="mx-2 text-yellow-600 hover:text-yellow-800 transition-colors duration-200 flex items-center text-sm"

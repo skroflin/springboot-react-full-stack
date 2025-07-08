@@ -4,8 +4,6 @@
  */
 package ffos.skroflin.service;
 
-import ffos.skroflin.model.Djelatnik;
-import ffos.skroflin.model.Odjel;
 import ffos.skroflin.model.Tvrtka;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
 import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
@@ -13,7 +11,6 @@ import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -123,6 +120,9 @@ public class TvrtkaService extends MainService{
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
         tvrtka.setUStjecaju(true);
+        session.beginTransaction();
+        session.persist(tvrtka);
+        session.getTransaction().commit();
     }
     
     @Transactional

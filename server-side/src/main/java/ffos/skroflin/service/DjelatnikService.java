@@ -157,16 +157,14 @@ public class DjelatnikService extends MainService {
 
     @Transactional
     public void softDelete(int sifra) {
-        try {
-            Djelatnik d = session.get(Djelatnik.class, sifra);
-            if (d == null) {
-                throw new NoResultException("Djelatnik sa šifrom " + sifra + " ne postoji!");
-            }
-            d.setJeZaposlen(false);
-            session.merge(d);
-        } catch (Exception e) {
-            throw new RuntimeException("Greška pri brisanju djelatnika: " + e.getMessage(), e);
+        Djelatnik d = session.get(Djelatnik.class, sifra);
+        if (d == null) {
+            throw new NoResultException("Djelatnik sa šifrom " + sifra + " ne postoji!");
         }
+        d.setJeZaposlen(false);
+        session.beginTransaction();
+        session.persist(d);
+        session.getTransaction().commit();
     }
 
     @Transactional

@@ -51,7 +51,7 @@ export function DjelatnikDeaktivacijaModal({ show, onHide, djelatnikSifra, onSuc
     };
 
     return (
-        <div className="fixed inset-0 backdrop-blur-sm justify-center items-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
             <div className="relative p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div className="flex justify-between items-center pb-3">
                     <h3 className="text-lg font-semibold text-gray-900">Otpuštanje djelatnika</h3>
