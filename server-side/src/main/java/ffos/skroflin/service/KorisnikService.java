@@ -108,6 +108,23 @@ public class KorisnikService extends MainService{
                 .collect(Collectors.toList());
     }
     
+    @Transactional
+    public List<KorisnikOdgovorDTO> getByNaziv(String uvjet) {
+        try {
+            List<Korisnik> korisnici = session.createQuery(
+                    "select k from Korisnik k "
+                    + "where lower (t.korisnickoIme) like lower (:uvjet)",
+                Korisnik.class)
+                .setParameter("uvjet", "%" + uvjet + "%")
+                .list();
+            return korisnici.stream()
+                    .map(this::mapToResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Greška pri pretraživanju korisnika: " + e.getMessage());
+        }
+    }
+    
     public KorisnikOdgovorDTO registracijaKorisnika(KorisnikRegistracijaDTO o){
         Korisnik noviKorisnik = new Korisnik();
         session.beginTransaction();

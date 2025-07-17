@@ -12,16 +12,21 @@ import ffos.skroflin.security.JwtTokenUtil;
 import ffos.skroflin.service.KorisnikService;
 import ffos.skroflin.service.KorisnikUserDetailsService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  *
@@ -43,6 +48,37 @@ public class KorisnikController {
         this.userDetailsService = userDetailsService;
     }
 
+    @GetMapping("/get")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<KorisnikOdgovorDTO>> getAll(){
+        try {
+            return new ResponseEntity<>(korisnikService.getAll(), HttpStatus.OK);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+        }
+    }
+    
+    @GetMapping("/getBySifra")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<KorisnikOdgovorDTO> getBySifa(
+            @RequestParam int sifra
+    ){
+        try {
+            if (sifra <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            }
+            KorisnikOdgovorDTO korisnik = korisnikService.getBySifra(sifra);
+            if (korisnik == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnik s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
+            }
+            return new ResponseEntity<>(korisnik, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+        }
+    }
+    
     @PostMapping("/registracija")
     public ResponseEntity<KorisnikOdgovorDTO> registracija(
             @Valid @RequestBody(required = true) KorisnikRegistracijaDTO dto

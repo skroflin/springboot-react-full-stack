@@ -140,8 +140,8 @@ public class TvrtkaService extends MainService{
     public List<TvrtkaOdgovorDTO> getByNaziv(String uvjet){
         try {
             List<Tvrtka> tvrtke = session.createQuery(
-                        "SELECT t FROM Tvrtka t " +
-                        "WHERE LOWER (t.nazivTvrtke) LIKE LOWER(:uvjet)",
+                        "select t from Tvrtka t " +
+                        "where lower (t.nazivTvrtke) like lower(:uvjet)",
                     Tvrtka.class)
                     .setParameter("uvjet", "%" + uvjet + "%")
                     .list();
