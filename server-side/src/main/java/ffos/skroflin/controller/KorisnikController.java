@@ -53,7 +53,7 @@ public class KorisnikController {
     }
 
     @GetMapping("/get")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<KorisnikOdgovorDTO>> getAll(){
         try {
             return new ResponseEntity<>(korisnikService.getAll(), HttpStatus.OK);
@@ -63,7 +63,7 @@ public class KorisnikController {
     }
     
     @GetMapping("/getBySifra")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<KorisnikOdgovorDTO> getBySifa(
             @RequestParam int sifra
     ){
@@ -115,6 +115,7 @@ public class KorisnikController {
     }
     
     @DeleteMapping("/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
             @RequestParam int sifra
     ){
@@ -130,6 +131,45 @@ public class KorisnikController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+        }
+    }
+    
+    @GetMapping("/getByNaziv")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<KorisnikOdgovorDTO>> getByNaziv(
+            @RequestParam String naziv
+    ){
+        try {
+            if (naziv == null || naziv.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
+            }
+            List<KorisnikOdgovorDTO> korisnici = korisnikService.getByNaziv(naziv);
+            if (korisnici == null || korisnici.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnici s navedenim nazivima" + " " + naziv + " " + "ne postoje!");
+            }
+            return new ResponseEntity<>(korisnici, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+        }
+    }
+    
+    @GetMapping("/getAktivneKorisnike")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<KorisnikOdgovorDTO>> getAktivneKorisnike(
+            @RequestParam boolean aktivan
+    ){
+        try {
+            List<KorisnikOdgovorDTO> korisnici = korisnikService.getAktivneKorisnike(aktivan);
+            if (korisnici == null || korisnici.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnici s navedenim uvjetom" + " " + aktivan + " " + "ne postoje!");
+            }
+            return new ResponseEntity<>(korisnici, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
         }
     }
     

@@ -18,13 +18,16 @@ import java.util.Date;
  *
  * @author svenk
  */
-@Entity(name = "korisnik")
+@Entity
 @AttributeOverride(name = "sifra", column = @Column(name = "korisnik_sifra"))
-@Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = "korisnicko_ime", name = "uq_korisnicko_ime"),
-    @UniqueConstraint(columnNames = "email", name = "uq_korisnicki_email")
-})
-public class Korisnik extends Entitet{
+@Table(
+        name = "korisnik",
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = "korisnicko_ime", name = "uq_korisnicko_ime"),
+            @UniqueConstraint(columnNames = "email", name = "uq_korisnicki_email")
+        })
+public class Korisnik extends Entitet {
+
     @Column(name = "korisnicko_ime", nullable = false)
     private String korisnickoIme;
     @Column(nullable = false)
@@ -32,7 +35,7 @@ public class Korisnik extends Entitet{
     @Column(nullable = false)
     private String email;
     private boolean aktivan;
-    @Column(columnDefinition = "datum_kreiranja")
+    @Column(name = "datum_kreiranja")
     private Date datumKreiranja;
     @Enumerated(EnumType.STRING)
     private Uloga uloga;

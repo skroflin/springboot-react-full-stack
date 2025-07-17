@@ -30,7 +30,7 @@ public class KorisnikUserDetailsService extends MainService implements UserDetai
         Korisnik korisnik = null;
         try(Session s = session.getSessionFactory().openSession()) {
             korisnik = s.createQuery(
-                    "from korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan = true", Korisnik.class)
+                    "from Korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan = true", Korisnik.class)
                     .setParameter("korisnickoIme", korisnickoIme)
                     .getSingleResult();
         } catch (NoResultException e) {

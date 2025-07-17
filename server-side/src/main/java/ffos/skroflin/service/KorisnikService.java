@@ -113,7 +113,7 @@ public class KorisnikService extends MainService{
         try {
             List<Korisnik> korisnici = session.createQuery(
                     "select k from Korisnik k "
-                    + "where lower (t.korisnickoIme) like lower (:uvjet)",
+                    + "where lower (k.korisnickoIme) like lower (:uvjet)",
                 Korisnik.class)
                 .setParameter("uvjet", "%" + uvjet + "%")
                 .list();
@@ -140,7 +140,7 @@ public class KorisnikService extends MainService{
     
     public KorisnikOdgovorDTO prijavaKorisnika(KorisnikPrijavaDTO o){
         Korisnik korisnik = session.createQuery(
-                "from korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan = true", Korisnik.class)
+                "from Korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan = true", Korisnik.class)
                 .setParameter("korisnickoIme", o.korisnickoIme())
                 .getSingleResult();
         if (!bCryptPasswordEncoder.matches(o.lozinka(), korisnik.getLozinka())) {
