@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Date;
@@ -38,6 +39,8 @@ public class Korisnik extends Entitet {
     private boolean aktivan;
     @Column(name = "datum_kreiranja")
     private Date datumKreiranja;    
+    @Column(name = "datum_azuriranja")
+    private Date datumAzuriranja;
     @Enumerated(EnumType.STRING)
     private Uloga uloga;
 
@@ -55,6 +58,11 @@ public class Korisnik extends Entitet {
     @PrePersist
     protected void priKreiranju(){
         datumKreiranja = new Date();
+    }
+    
+    @PreUpdate
+    protected void priAzuriranju(){
+        datumAzuriranja = new Date();
     }
     
     public String getKorisnickoIme() {
@@ -93,6 +101,14 @@ public class Korisnik extends Entitet {
         return datumKreiranja;
     }
 
+    public Date getDatumAzuriranja() {
+        return datumAzuriranja;
+    }
+
+    public void setDatumAzuriranja(Date datumAzuriranja) {
+        this.datumAzuriranja = datumAzuriranja;
+    }
+    
     public void setDatumKreiranja(Date datumKreiranja) {
         this.datumKreiranja = datumKreiranja;
     }

@@ -13,11 +13,17 @@ import java.util.Date;
  * @author svenk
  */
 public record KorisnikOdgovorDTO(
-        @Schema(example = "skroflin") String korisnickoIme,
-        @Schema(example = "skroflin@gmail.com") String email,
-        @Schema(example = "true") boolean aktivan,
-        @Schema(example = "2025-07-16") Date datumKreiranja,
-        @Schema(example = "admin") Uloga uloga
-        ) {
-    
+        @Schema(example = "skroflin")
+        String korisnickoIme,
+        @Schema(example = "skroflin@gmail.com")
+        String email,
+        @Schema(example = "true")
+        boolean aktivan,
+        @Schema(example = "2025-07-16")
+        Date datumKreiranja,
+        @Schema(example = "2025-07-16")
+        Date datumAzuriranja,
+        @Schema(example = "admin")
+        Uloga uloga) {
+
 }

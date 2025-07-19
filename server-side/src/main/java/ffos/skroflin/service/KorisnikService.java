@@ -29,7 +29,7 @@ public class KorisnikService extends MainService{
     }
     
     private KorisnikOdgovorDTO mapToResponseDTO(Korisnik korisnik){
-        return new KorisnikOdgovorDTO(korisnik.getKorisnickoIme(), korisnik.getEmail(), korisnik.isAktivan(), korisnik.getDatumKreiranja(), korisnik.getUloga());
+        return new KorisnikOdgovorDTO(korisnik.getKorisnickoIme(), korisnik.getEmail(), korisnik.isAktivan(), korisnik.getDatumKreiranja(), korisnik.getDatumAzuriranja(), korisnik.getUloga());
     }
     
     @Transactional

@@ -21,6 +21,8 @@ public record KorisnikDTO(
         boolean aktivan,
         @Schema(example = "2025-07-16")
         Date datumKreiranja,
+        @Schema(example = "2025-07-16")
+        Date datumAzuriranja,
         @Schema(example = "admin")
         Uloga uloga) {
 
