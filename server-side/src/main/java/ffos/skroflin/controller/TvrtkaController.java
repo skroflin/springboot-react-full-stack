@@ -166,4 +166,22 @@ public class TvrtkaController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
         }
     }
+    
+    @GetMapping("/getAktivneTvrtke")
+    @PreAuthorize("isAuthenticated")
+    public ResponseEntity<List<TvrtkaOdgovorDTO>> getAktivneTvrtke(
+            @RequestParam boolean aktivna
+    ){
+        try {
+            List<TvrtkaOdgovorDTO> tvrtke = tvrtkaService.getAktivneTvrtke(aktivna);
+            if (tvrtke == null || tvrtke.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtke s navedenim uvjetom" + " " + aktivna + " " + "ne postoje!");
+            }
+            return new ResponseEntity<>(tvrtke, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+        }
+    }
 }

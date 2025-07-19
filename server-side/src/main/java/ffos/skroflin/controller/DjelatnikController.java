@@ -210,6 +210,24 @@ public class DjelatnikController {
         }
     }
     
+    @GetMapping("/getAllZaposleni")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<DjelatnikOdgovorDTO>> getAllZaposleni(
+            @RequestParam boolean zaposleni
+    ){
+        try {
+            List<DjelatnikOdgovorDTO> djelatnici = djelatnikService.getAllZaposleni(zaposleni);
+            if (djelatnici == null || djelatnici.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnici s navedenim uvjetom" + " " + zaposleni + " " + "ne postoje!");
+            }
+            return new ResponseEntity<>(djelatnici, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+        }
+    }
+    
     @GetMapping("/getByNaziv")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DjelatnikOdgovorDTO>> getByNaziv(
@@ -232,6 +250,7 @@ public class DjelatnikController {
     }
     
     @DeleteMapping("/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
             @RequestParam int sifra
     ){
