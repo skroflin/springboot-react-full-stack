@@ -10,6 +10,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -128,6 +129,7 @@ public class DjelatnikService extends MainService {
     public DjelatnikOdgovorDTO post(DjelatnikDTO o) {
         try {
             Djelatnik djelatnik = convertToEntity(o);
+            session.beginTransaction();
             session.persist(djelatnik);
             session.flush();
             return convertToResponseDTO(djelatnik);
@@ -195,6 +197,22 @@ public class DjelatnikService extends MainService {
                     "SELECT d FROM Djelatnik d LEFT JOIN FETCH d.odjel LEFT JOIN FETCH d.tvrtka " +
                     "WHERE LOWER(d.imeDjelatnika) LIKE LOWER(:uvjet) " +
                     "OR LOWER(d.prezimeDjelatnika) LIKE LOWER(:uvjet)", 
+                    Djelatnik.class)
+                    .setParameter("uvjet", "%" + uvjet + "%")
+                    .list();
+            return djelatnici.stream()
+                    .map(this::convertToResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Greška pri pretraživanju djelatnika: " + e.getMessage(), e);
+        }
+    }
+    
+    public List<DjelatnikOdgovorDTO> getByPocetakRada(Date uvjet){
+        try {
+            List<Djelatnik> djelatnici = session.createQuery(
+                    "select d from Djelatnik d left join fetch d.odjel left join fetch d.tvrtka " +
+                    "where lower (d.pocetakRada) like lower(:uvjet)",
                     Djelatnik.class)
                     .setParameter("uvjet", "%" + uvjet + "%")
                     .list();

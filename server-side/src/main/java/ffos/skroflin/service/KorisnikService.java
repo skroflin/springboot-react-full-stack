@@ -11,6 +11,7 @@ import ffos.skroflin.model.dto.korisnik.KorisnikPrijavaDTO;
 import ffos.skroflin.model.dto.korisnik.KorisnikRegistracijaDTO;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -113,6 +114,22 @@ public class KorisnikService extends MainService{
                 Korisnik.class)
                 .setParameter("uvjet", "%" + uvjet + "%")
                 .list();
+            return korisnici.stream()
+                    .map(this::mapToResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Greška pri pretraživanju korisnika: " + e.getMessage());
+        }
+    }
+    
+    public List<KorisnikOdgovorDTO> getByDatumKreiranja(Date uvjet){
+        try {
+            List<Korisnik> korisnici = session.createQuery(
+                    "select k from Korisnik k "
+                    + "where lower(k.datumKreiranja) like lower (:uvjet)",
+                    Korisnik.class)
+                    .setParameter("uvjet", "%" + uvjet + "%")
+                    .list();
             return korisnici.stream()
                     .map(this::mapToResponseDTO)
                     .collect(Collectors.toList());
