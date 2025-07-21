@@ -22,10 +22,10 @@ import org.springframework.stereotype.Service;
  * @author svenk
  */
 @Service
-public class KorisnikService extends MainService{
+public class UserService extends MainService{
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public KorisnikService(BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserService(BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
     

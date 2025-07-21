@@ -28,12 +28,12 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/api/skroflin/odjel")
-public class OdjelController {
+public class DepartmentController {
 
     private final DepartmentService odjelService;
     private final CompanyService tvrtkaService;
 
-    public OdjelController(DepartmentService odjelService, CompanyService tvrtkaService) {
+    public DepartmentController(DepartmentService odjelService, CompanyService tvrtkaService) {
         this.odjelService = odjelService;
         this.tvrtkaService = tvrtkaService;
     }

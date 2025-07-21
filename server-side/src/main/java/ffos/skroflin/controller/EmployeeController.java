@@ -33,12 +33,12 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/api/skroflin/djelatnik")
-public class DjelatnikController {
+public class EmployeeController {
     private final EmployeeService djelatnikService;
     private final DepartmentService odjelService;
     private final CompanyService tvrtkaService;
 
-    public DjelatnikController(EmployeeService djelatnikService, DepartmentService odjelService, CompanyService tvrtkaService) {
+    public EmployeeController(EmployeeService djelatnikService, DepartmentService odjelService, CompanyService tvrtkaService) {
         this.djelatnikService = djelatnikService;
         this.odjelService = odjelService;
         this.tvrtkaService = tvrtkaService;

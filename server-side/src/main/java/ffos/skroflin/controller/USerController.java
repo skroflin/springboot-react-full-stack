@@ -10,7 +10,7 @@ import ffos.skroflin.model.dto.user.UserResponseDTO;
 import ffos.skroflin.model.dto.user.UserSignUpDTO;
 import ffos.skroflin.model.dto.user.UserRegistrationDTO;
 import ffos.skroflin.security.JwtTokenUtil;
-import ffos.skroflin.service.KorisnikService;
+import ffos.skroflin.service.UserService;
 import ffos.skroflin.service.UsersDetailsService;
 import jakarta.persistence.NoResultException;
 import jakarta.validation.Valid;
@@ -38,14 +38,14 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/api/skroflin/korisnik")
-public class KorisnikController {
+public class UserController {
 
-    private final KorisnikService korisnikService;
+    private final UserService korisnikService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final UsersDetailsService userDetailsService;
 
-    public KorisnikController(KorisnikService korisnikService, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, UsersDetailsService userDetailsService) {
+    public UserController(UserService korisnikService, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, UsersDetailsService userDetailsService) {
         this.korisnikService = korisnikService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;

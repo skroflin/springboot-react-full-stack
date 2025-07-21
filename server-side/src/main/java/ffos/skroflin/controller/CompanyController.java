@@ -26,43 +26,43 @@ import org.springframework.web.server.ResponseStatusException;
  * @author svenk
  */
 @RestController
-@RequestMapping("/api/skroflin/tvrtka")
+@RequestMapping("/api/skroflin/company")
 public class CompanyController {
 
-    private final CompanyService tvrtkaService;
+    private final CompanyService companyService;
 
-    public CompanyController(CompanyService tvrtkaService) {
-        this.tvrtkaService = tvrtkaService;
-    }
+    public CompanyController(CompanyService companyService) {
+        this.companyService = companyService;
+    }    
 
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<CompanyResponseDTO>> getAll() {
         try {
-            return new ResponseEntity<>(tvrtkaService.getAll(), HttpStatus.OK);
+            return new ResponseEntity<>(companyService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
 
-    @GetMapping("/getBySifra")
+    @GetMapping("/getById")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CompanyResponseDTO> getBySifra(
-            @RequestParam int sifra
+    public ResponseEntity<CompanyResponseDTO> getById(
+            @RequestParam int id
     ) {
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lesser than 0");
             }
-            CompanyResponseDTO tvrtka = tvrtkaService.getBySifra(sifra);
-            if (tvrtka == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtka s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
+            CompanyResponseDTO company = companyService.getById(id);
+            if (company == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company with the following id" + " " + id + " " + "doesn't exist!");
             }
-            return new ResponseEntity<>(tvrtka, HttpStatus.OK);
+            return new ResponseEntity<>(company, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
 
@@ -73,16 +73,16 @@ public class CompanyController {
     ) {
         try {
             if (dto == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nisu uneseni traženi podaci!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The necessary data wasn't entered!");
             }
-            if (dto.nazivTvrtke() == null || dto.nazivTvrtke().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv tvrtke je obavezan!");
+            if (dto.companyName() == null || dto.companyName().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company name is necessary!");
             }
-            if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
+            if (dto.companyLocation() == null || dto.companyLocation().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company location is necessary!");
             }
-            CompanyResponseDTO kreiranaTvrtka = tvrtkaService.post(dto);
-            return new ResponseEntity<>(kreiranaTvrtka, HttpStatus.CREATED);
+            CompanyResponseDTO createdCompany = companyService.post(dto);
+            return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (NoResultException e) {
@@ -95,24 +95,24 @@ public class CompanyController {
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CompanyResponseDTO> put(
-            @RequestParam int sifra,
+            @RequestParam int id,
             @RequestBody(required = true) CompanyDTO dto
     ) {
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lesser than 0");
             }
             if (dto == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nisu uneseni traženi podaci!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The necessary data wasn't entered!");
             }
-            if (dto.nazivTvrtke() == null || dto.nazivTvrtke().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv tvrtke je obavezan!");
+            if (dto.companyName() == null || dto.companyName().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company name is necessary!");
             }
-            if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
+            if (dto.companyLocation() == null || dto.companyLocation().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company location is necessary!");
             }
-            CompanyResponseDTO azuriranaTvrtka = tvrtkaService.put(dto, sifra);
-            return new ResponseEntity<>(azuriranaTvrtka, HttpStatus.OK);
+            CompanyResponseDTO updatedCompany = companyService.put(dto, id);
+            return new ResponseEntity<>(updatedCompany, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
@@ -120,7 +120,7 @@ public class CompanyController {
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Greška prilikom ažuriranja" + " " + e.getMessage(),
+                    "Error upon updating" + " " + e.getMessage(),
                     e
             );
         }
@@ -129,59 +129,59 @@ public class CompanyController {
     @PutMapping("/softDelete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> softDelete(
-            @RequestParam int sifra
+            @RequestParam int id
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lesser than 0");
             }
-            tvrtkaService.softDelete(sifra);
+            companyService.softDelete(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon soft deletion" + " " + e.getMessage(), e);
         }
     }
     
-    @GetMapping("/getByNaziv")
+    @GetMapping("/getByName")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<CompanyResponseDTO>> getByNaziv(
-            @RequestParam String naziv
+    public ResponseEntity<List<CompanyResponseDTO>> getByName(
+            @RequestParam String name
     ) {
         try {
-            if (naziv == null || naziv.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
+            if (name == null || name.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is necessary");
             }
-            List<CompanyResponseDTO> tvrtke = tvrtkaService.getByNaziv(naziv);
-            if (tvrtke == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtke s navedenim nazivom" + " " + naziv + " " + "ne postoje!");
+            List<CompanyResponseDTO> companies = companyService.getByName(name);
+            if (companies == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Companies with the following name" + " " + name + " " + "don't exist!");
             }
-            return new ResponseEntity<>(tvrtke, HttpStatus.OK);
+            return new ResponseEntity<>(companies, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
     
-    @GetMapping("/getAktivneTvrtke")
+    @GetMapping("/getActiveCompanies")
     @PreAuthorize("isAuthenticated")
-    public ResponseEntity<List<CompanyResponseDTO>> getAktivneTvrtke(
-            @RequestParam boolean aktivna
+    public ResponseEntity<List<CompanyResponseDTO>> getActiveCompanies(
+            @RequestParam boolean active
     ){
         try {
-            List<CompanyResponseDTO> tvrtke = tvrtkaService.getAktivneTvrtke(aktivna);
-            if (tvrtke == null || tvrtke.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtke s navedenim uvjetom" + " " + aktivna + " " + "ne postoje!");
+            List<CompanyResponseDTO> companies = companyService.getActiveCompanies(active);
+            if (companies == null || companies.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company with the following status" + " " + active + " " + "doesn't exist!");
             }
-            return new ResponseEntity<>(tvrtke, HttpStatus.OK);
+            return new ResponseEntity<>(companies, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
 }
