@@ -52,7 +52,6 @@ public class KorisnikService extends MainService{
         korisnik.setDatumKreiranja(dto.datumKreiranja());
     }
     
-    @Transactional
     public List<KorisnikOdgovorDTO> getAll(){
         List<Korisnik> korisnici = session.createQuery(
                 "from Korisnik", Korisnik.class).list();
@@ -61,13 +60,11 @@ public class KorisnikService extends MainService{
                 .collect(Collectors.toList());
     }
     
-    @Transactional
     public KorisnikOdgovorDTO getBySifra(int sifra){
         Korisnik korisnik = session.get(Korisnik.class, sifra);
         return mapToResponseDTO(korisnik);
     }
     
-    @Transactional
     public KorisnikOdgovorDTO put(KorisnikDTO o, int sifra){
         Korisnik k = (Korisnik) session.get(Korisnik.class, sifra);
         if (k == null) {
@@ -88,7 +85,6 @@ public class KorisnikService extends MainService{
         return mapToResponseDTO(k);
     }
     
-    @Transactional
     public void delete(int sifra){
         Korisnik korisnik = session.get(Korisnik.class, sifra);
         if (korisnik == null) {

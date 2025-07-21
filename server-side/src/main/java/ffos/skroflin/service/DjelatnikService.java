@@ -94,7 +94,6 @@ public class DjelatnikService extends MainService {
         }
     }
 
-    @Transactional
     public List<DjelatnikOdgovorDTO> getAll() {
         try {
             List<Djelatnik> djelatnici = session.createQuery(
@@ -108,7 +107,6 @@ public class DjelatnikService extends MainService {
         }
     }
 
-    @Transactional
     public DjelatnikOdgovorDTO getBySifra(int sifra) {
         try {
             Djelatnik djelatnik = session.createQuery(
@@ -127,7 +125,6 @@ public class DjelatnikService extends MainService {
         }
     }
  
-    @Transactional
     public DjelatnikOdgovorDTO post(DjelatnikDTO o) {
         try {
             Djelatnik djelatnik = convertToEntity(o);
@@ -139,7 +136,6 @@ public class DjelatnikService extends MainService {
         }
     }
 
-    @Transactional
     public DjelatnikOdgovorDTO put(DjelatnikDTO o, int sifra) {
         try {
             Djelatnik dj = session.get(Djelatnik.class, sifra);
@@ -155,7 +151,6 @@ public class DjelatnikService extends MainService {
         }
     }
 
-    @Transactional
     public void softDelete(int sifra) {
         Djelatnik d = session.get(Djelatnik.class, sifra);
         if (d == null) {
@@ -167,7 +162,6 @@ public class DjelatnikService extends MainService {
         session.getTransaction().commit();
     }
     
-    @Transactional
     public void delete(int sifra){
         Djelatnik d = session.get(Djelatnik.class, sifra);
         if (d == null) {

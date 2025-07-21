@@ -18,51 +18,48 @@ import org.springframework.stereotype.Service;
  * @author svenk
  */
 @Service
-public class TvrtkaService extends MainService{
-    
-    private TvrtkaOdgovorDTO convertToResponseDTO(Tvrtka tvrtka){
-        
+public class TvrtkaService extends MainService {
+
+    private TvrtkaOdgovorDTO convertToResponseDTO(Tvrtka tvrtka) {
+
         return new TvrtkaOdgovorDTO(
-                tvrtka.getSifra(), 
-                tvrtka.getNazivTvrtke(), 
-                tvrtka.getSjedisteTvrtke(), 
+                tvrtka.getSifra(),
+                tvrtka.getNazivTvrtke(),
+                tvrtka.getSjedisteTvrtke(),
                 tvrtka.isUStjecaju()
         );
     }
-    
+
     @Transactional
-    private Tvrtka convertToEntity(TvrtkaDTO dto){
+    private Tvrtka convertToEntity(TvrtkaDTO dto) {
         Tvrtka tvrtka = new Tvrtka();
         tvrtka.setNazivTvrtke(dto.nazivTvrtke());
         tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
         tvrtka.setUStjecaju(dto.uStjecaju());
         return tvrtka;
     }
-    
+
     @Transactional
-    private void updateEntityFromDto(Tvrtka tvrtka, TvrtkaDTO dto){
+    private void updateEntityFromDto(Tvrtka tvrtka, TvrtkaDTO dto) {
         tvrtka.setNazivTvrtke(dto.nazivTvrtke());
         tvrtka.setSjedisteTvrtke(dto.sjedisteTvrtke());
         tvrtka.setUStjecaju(dto.uStjecaju());
     }
-    
-    @Transactional
-    public List<TvrtkaOdgovorDTO> getAll(){
+
+    public List<TvrtkaOdgovorDTO> getAll() {
         List<Tvrtka> tvrtke = session.createQuery(
                 "from Tvrtka", Tvrtka.class).list();
         return tvrtke.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
-    
-    @Transactional
-    public TvrtkaOdgovorDTO getBySifra(int sifra){
+
+    public TvrtkaOdgovorDTO getBySifra(int sifra) {
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         return convertToResponseDTO(tvrtka);
     }
-    
-    @Transactional
-    public TvrtkaOdgovorDTO post(TvrtkaDTO o){
+
+    public TvrtkaOdgovorDTO post(TvrtkaDTO o) {
         try {
             Long count = session.createQuery(
                     "select count(*) from Tvrtka t where t.nazivTvrtke = :naziv", Long.class)
@@ -81,9 +78,8 @@ public class TvrtkaService extends MainService{
             throw new RuntimeException("Greška prilikom stvaranja tvrtke" + " " + e.getMessage(), e);
         }
     }
-    
-    @Transactional
-    public TvrtkaOdgovorDTO put(TvrtkaDTO o, int sifra){
+
+    public TvrtkaOdgovorDTO put(TvrtkaDTO o, int sifra) {
         Tvrtka t = (Tvrtka) session.get(Tvrtka.class, sifra);
         if (t == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
@@ -103,18 +99,16 @@ public class TvrtkaService extends MainService{
         session.getTransaction().commit();
         return convertToResponseDTO(t);
     }
-    
-    @Transactional
-    public void delete(int sifra){
+
+    public void delete(int sifra) {
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         if (tvrtka == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
         }
         session.remove(tvrtka);
     }
-    
-    @Transactional
-    public void softDelete(int sifra){
+
+    public void softDelete(int sifra) {
         Tvrtka tvrtka = session.get(Tvrtka.class, sifra);
         if (tvrtka == null) {
             throw new NoResultException("Tvrtka sa šifrom" + " " + sifra + " " + "ne postoji!");
@@ -124,9 +118,8 @@ public class TvrtkaService extends MainService{
         session.persist(tvrtka);
         session.getTransaction().commit();
     }
-    
-    @Transactional
-    public List<TvrtkaOdgovorDTO> getAktivneTvrtke(boolean aktivan){
+
+    public List<TvrtkaOdgovorDTO> getAktivneTvrtke(boolean aktivan) {
         List<Tvrtka> tvrtke = session.createQuery(
                 "from Tvrtka t where t.uStjecaju = :uvjet", Tvrtka.class)
                 .setParameter("uvjet", aktivan)
@@ -135,13 +128,28 @@ public class TvrtkaService extends MainService{
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<TvrtkaOdgovorDTO> getByNaziv(String uvjet) {
+        try {
+            List<Tvrtka> tvrtke = session.createQuery(  
+                    "select t from Tvrtka t "
+                    + "where lower (t.nazivTvrtke) like lower(:uvjet)",
+                    Tvrtka.class)
+                    .setParameter("uvjet", "%" + uvjet + "%")
+                    .list();
+            return tvrtke.stream()
+                    .map(this::convertToResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Greška pri pretraživanju tvrtki: " + e.getMessage(), e);
+        }
+    }
     
-    @Transactional
-    public List<TvrtkaOdgovorDTO> getByNaziv(String uvjet){
+    public List<TvrtkaOdgovorDTO> getBySjediste(String uvjet) {
         try {
             List<Tvrtka> tvrtke = session.createQuery(
-                        "select t from Tvrtka t " +
-                        "where lower (t.nazivTvrtke) like lower(:uvjet)",
+                    "select t from Tvrtka t "
+                    + "where lower (t.sjedisteTvrtke) like lower(:uvjet)",
                     Tvrtka.class)
                     .setParameter("uvjet", "%" + uvjet + "%")
                     .list();
