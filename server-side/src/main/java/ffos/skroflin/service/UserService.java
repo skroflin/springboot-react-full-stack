@@ -150,7 +150,7 @@ public class UserService extends MainService{
     
     public UserResponseDTO userSignUp(UserSignUpDTO o){
         Users user = session.createQuery(
-                "from User u where u.userName = :userName "
+                "from Users u where u.userName = :userName "
                         + "and u.active = true", 
                 Users.class)
                 .setParameter("userName", o.userName())

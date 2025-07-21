@@ -193,7 +193,7 @@ public class UserController {
         }
     }
     
-    @PostMapping("/userRegistartion")
+    @PostMapping("/userRegistration")
     public ResponseEntity<UserResponseDTO> userRegistration(
             @Valid @RequestBody(required = true) UserRegistrationDTO dto
     ) {

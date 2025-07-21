@@ -30,7 +30,7 @@ public class UsersDetailsService extends MainService implements UserDetailsServi
         Users u = null;
         try(Session s = session.getSessionFactory().openSession()) {
             u = s.createQuery("from Users u where u.userName = :userName and u.active = true", Users.class)
-                    .setParameter("korisnickoIme", userName)
+                    .setParameter("userName", userName)
                     .getSingleResult();
         } catch (NoResultException e) {
             throw new UsernameNotFoundException(

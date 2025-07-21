@@ -76,7 +76,7 @@ public class DepartmentService extends MainService {
 
     public DepartmentResponseDTO getById(int id) {
         try {
-            Department department = session.createQuery("select d from Department d left join fetch d.company where o.id = :id", Department.class)
+            Department department = session.createQuery("select d from Department d left join fetch d.company where d.id = :id", Department.class)
                     .setParameter("id", id)
                     .uniqueResult();
 

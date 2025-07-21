@@ -19,10 +19,10 @@
         <property name="hbm2ddl.auto">update</property>
         <!-- Postavljanje uvjeta mapiranja - entiteti -->
         <!-- <mapping class="ffos.kolokvij.model.ImeKlase" /> -->
-        <mapping class="ffos.skroflin.model.Odjel" />
-        <mapping class="ffos.skroflin.model.Djelatnik" />
-        <mapping class="ffos.skroflin.model.Tvrtka" />
-        <mapping class="ffos.skroflin.model.Korisnik" />
+        <mapping class="ffos.skroflin.model.Department" />
+        <mapping class="ffos.skroflin.model.Employee" />
+        <mapping class="ffos.skroflin.model.Company" />
+        <mapping class="ffos.skroflin.model.Users" />
 
     </session-factory>
 </hibernate-configuration>

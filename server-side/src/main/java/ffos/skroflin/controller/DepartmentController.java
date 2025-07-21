@@ -27,7 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
  * @author svenk
  */
 @RestController
-@RequestMapping("/api/skroflin/company")
+@RequestMapping("/api/skroflin/department")
 public class DepartmentController {
 
     private final DepartmentService departmentService;

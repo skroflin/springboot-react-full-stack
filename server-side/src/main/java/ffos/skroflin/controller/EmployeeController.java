@@ -148,7 +148,7 @@ public class EmployeeController {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
                 }
             }
-            if (dto.companyId()!= null) {
+            if (dto.companyId() != null) {
                 try {
                     companyService.getById(dto.companyId());
                 } catch (Exception e) {
@@ -293,7 +293,7 @@ public class EmployeeController {
         }
     }
     
-    @GetMapping("/getByName")
+    @GetMapping("/getByBeginningOfWork")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<EmployeeResponseDTO>> getByBeginningOfWork(
             @RequestParam Date timestamp

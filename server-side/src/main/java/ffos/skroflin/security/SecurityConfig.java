@@ -85,13 +85,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                .requestMatchers("/api/skroflin/korisnik/prijava").permitAll()
-                .requestMatchers("/api/skroflin/korisnik/registracija").permitAll()
+                .requestMatchers("/api/skroflin/user/userSignUp").permitAll()
+                .requestMatchers("/api/skroflin/user/userRegistration").permitAll()
                 
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 
-                .requestMatchers(HttpMethod.PUT, "/api/skroflin/tvrtka/softDelete**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/skroflin/tvrtka").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/skroflin/company/softDelete**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/skroflin/company").hasRole("ADMIN")
                 
                 .requestMatchers("/api/skroflin/**").authenticated()
                 .anyRequest().authenticated()
