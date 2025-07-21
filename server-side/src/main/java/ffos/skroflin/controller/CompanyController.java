@@ -4,9 +4,9 @@
  */
 package ffos.skroflin.controller;
 
-import ffos.skroflin.model.dto.tvrtka.TvrtkaDTO;
-import ffos.skroflin.model.dto.tvrtka.TvrtkaOdgovorDTO;
-import ffos.skroflin.service.TvrtkaService;
+import ffos.skroflin.model.dto.company.CompanyDTO;
+import ffos.skroflin.model.dto.company.CompanyResponseDTO;
+import ffos.skroflin.service.CompanyService;
 import jakarta.persistence.NoResultException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -27,17 +27,17 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/api/skroflin/tvrtka")
-public class TvrtkaController {
+public class CompanyController {
 
-    private final TvrtkaService tvrtkaService;
+    private final CompanyService tvrtkaService;
 
-    public TvrtkaController(TvrtkaService tvrtkaService) {
+    public CompanyController(CompanyService tvrtkaService) {
         this.tvrtkaService = tvrtkaService;
     }
 
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<TvrtkaOdgovorDTO>> getAll() {
+    public ResponseEntity<List<CompanyResponseDTO>> getAll() {
         try {
             return new ResponseEntity<>(tvrtkaService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
@@ -47,14 +47,14 @@ public class TvrtkaController {
 
     @GetMapping("/getBySifra")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<TvrtkaOdgovorDTO> getBySifra(
+    public ResponseEntity<CompanyResponseDTO> getBySifra(
             @RequestParam int sifra
     ) {
         try {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-            TvrtkaOdgovorDTO tvrtka = tvrtkaService.getBySifra(sifra);
+            CompanyResponseDTO tvrtka = tvrtkaService.getBySifra(sifra);
             if (tvrtka == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtka s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
             }
@@ -68,8 +68,8 @@ public class TvrtkaController {
 
     @PostMapping("/post")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TvrtkaOdgovorDTO> post(
-            @RequestBody(required = true) TvrtkaDTO dto
+    public ResponseEntity<CompanyResponseDTO> post(
+            @RequestBody(required = true) CompanyDTO dto
     ) {
         try {
             if (dto == null) {
@@ -81,7 +81,7 @@ public class TvrtkaController {
             if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
             }
-            TvrtkaOdgovorDTO kreiranaTvrtka = tvrtkaService.post(dto);
+            CompanyResponseDTO kreiranaTvrtka = tvrtkaService.post(dto);
             return new ResponseEntity<>(kreiranaTvrtka, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -94,9 +94,9 @@ public class TvrtkaController {
 
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TvrtkaOdgovorDTO> put(
+    public ResponseEntity<CompanyResponseDTO> put(
             @RequestParam int sifra,
-            @RequestBody(required = true) TvrtkaDTO dto
+            @RequestBody(required = true) CompanyDTO dto
     ) {
         try {
             if (sifra <= 0) {
@@ -111,7 +111,7 @@ public class TvrtkaController {
             if (dto.sjedisteTvrtke() == null || dto.sjedisteTvrtke().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sjedište tvrtke je obavezno!");
             }
-            TvrtkaOdgovorDTO azuriranaTvrtka = tvrtkaService.put(dto, sifra);
+            CompanyResponseDTO azuriranaTvrtka = tvrtkaService.put(dto, sifra);
             return new ResponseEntity<>(azuriranaTvrtka, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -148,14 +148,14 @@ public class TvrtkaController {
     
     @GetMapping("/getByNaziv")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<TvrtkaOdgovorDTO>> getByNaziv(
+    public ResponseEntity<List<CompanyResponseDTO>> getByNaziv(
             @RequestParam String naziv
     ) {
         try {
             if (naziv == null || naziv.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
             }
-            List<TvrtkaOdgovorDTO> tvrtke = tvrtkaService.getByNaziv(naziv);
+            List<CompanyResponseDTO> tvrtke = tvrtkaService.getByNaziv(naziv);
             if (tvrtke == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtke s navedenim nazivom" + " " + naziv + " " + "ne postoje!");
             }
@@ -169,11 +169,11 @@ public class TvrtkaController {
     
     @GetMapping("/getAktivneTvrtke")
     @PreAuthorize("isAuthenticated")
-    public ResponseEntity<List<TvrtkaOdgovorDTO>> getAktivneTvrtke(
+    public ResponseEntity<List<CompanyResponseDTO>> getAktivneTvrtke(
             @RequestParam boolean aktivna
     ){
         try {
-            List<TvrtkaOdgovorDTO> tvrtke = tvrtkaService.getAktivneTvrtke(aktivna);
+            List<CompanyResponseDTO> tvrtke = tvrtkaService.getAktivneTvrtke(aktivna);
             if (tvrtke == null || tvrtke.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tvrtke s navedenim uvjetom" + " " + aktivna + " " + "ne postoje!");
             }

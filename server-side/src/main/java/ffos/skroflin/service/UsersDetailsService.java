@@ -4,7 +4,7 @@
  */
 package ffos.skroflin.service;
 
-import ffos.skroflin.model.Korisnik;
+import ffos.skroflin.model.Users;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.util.Collections;
@@ -22,27 +22,26 @@ import org.springframework.stereotype.Service;
  * @author svenk
  */
 @Service
-public class KorisnikUserDetailsService extends MainService implements UserDetailsService{
+public class UsersDetailsService extends MainService implements UserDetailsService{
     
     @Transactional
     @Override
-    public UserDetails loadUserByUsername(String korisnickoIme) throws UsernameNotFoundException {
-        Korisnik korisnik = null;
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        Users u = null;
         try(Session s = session.getSessionFactory().openSession()) {
-            korisnik = s.createQuery(
-                    "from Korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan = true", Korisnik.class)
-                    .setParameter("korisnickoIme", korisnickoIme)
+            u = s.createQuery("from Users u where u.userName = :userName and u.active = true", Users.class)
+                    .setParameter("korisnickoIme", userName)
                     .getSingleResult();
         } catch (NoResultException e) {
             throw new UsernameNotFoundException(
-                    "Korisnik s navedenim korisničkim imenom"
-                            + " " + korisnickoIme + " " + "ne postoji!");
+                    "User with the given username:"
+                            + " " + userName + " " + "doesn't exist!");
         }
         
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + korisnik.getUloga().name().toUpperCase());
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + u.getRole().name().toUpperCase());
         return new User(
-                korisnik.getKorisnickoIme(),
-                korisnik.getLozinka(),
+                u.getUserName(),
+                u.getPassword(),
                 Collections.singletonList(authority)
         );
     }

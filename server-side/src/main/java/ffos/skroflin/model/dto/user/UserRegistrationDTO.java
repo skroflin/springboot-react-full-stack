@@ -2,28 +2,26 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package ffos.skroflin.model.dto.korisnik;
+package ffos.skroflin.model.dto.user;
 
-import ffos.skroflin.model.enums.Uloga;
+import ffos.skroflin.model.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Date;
 
 /**
  *
  * @author svenk
  */
-public record KorisnikOdgovorDTO(
+public record UserRegistrationDTO(
         @Schema(example = "skroflin")
-        String korisnickoIme,
+        String userName,
+        @Schema(example = "lozinka123")
+        String password,
         @Schema(example = "skroflin@gmail.com")
         String email,
-        @Schema(example = "true")
-        boolean aktivan,
-        @Schema(example = "2025-07-16")
-        Date datumKreiranja,
-        @Schema(example = "2025-07-16")
-        Date datumAzuriranja,
         @Schema(example = "admin")
-        Uloga uloga) {
+        Role role,
+        @Schema(example = "true")
+        boolean active
+        ) {
 
 }

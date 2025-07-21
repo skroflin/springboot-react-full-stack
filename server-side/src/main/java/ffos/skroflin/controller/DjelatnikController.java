@@ -4,12 +4,12 @@
  */
 package ffos.skroflin.controller;
 
-import ffos.skroflin.model.dto.djelatnik.DjelatnikDTO;
-import ffos.skroflin.model.dto.djelatnik.DjelatnikOdgovorDTO;
-import ffos.skroflin.model.dto.djelatnik.PlacaOdgovorDTO;
-import ffos.skroflin.service.DjelatnikService;
-import ffos.skroflin.service.OdjelService;
-import ffos.skroflin.service.TvrtkaService;
+import ffos.skroflin.model.dto.employee.EmployeeDTO;
+import ffos.skroflin.model.dto.employee.EmployeeResponseDTO;
+import ffos.skroflin.model.dto.employee.SalaryResponseDTO;
+import ffos.skroflin.service.EmployeeService;
+import ffos.skroflin.service.DepartmentService;
+import ffos.skroflin.service.CompanyService;
 import jakarta.persistence.NoResultException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,11 +34,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/skroflin/djelatnik")
 public class DjelatnikController {
-    private final DjelatnikService djelatnikService;
-    private final OdjelService odjelService;
-    private final TvrtkaService tvrtkaService;
+    private final EmployeeService djelatnikService;
+    private final DepartmentService odjelService;
+    private final CompanyService tvrtkaService;
 
-    public DjelatnikController(DjelatnikService djelatnikService, OdjelService odjelService, TvrtkaService tvrtkaService) {
+    public DjelatnikController(EmployeeService djelatnikService, DepartmentService odjelService, CompanyService tvrtkaService) {
         this.djelatnikService = djelatnikService;
         this.odjelService = odjelService;
         this.tvrtkaService = tvrtkaService;
@@ -46,7 +46,7 @@ public class DjelatnikController {
     
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<DjelatnikOdgovorDTO>> getAll(){
+    public ResponseEntity<List<EmployeeResponseDTO>> getAll(){
         try {
             return new ResponseEntity<>(djelatnikService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
@@ -56,14 +56,14 @@ public class DjelatnikController {
     
     @GetMapping("/getBySifra")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<DjelatnikOdgovorDTO> getBySifra(
+    public ResponseEntity<EmployeeResponseDTO> getBySifra(
             @RequestParam int sifra
     ){
         try {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-            DjelatnikOdgovorDTO djelatnik = djelatnikService.getBySifra(sifra);
+            EmployeeResponseDTO djelatnik = djelatnikService.getBySifra(sifra);
             if (djelatnik == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnik s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
             }
@@ -77,8 +77,8 @@ public class DjelatnikController {
     
     @PostMapping("/post")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DjelatnikOdgovorDTO> post(
-            @RequestBody(required = true) DjelatnikDTO dto
+    public ResponseEntity<EmployeeResponseDTO> post(
+            @RequestBody(required = true) EmployeeDTO dto
     ){
         try {
             if (dto == null) {
@@ -107,7 +107,7 @@ public class DjelatnikController {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
                 }
             }
-            DjelatnikOdgovorDTO unesenDjelatnik = djelatnikService.post(dto);
+            EmployeeResponseDTO unesenDjelatnik = djelatnikService.post(dto);
             return new ResponseEntity<>(unesenDjelatnik, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -120,9 +120,9 @@ public class DjelatnikController {
     
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DjelatnikOdgovorDTO> put(
+    public ResponseEntity<EmployeeResponseDTO> put(
             @RequestParam int sifra,
-            @RequestBody(required = true) DjelatnikDTO dto
+            @RequestBody(required = true) EmployeeDTO dto
     ){
         try {
             if (sifra <= 0) {
@@ -151,7 +151,7 @@ public class DjelatnikController {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
                 }
             }
-            DjelatnikOdgovorDTO azuriraniDjelatnik = djelatnikService.put(dto, sifra);
+            EmployeeResponseDTO azuriraniDjelatnik = djelatnikService.put(dto, sifra);
             return new ResponseEntity<>(azuriraniDjelatnik, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -188,7 +188,7 @@ public class DjelatnikController {
     
     @GetMapping("/izracunajPlacu/{sifra}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PlacaOdgovorDTO> izracunajPlacu(
+    public ResponseEntity<SalaryResponseDTO> izracunajPlacu(
             @PathVariable int sifra,
             @RequestParam BigDecimal brutoOsnovica
     ){
@@ -199,7 +199,7 @@ public class DjelatnikController {
             if (brutoOsnovica == null || brutoOsnovica.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bruto osnovica ne smije biti manja od 0!");
             }
-            PlacaOdgovorDTO placa = djelatnikService.izracunajPlacu(sifra, brutoOsnovica);
+            SalaryResponseDTO placa = djelatnikService.izracunajPlacu(sifra, brutoOsnovica);
             return new ResponseEntity<>(placa, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -212,11 +212,11 @@ public class DjelatnikController {
     
     @GetMapping("/getAllZaposleni")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<DjelatnikOdgovorDTO>> getAllZaposleni(
+    public ResponseEntity<List<EmployeeResponseDTO>> getAllZaposleni(
             @RequestParam boolean zaposleni
     ){
         try {
-            List<DjelatnikOdgovorDTO> djelatnici = djelatnikService.getAllZaposleni(zaposleni);
+            List<EmployeeResponseDTO> djelatnici = djelatnikService.getAllZaposleni(zaposleni);
             if (djelatnici == null || djelatnici.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnici s navedenim uvjetom" + " " + zaposleni + " " + "ne postoje!");
             }
@@ -230,14 +230,14 @@ public class DjelatnikController {
     
     @GetMapping("/getByNaziv")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<DjelatnikOdgovorDTO>> getByNaziv(
+    public ResponseEntity<List<EmployeeResponseDTO>> getByNaziv(
             @RequestParam String naziv
     ) {
         try {
             if (naziv == null || naziv.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
             }
-            List<DjelatnikOdgovorDTO> djelatnici = djelatnikService.getByImePrezime(naziv);
+            List<EmployeeResponseDTO> djelatnici = djelatnikService.getByImePrezime(naziv);
             if (djelatnici == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnici s navedenim nazivima" + " " + naziv + " " + "ne postoje!");
             }

@@ -15,18 +15,18 @@ import jakarta.persistence.MappedSuperclass;
  * @author svenk
  */
 @MappedSuperclass
-public abstract class Entitet {
+public abstract class MainEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    private Integer sifra;
+    private Integer id;
 
-    public Integer getSifra() {
-        return sifra;
+    public Integer getId() {
+        return id;
     }
 
-    public void setSifra(Integer sifra) {
-        this.sifra = sifra;
+    public void setId(Integer id) {
+        this.id = id;
     }
     
 }

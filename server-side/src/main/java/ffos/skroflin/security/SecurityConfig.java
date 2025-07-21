@@ -1,6 +1,6 @@
 package ffos.skroflin.security;
 
-import ffos.skroflin.service.KorisnikUserDetailsService;
+import ffos.skroflin.service.UsersDetailsService;
 import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,11 +26,11 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final KorisnikUserDetailsService userDetailsService;
+    private final UsersDetailsService userDetailsService;
     private final JwtRequestFilter jwtRequestFilter;
     private final AuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    public SecurityConfig(KorisnikUserDetailsService userDetailsService, JwtRequestFilter jwtRequestFilter, AuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+    public SecurityConfig(UsersDetailsService userDetailsService, JwtRequestFilter jwtRequestFilter, AuthenticationEntryPoint jwtAuthenticationEntryPoint) {
         this.userDetailsService = userDetailsService;
         this.jwtRequestFilter = jwtRequestFilter;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;

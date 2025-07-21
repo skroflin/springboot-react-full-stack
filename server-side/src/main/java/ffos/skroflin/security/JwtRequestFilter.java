@@ -1,6 +1,6 @@
 package ffos.skroflin.security;
 
-import ffos.skroflin.service.KorisnikUserDetailsService;
+import ffos.skroflin.service.UsersDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
@@ -19,10 +19,10 @@ import java.io.IOException;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private final KorisnikUserDetailsService userDetailsService;
+    private final UsersDetailsService userDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    public JwtRequestFilter(KorisnikUserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil) {
+    public JwtRequestFilter(UsersDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil) {
         this.userDetailsService = userDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
     }

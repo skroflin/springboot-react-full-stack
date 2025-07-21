@@ -5,13 +5,13 @@
 package ffos.skroflin.controller;
 
 import ffos.skroflin.model.dto.auth.JwtResponse;
-import ffos.skroflin.model.dto.korisnik.KorisnikDTO;
-import ffos.skroflin.model.dto.korisnik.KorisnikOdgovorDTO;
-import ffos.skroflin.model.dto.korisnik.KorisnikPrijavaDTO;
-import ffos.skroflin.model.dto.korisnik.KorisnikRegistracijaDTO;
+import ffos.skroflin.model.dto.user.UserDTO;
+import ffos.skroflin.model.dto.user.UserResponseDTO;
+import ffos.skroflin.model.dto.user.UserSignUpDTO;
+import ffos.skroflin.model.dto.user.UserRegistrationDTO;
 import ffos.skroflin.security.JwtTokenUtil;
 import ffos.skroflin.service.KorisnikService;
-import ffos.skroflin.service.KorisnikUserDetailsService;
+import ffos.skroflin.service.UsersDetailsService;
 import jakarta.persistence.NoResultException;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -43,9 +43,9 @@ public class KorisnikController {
     private final KorisnikService korisnikService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-    private final KorisnikUserDetailsService userDetailsService;
+    private final UsersDetailsService userDetailsService;
 
-    public KorisnikController(KorisnikService korisnikService, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, KorisnikUserDetailsService userDetailsService) {
+    public KorisnikController(KorisnikService korisnikService, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, UsersDetailsService userDetailsService) {
         this.korisnikService = korisnikService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
@@ -54,7 +54,7 @@ public class KorisnikController {
 
     @GetMapping("/get")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<KorisnikOdgovorDTO>> getAll(){
+    public ResponseEntity<List<UserResponseDTO>> getAll(){
         try {
             return new ResponseEntity<>(korisnikService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
@@ -64,14 +64,14 @@ public class KorisnikController {
     
     @GetMapping("/getBySifra")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<KorisnikOdgovorDTO> getBySifa(
+    public ResponseEntity<UserResponseDTO> getBySifa(
             @RequestParam int sifra
     ){
         try {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-            KorisnikOdgovorDTO korisnik = korisnikService.getBySifra(sifra);
+            UserResponseDTO korisnik = korisnikService.getBySifra(sifra);
             if (korisnik == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnik s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
             }
@@ -85,9 +85,9 @@ public class KorisnikController {
     
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<KorisnikOdgovorDTO> put(
+    public ResponseEntity<UserResponseDTO> put(
             @RequestParam int sifra,
-            @RequestBody(required = true) KorisnikDTO dto
+            @RequestBody(required = true) UserDTO dto
     ){
         try {
             if (sifra <= 0) {
@@ -99,7 +99,7 @@ public class KorisnikController {
             if (dto.korisnickoIme() == null || dto.korisnickoIme().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Korisničko ime je obavezno!");
             }
-            KorisnikOdgovorDTO azuriraniKorisnik = korisnikService.put(dto, sifra);
+            UserResponseDTO azuriraniKorisnik = korisnikService.put(dto, sifra);
             return new ResponseEntity<>(azuriraniKorisnik, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -136,14 +136,14 @@ public class KorisnikController {
     
     @GetMapping("/getByNaziv")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<KorisnikOdgovorDTO>> getByNaziv(
+    public ResponseEntity<List<UserResponseDTO>> getByNaziv(
             @RequestParam String naziv
     ){
         try {
             if (naziv == null || naziv.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
             }
-            List<KorisnikOdgovorDTO> korisnici = korisnikService.getByNaziv(naziv);
+            List<UserResponseDTO> korisnici = korisnikService.getByNaziv(naziv);
             if (korisnici == null || korisnici.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnici s navedenim nazivima" + " " + naziv + " " + "ne postoje!");
             }
@@ -157,11 +157,11 @@ public class KorisnikController {
     
     @GetMapping("/getAktivneKorisnike")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<KorisnikOdgovorDTO>> getAktivneKorisnike(
+    public ResponseEntity<List<UserResponseDTO>> getAktivneKorisnike(
             @RequestParam boolean aktivan
     ){
         try {
-            List<KorisnikOdgovorDTO> korisnici = korisnikService.getAktivneKorisnike(aktivan);
+            List<UserResponseDTO> korisnici = korisnikService.getAktivneKorisnike(aktivan);
             if (korisnici == null || korisnici.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnici s navedenim uvjetom" + " " + aktivan + " " + "ne postoje!");
             }
@@ -174,16 +174,16 @@ public class KorisnikController {
     }
     
     @PostMapping("/registracija")
-    public ResponseEntity<KorisnikOdgovorDTO> registracija(
-            @Valid @RequestBody(required = true) KorisnikRegistracijaDTO dto
+    public ResponseEntity<UserResponseDTO> registracija(
+            @Valid @RequestBody(required = true) UserRegistrationDTO dto
     ) {
-        KorisnikOdgovorDTO odgovor = korisnikService.registracijaKorisnika(dto);
+        UserResponseDTO odgovor = korisnikService.registracijaKorisnika(dto);
         return new ResponseEntity<>(odgovor, HttpStatus.CREATED);
     }
 
     @PostMapping("/prijava")
     public ResponseEntity<?> prijava(
-            @Valid @RequestBody(required = true) KorisnikPrijavaDTO dto
+            @Valid @RequestBody(required = true) UserSignUpDTO dto
     ) {
         try {
             authenticationManager.authenticate(

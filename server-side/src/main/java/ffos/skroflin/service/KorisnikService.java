@@ -4,11 +4,11 @@
  */
 package ffos.skroflin.service;
 
-import ffos.skroflin.model.Korisnik;
-import ffos.skroflin.model.dto.korisnik.KorisnikDTO;
-import ffos.skroflin.model.dto.korisnik.KorisnikOdgovorDTO;
-import ffos.skroflin.model.dto.korisnik.KorisnikPrijavaDTO;
-import ffos.skroflin.model.dto.korisnik.KorisnikRegistracijaDTO;
+import ffos.skroflin.model.Users;
+import ffos.skroflin.model.dto.user.UserDTO;
+import ffos.skroflin.model.dto.user.UserResponseDTO;
+import ffos.skroflin.model.dto.user.UserSignUpDTO;
+import ffos.skroflin.model.dto.user.UserRegistrationDTO;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.util.Date;
@@ -29,136 +29,134 @@ public class KorisnikService extends MainService{
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
     
-    private KorisnikOdgovorDTO mapToResponseDTO(Korisnik korisnik){
-        return new KorisnikOdgovorDTO(korisnik.getKorisnickoIme(), korisnik.getEmail(), korisnik.isAktivan(), korisnik.getDatumKreiranja(), korisnik.getDatumAzuriranja(), korisnik.getUloga());
+    private UserResponseDTO mapToResponseDTO(Users user){
+        return new UserResponseDTO(user.getUserName(), user.getEmail(), user.isActive(), user.getDateCreated(), user.getDateUpdated(), user.getRole());
     }
     
     @Transactional
-    private Korisnik convertToEntity(KorisnikDTO dto){
-        Korisnik korisnik = new Korisnik();
-        korisnik.setKorisnickoIme(dto.korisnickoIme());
-        korisnik.setEmail(dto.email());
-        korisnik.setAktivan(dto.aktivan());
-        korisnik.setUloga(dto.uloga());
-        korisnik.setDatumKreiranja(dto.datumKreiranja());
-        return korisnik;
+    private Users convertToEntity(UserDTO dto){
+        Users user = new Users();
+        user.setUserName(dto.userName());
+        user.setEmail(dto.email());
+        user.setActive(dto.active());
+        user.setRole(dto.role());
+        user.setDateCreated(dto.dateCreated());
+        return user;
     }
     
     @Transactional
-    private void updateEntityFromDto(Korisnik korisnik, KorisnikDTO dto){
-        korisnik.setKorisnickoIme(dto.korisnickoIme());
-        korisnik.setEmail(dto.email());
-        korisnik.setAktivan(dto.aktivan());
-        korisnik.setUloga(dto.uloga());
-        korisnik.setDatumKreiranja(dto.datumKreiranja());
+    private void updateEntityFromDto(Users user, UserDTO dto){
+        user.setUserName(dto.userName());
+        user.setEmail(dto.email());
+        user.setActive(dto.active());
+        user.setRole(dto.role());
+        user.setDateCreated(dto.dateCreated());
     }
     
-    public List<KorisnikOdgovorDTO> getAll(){
-        List<Korisnik> korisnici = session.createQuery(
-                "from Korisnik", Korisnik.class).list();
-        return korisnici.stream()
+    public List<UserResponseDTO> getAll(){
+        List<Users> users = session.createQuery("from User", Users.class).list();
+        return users.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
     
-    public KorisnikOdgovorDTO getBySifra(int sifra){
-        Korisnik korisnik = session.get(Korisnik.class, sifra);
-        return mapToResponseDTO(korisnik);
+    public UserResponseDTO getById(int sifra){
+        Users user = session.get(Users.class, sifra);
+        return mapToResponseDTO(user);
     }
     
-    public KorisnikOdgovorDTO put(KorisnikDTO o, int sifra){
-        Korisnik k = (Korisnik) session.get(Korisnik.class, sifra);
-        if (k == null) {
-            throw new NoResultException("Korisnik sa šifrom" + " " + sifra + " " + "ne postoji!");
+    public UserResponseDTO put(UserDTO o, int id){
+        Users u = (Users) session.get(Users.class, id);
+        if (u == null) {
+            throw new NoResultException("User with id" + " " + id + " " + "doesn't exist!");
         }
-        if (!k.getKorisnickoIme().equals(o.korisnickoIme())) {
+        if (!u.getUserName().equals(o.userName())) {
             Long count = session.createQuery(
-                    "select count(*) from Korisnik k where k.korisnickoIme = :naziv", Long.class)
+                    "select count(*) from User u "
+                            + "where u.userName= :name", Long.class)
                     .getSingleResult();
             if (count > 0) {
-                throw new IllegalArgumentException("Korisnik s korisničkim imenom" + " " + o.korisnickoIme() + " " + "već postoji!");
+                throw new IllegalArgumentException("User with the said username" + " " + o.userName() + " " + "already exists!");
             }
         }
-        updateEntityFromDto(k, o);
+        updateEntityFromDto(u, o);
         session.beginTransaction();
-        session.persist(k);
+        session.persist(u);
         session.getTransaction().commit();
-        return mapToResponseDTO(k);
+        return mapToResponseDTO(u);
     }
     
-    public void delete(int sifra){
-        Korisnik korisnik = session.get(Korisnik.class, sifra);
-        if (korisnik == null) {
-            throw new NoResultException("Korisnik sa šifrom" + " " + sifra + " " + "ne postoji!");
+    public void delete(int id){
+        Users user = session.get(Users.class, id);
+        if (user == null) {
+            throw new NoResultException("User with id" + " " + id + " " + "doesn't exist!");
         }
-        session.remove(korisnik);
+        session.remove(user);
     }
     
     @Transactional
-    public List<KorisnikOdgovorDTO> getAktivneKorisnike(boolean aktivan){
-        List<Korisnik> korisnici = session.createQuery(
-                "from Korisnik k where k.aktivan = :uvjet", Korisnik.class)
-                .setParameter("uvjet", aktivan)
+    public List<UserResponseDTO> getActiveUsers(boolean active){
+        List<Users> users = session.createQuery("from User u where u.active = :active", Users.class)
+                .setParameter("active", active)
                 .getResultList();
-        return korisnici.stream()
+        return users.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
     
     @Transactional
-    public List<KorisnikOdgovorDTO> getByNaziv(String uvjet) {
+    public List<UserResponseDTO> getByName(String name) {
         try {
-            List<Korisnik> korisnici = session.createQuery(
-                    "select k from Korisnik k "
-                    + "where lower (k.korisnickoIme) like lower (:uvjet)",
-                Korisnik.class)
-                .setParameter("uvjet", "%" + uvjet + "%")
+            List<Users> users = session.createQuery("select u from User u "
+                    + "where lower (u.userName) like lower (:name)",
+                Users.class)
+                .setParameter("name", "%" + name + "%")
                 .list();
-            return korisnici.stream()
+            return users.stream()
                     .map(this::mapToResponseDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new RuntimeException("Greška pri pretraživanju korisnika: " + e.getMessage());
+            throw new RuntimeException("Error upon searching employees: " + e.getMessage());
         }
     }
     
-    public List<KorisnikOdgovorDTO> getByDatumKreiranja(Date uvjet){
+    public List<UserResponseDTO> getByDateOfCreation(Date timestamp){
         try {
-            List<Korisnik> korisnici = session.createQuery(
-                    "select k from Korisnik k "
-                    + "where lower(k.datumKreiranja) like lower (:uvjet)",
-                    Korisnik.class)
-                    .setParameter("uvjet", "%" + uvjet + "%")
+            List<Users> users = session.createQuery("select u from User u "
+                    + "where lower(u.dateCreated) like lower (:timestamp)",
+                    Users.class)
+                    .setParameter("timestamp", "%" + timestamp + "%")
                     .list();
-            return korisnici.stream()
+            return users.stream()
                     .map(this::mapToResponseDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new RuntimeException("Greška pri pretraživanju korisnika: " + e.getMessage());
+            throw new RuntimeException("Error upon searching employees: " + e.getMessage());
         }
     }
     
-    public KorisnikOdgovorDTO registracijaKorisnika(KorisnikRegistracijaDTO o){
-        Korisnik noviKorisnik = new Korisnik();
+    public UserResponseDTO registracijaKorisnika(UserRegistrationDTO o){
+        Users newUser = new Users();
         session.beginTransaction();
-        noviKorisnik.setKorisnickoIme(o.korisnickoIme());
-        noviKorisnik.setLozinka(bCryptPasswordEncoder.encode(o.lozinka()));
-        noviKorisnik.setEmail(o.email());
-        noviKorisnik.setAktivan(o.aktivan());
-        noviKorisnik.setUloga(o.uloga());
-        session.persist(noviKorisnik);
+        newUser.setUserName(o.userName());
+        newUser.setPassword(bCryptPasswordEncoder.encode(o.password()));
+        newUser.setEmail(o.email());
+        newUser.setActive(o.active());
+        newUser.setRole(o.role());
+        session.persist(newUser);
         session.getTransaction().commit();
-        return mapToResponseDTO(noviKorisnik);
+        return mapToResponseDTO(newUser);
     }
     
-    public KorisnikOdgovorDTO prijavaKorisnika(KorisnikPrijavaDTO o){
-        Korisnik korisnik = session.createQuery(
-                "from Korisnik k where k.korisnickoIme = :korisnickoIme and k.aktivan = true", Korisnik.class)
-                .setParameter("korisnickoIme", o.korisnickoIme())
+    public UserResponseDTO prijavaKorisnika(UserSignUpDTO o){
+        Users user = session.createQuery("from User u where u.userName = :userName "
+                        + "and u.active = true", 
+                Users.class)
+                .setParameter("userName", o.userName())
                 .getSingleResult();
-        if (!bCryptPasswordEncoder.matches(o.lozinka(), korisnik.getLozinka())) {
-            throw new IllegalArgumentException("Pogrešna lozinka!");
+        if (!bCryptPasswordEncoder.matches(o.password(), user.getPassword())) {
+            throw new IllegalArgumentException("Wrong password!");
         }
-        return mapToResponseDTO(korisnik);
+        return mapToResponseDTO(user);
     }
 }

@@ -8,7 +8,7 @@ package ffos.skroflin.model.enums;
  *
  * @author svenk
  */
-public enum Uloga {
+public enum Role {
     admin,
     user
 }

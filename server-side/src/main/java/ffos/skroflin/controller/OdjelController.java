@@ -4,10 +4,10 @@
  */
 package ffos.skroflin.controller;
 
-import ffos.skroflin.model.dto.odjel.OdjelDTO;
-import ffos.skroflin.model.dto.odjel.OdjelOdgovorDTO;
-import ffos.skroflin.service.OdjelService;
-import ffos.skroflin.service.TvrtkaService;
+import ffos.skroflin.model.dto.department.DepartmentDTO;
+import ffos.skroflin.model.dto.department.DepartmentResponseDTO;
+import ffos.skroflin.service.DepartmentService;
+import ffos.skroflin.service.CompanyService;
 import jakarta.persistence.NoResultException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -30,17 +30,17 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/skroflin/odjel")
 public class OdjelController {
 
-    private final OdjelService odjelService;
-    private final TvrtkaService tvrtkaService;
+    private final DepartmentService odjelService;
+    private final CompanyService tvrtkaService;
 
-    public OdjelController(OdjelService odjelService, TvrtkaService tvrtkaService) {
+    public OdjelController(DepartmentService odjelService, CompanyService tvrtkaService) {
         this.odjelService = odjelService;
         this.tvrtkaService = tvrtkaService;
     }
 
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<OdjelOdgovorDTO>> getAll() {
+    public ResponseEntity<List<DepartmentResponseDTO>> getAll() {
         try {
             return new ResponseEntity<>(odjelService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
@@ -50,14 +50,14 @@ public class OdjelController {
 
     @GetMapping("/getBySifra")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<OdjelOdgovorDTO> getBySifra(
+    public ResponseEntity<DepartmentResponseDTO> getBySifra(
             @RequestParam int sifra
     ) {
         try {
             if (sifra <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
-            OdjelOdgovorDTO odjel = odjelService.getBySifra(sifra);
+            DepartmentResponseDTO odjel = odjelService.getBySifra(sifra);
             if (odjel == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Odjel s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
             }
@@ -71,8 +71,8 @@ public class OdjelController {
 
     @PostMapping("/post")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<OdjelOdgovorDTO> post(
-            @RequestBody(required = true) OdjelDTO dto
+    public ResponseEntity<DepartmentResponseDTO> post(
+            @RequestBody(required = true) DepartmentDTO dto
     ) {
         try {
             if (dto == null) {
@@ -91,7 +91,7 @@ public class OdjelController {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
                 }
             }
-            OdjelOdgovorDTO kreiraniOdjel = odjelService.post(dto);
+            DepartmentResponseDTO kreiraniOdjel = odjelService.post(dto);
             return new ResponseEntity<>(kreiraniOdjel, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -104,9 +104,9 @@ public class OdjelController {
     
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<OdjelOdgovorDTO> put(
+    public ResponseEntity<DepartmentResponseDTO> put(
             @RequestParam int sifra,
-            @RequestBody(required = true) OdjelDTO dto
+            @RequestBody(required = true) DepartmentDTO dto
     ){
         try {
             if (sifra <= 0) {
@@ -125,7 +125,7 @@ public class OdjelController {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
                 }
             }
-            OdjelOdgovorDTO azuriraniOdjel = odjelService.put(dto, sifra);
+            DepartmentResponseDTO azuriraniOdjel = odjelService.put(dto, sifra);
             return new ResponseEntity<>(azuriraniOdjel, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -162,14 +162,14 @@ public class OdjelController {
     
     @GetMapping("/getByNaziv")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<OdjelOdgovorDTO>> getByNaziv(
+    public ResponseEntity<List<DepartmentResponseDTO>> getByNaziv(
             @RequestParam String naziv
     ) {
         try {
             if (naziv == null || naziv.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
             }
-            List<OdjelOdgovorDTO> odjeli = odjelService.getByNaziv(naziv);
+            List<DepartmentResponseDTO> odjeli = odjelService.getByNaziv(naziv);
             if (odjeli == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Odjeli s navedenim nazivom" + " " + naziv + " " + "ne postoje!");
             }

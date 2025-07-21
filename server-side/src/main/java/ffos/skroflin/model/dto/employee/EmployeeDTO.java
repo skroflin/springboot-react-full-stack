@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package ffos.skroflin.model.dto.djelatnik;
+package ffos.skroflin.model.dto.employee;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
@@ -12,22 +12,22 @@ import java.util.Date;
  *
  * @author svenk
  */
-public record DjelatnikDTO(
+public record EmployeeDTO(
         @Schema(example = "Sven")
-        String imeDjelatnika,
+        String employeeName,
         @Schema(example = "Kroflin")
-        String prezimeDjelatnika,
+        String employeeSurname,
         @Schema(example = "1050.65")
-        BigDecimal placaDjelatnika,
+        BigDecimal employeeSalary,
         @Schema(example = "2002-03-05")
-        Date datumRodenja,
+        Date dateOfBirth,
         @Schema(example = "2026-06-25")
-        Date pocetakRada,
+        Date beginningOfWork,
         @Schema(example = "true")
-        boolean jeZaposlen,
+        boolean employeed,
         @Schema(example = "1")
-        Integer odjelSifra,
+        Integer departmentId,
         @Schema(example = "1")
-        Integer tvrtkaSifra) {
+        Integer companyId) {
 
 }
