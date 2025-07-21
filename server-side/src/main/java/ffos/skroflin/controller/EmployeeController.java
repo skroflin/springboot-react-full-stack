@@ -12,6 +12,7 @@ import ffos.skroflin.service.DepartmentService;
 import ffos.skroflin.service.CompanyService;
 import jakarta.persistence.NoResultException;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,46 +33,46 @@ import org.springframework.web.server.ResponseStatusException;
  * @author svenk
  */
 @RestController
-@RequestMapping("/api/skroflin/djelatnik")
+@RequestMapping("/api/skroflin/employee")
 public class EmployeeController {
-    private final EmployeeService djelatnikService;
-    private final DepartmentService odjelService;
-    private final CompanyService tvrtkaService;
+    private final EmployeeService employeeService;
+    private final DepartmentService departmentService;
+    private final CompanyService companyService;
 
-    public EmployeeController(EmployeeService djelatnikService, DepartmentService odjelService, CompanyService tvrtkaService) {
-        this.djelatnikService = djelatnikService;
-        this.odjelService = odjelService;
-        this.tvrtkaService = tvrtkaService;
+    public EmployeeController(EmployeeService employeeService, DepartmentService departmentService, CompanyService companyService) {
+        this.employeeService = employeeService;
+        this.departmentService = departmentService;
+        this.companyService = companyService;
     }
     
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<EmployeeResponseDTO>> getAll(){
         try {
-            return new ResponseEntity<>(djelatnikService.getAll(), HttpStatus.OK);
+            return new ResponseEntity<>(employeeService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
     
-    @GetMapping("/getBySifra")
+    @GetMapping("/getById")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<EmployeeResponseDTO> getBySifra(
-            @RequestParam int sifra
+    public ResponseEntity<EmployeeResponseDTO> getById(
+            @RequestParam int id
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be less than 0");
             }
-            EmployeeResponseDTO djelatnik = djelatnikService.getBySifra(sifra);
-            if (djelatnik == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnik s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
+            EmployeeResponseDTO employee = employeeService.getById(id);
+            if (employee == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee with the following" + " " + id + " " + "doesn't exist!");
             }
-            return new ResponseEntity<>(djelatnik, HttpStatus.OK);
+            return new ResponseEntity<>(employee, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
     
@@ -82,77 +83,80 @@ public class EmployeeController {
     ){
         try {
             if (dto == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nisu uneseni traženi podaci!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The necessary data wasn't entered!");
             }
-            if (dto.imeDjelatnika() == null || dto.imeDjelatnika().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ime djelatnik je obavezno!");
+            if (dto.employeeName()== null || dto.employeeName().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee name is necessary!");
             }
-            if (dto.prezimeDjelatnika() == null || dto.prezimeDjelatnika().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prezime djelatnik je obavezno!");
+            if (dto.employeeSurname()== null || dto.employeeSurname().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee surname is necessary!");
             }
-            if (dto.pocetakRada() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Početak rada djelatnika je obavezno!");
+            if (dto.beginningOfWork()== null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Beginning of work date is necessary!");
             }
-            if (dto.odjelSifra() != null) {
+            if (dto.departmentId() != null) {
                 try {
-                    odjelService.getBySifra(dto.odjelSifra());
+                    departmentService.getById(dto.departmentId());
                 } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
                 }
             }
-            if (dto.tvrtkaSifra() != null) {
+            if (dto.companyId()!= null) {
                 try {
-                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                    companyService.getById(dto.companyId());
                 } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
                 }
             }
-            EmployeeResponseDTO unesenDjelatnik = djelatnikService.post(dto);
-            return new ResponseEntity<>(unesenDjelatnik, HttpStatus.OK);
+            EmployeeResponseDTO createdEmployee = employeeService.post(dto);
+            return new ResponseEntity<>(createdEmployee, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon creating" + " " + e.getMessage(),
+                    e
+            );
         }
     }
     
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmployeeResponseDTO> put(
-            @RequestParam int sifra,
+            @RequestParam int id,
             @RequestBody(required = true) EmployeeDTO dto
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (dto == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The necessary data wasn't entered!");
             }
-            if (dto.imeDjelatnika() == null || dto.imeDjelatnika().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ime djelatnik je obavezno!");
+            if (dto.employeeName()== null || dto.employeeName().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee name is necessary!");
             }
-            if (dto.prezimeDjelatnika() == null || dto.prezimeDjelatnika().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prezime djelatnik je obavezno!");
+            if (dto.employeeSurname()== null || dto.employeeSurname().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee surname is necessary!");
             }
-            if (dto.pocetakRada() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Početak rada djelatnika je obavezno!");
+            if (dto.beginningOfWork()== null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Beginning of work date is necessary!");
             }
-            if (dto.odjelSifra() != null) {
+            if (dto.departmentId() != null) {
                 try {
-                    odjelService.getBySifra(dto.odjelSifra());
+                    departmentService.getById(dto.departmentId());
                 } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
                 }
             }
-            if (dto.tvrtkaSifra() != null) {
+            if (dto.companyId()!= null) {
                 try {
-                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                    companyService.getById(dto.companyId());
                 } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
                 }
             }
-            EmployeeResponseDTO azuriraniDjelatnik = djelatnikService.put(dto, sifra);
-            return new ResponseEntity<>(azuriraniDjelatnik, HttpStatus.OK);
+            EmployeeResponseDTO updatedEmployee = employeeService.put(dto, id);
+            return new ResponseEntity<>(updatedEmployee, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
@@ -160,7 +164,7 @@ public class EmployeeController {
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Greška prilikom ažuriranja" + " " + e.getMessage(),
+                    "Error upon updating" + " " + e.getMessage(),
                     e
             );
         }
@@ -169,103 +173,148 @@ public class EmployeeController {
     @PutMapping("/softDelete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> softDelete(
-            @RequestParam int sifra
+            @RequestParam int id
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lesser than 0!");
             }
-            djelatnikService.softDelete(sifra);
+            employeeService.softDelete(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon soft deletion" + " " + e.getMessage(), 
+                    e
+            );
         }
     }
     
-    @GetMapping("/izracunajPlacu/{sifra}")
+    @GetMapping("/calculatePay/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<SalaryResponseDTO> izracunajPlacu(
-            @PathVariable int sifra,
-            @RequestParam BigDecimal brutoOsnovica
+    public ResponseEntity<SalaryResponseDTO> calculatePay(
+            @PathVariable int id,
+            @RequestParam BigDecimal grossBasis
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lesser than 0!");
             }
-            if (brutoOsnovica == null || brutoOsnovica.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bruto osnovica ne smije biti manja od 0!");
+            if (grossBasis == null || grossBasis.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Gross basis musn't be lesser than 0!");
             }
-            SalaryResponseDTO placa = djelatnikService.izracunajPlacu(sifra, brutoOsnovica);
-            return new ResponseEntity<>(placa, HttpStatus.OK);
+            SalaryResponseDTO salary = employeeService.calculatePay(id, grossBasis);
+            return new ResponseEntity<>(salary, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon calculating salary" + " " + e.getMessage(),
+                    e
+            );
         }
     }
     
-    @GetMapping("/getAllZaposleni")
+    @GetMapping("/getAllEmployeed")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<EmployeeResponseDTO>> getAllZaposleni(
-            @RequestParam boolean zaposleni
+    public ResponseEntity<List<EmployeeResponseDTO>> getAllEmployeed(
+            @RequestParam boolean employeed
     ){
         try {
-            List<EmployeeResponseDTO> djelatnici = djelatnikService.getAllZaposleni(zaposleni);
-            if (djelatnici == null || djelatnici.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnici s navedenim uvjetom" + " " + zaposleni + " " + "ne postoje!");
+            List<EmployeeResponseDTO> employees = employeeService.getAllEmployeed(employeed);
+            if (employees == null || employees.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employees with the following status" + " " + employeed + " " + "don't exist!");
             }
-            return new ResponseEntity<>(djelatnici, HttpStatus.OK);
+            return new ResponseEntity<>(employees, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(),
+                    e
+            );
         }
     }
     
-    @GetMapping("/getByNaziv")
+    @GetMapping("/getByName")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<EmployeeResponseDTO>> getByNaziv(
-            @RequestParam String naziv
+    public ResponseEntity<List<EmployeeResponseDTO>> getByName(
+            @RequestParam String name
     ) {
         try {
-            if (naziv == null || naziv.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
+            if (name == null || name.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee name is necessary");
             }
-            List<EmployeeResponseDTO> djelatnici = djelatnikService.getByImePrezime(naziv);
-            if (djelatnici == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Djelatnici s navedenim nazivima" + " " + naziv + " " + "ne postoje!");
+            List<EmployeeResponseDTO> employees = employeeService.getByName(name);
+            if (employees == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employees with the following name" + " " + name + " " + "don't exist!");
             }
-            return new ResponseEntity<>(djelatnici, HttpStatus.OK);
+            return new ResponseEntity<>(employees, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
         }
     }
     
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
-            @RequestParam int sifra
+            @RequestParam int id
     ){
         try {
-            if(sifra <= 0){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if(id <= 0){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be less than 0!");
             }
-            djelatnikService.delete(sifra);
+            employeeService.delete(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon deletion" + " " + e.getMessage(), 
+                    e
+            );
         }
-    } 
+    }
+    
+    @GetMapping("/getByName")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<EmployeeResponseDTO>> getByBeginningOfWork(
+            @RequestParam Date timestamp
+    ) {
+        try {
+            if (timestamp == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is necessary");
+            }
+            List<EmployeeResponseDTO> employees = employeeService.getByBeginningOfWork(timestamp);
+            if (employees == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employees with the following beginning of work date" + " " + timestamp  + " " + "don't exist!");
+            }
+            return new ResponseEntity<>(employees, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
 }

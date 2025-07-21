@@ -27,45 +27,45 @@ import org.springframework.web.server.ResponseStatusException;
  * @author svenk
  */
 @RestController
-@RequestMapping("/api/skroflin/odjel")
+@RequestMapping("/api/skroflin/company")
 public class DepartmentController {
 
-    private final DepartmentService odjelService;
-    private final CompanyService tvrtkaService;
+    private final DepartmentService departmentService;
+    private final CompanyService companyService;
 
-    public DepartmentController(DepartmentService odjelService, CompanyService tvrtkaService) {
-        this.odjelService = odjelService;
-        this.tvrtkaService = tvrtkaService;
+    public DepartmentController(DepartmentService departmentService, CompanyService companyService) {
+        this.departmentService = departmentService;
+        this.companyService = companyService;
     }
 
     @GetMapping("/get")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DepartmentResponseDTO>> getAll() {
         try {
-            return new ResponseEntity<>(odjelService.getAll(), HttpStatus.OK);
+            return new ResponseEntity<>(departmentService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
 
-    @GetMapping("/getBySifra")
+    @GetMapping("/getById")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<DepartmentResponseDTO> getBySifra(
-            @RequestParam int sifra
+    public ResponseEntity<DepartmentResponseDTO> getById(
+            @RequestParam int id
     ) {
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be less than 0!");
             }
-            DepartmentResponseDTO odjel = odjelService.getBySifra(sifra);
-            if (odjel == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Odjel s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
+            DepartmentResponseDTO department = departmentService.getById(id);
+            if (department == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department with the following id" + " " + id + " " + "wasn't found!");
             }
-            return new ResponseEntity<>(odjel, HttpStatus.OK);
+            return new ResponseEntity<>(department, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
 
@@ -76,23 +76,23 @@ public class DepartmentController {
     ) {
         try {
             if (dto == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nisu uneseni traženi podaci!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The necessary data wasn't entered!");
             }
-            if (dto.nazivOdjela() == null || dto.nazivOdjela().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv odjela je obavezan!");
+            if (dto.departmentName()== null || dto.departmentName().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department name is necessary!");
             }
-            if (dto.lokacijaOdjela() == null || dto.lokacijaOdjela().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lokacija odjela je obavezna!");
+            if (dto.departmentLocation()== null || dto.departmentLocation().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department location is necessary!");
             }
-            if (dto.tvrtkaSifra() != null) {
+            if (dto.companyId() != null) {
                 try {
-                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                    companyService.getById(dto.companyId());
                 } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
                 }
             }
-            DepartmentResponseDTO kreiraniOdjel = odjelService.post(dto);
-            return new ResponseEntity<>(kreiraniOdjel, HttpStatus.CREATED);
+            DepartmentResponseDTO createdDepartment = departmentService.post(dto);
+            return new ResponseEntity<>(createdDepartment, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (NoResultException e) {
@@ -105,28 +105,28 @@ public class DepartmentController {
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DepartmentResponseDTO> put(
-            @RequestParam int sifra,
+            @RequestParam int id,
             @RequestBody(required = true) DepartmentDTO dto
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be less than 0!");
             }
-            if (dto.nazivOdjela() == null || dto.nazivOdjela().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv odjela je obavezan!");
+            if (dto.departmentName()== null || dto.departmentName().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department name is necessary!");
             }
-            if (dto.lokacijaOdjela() == null || dto.lokacijaOdjela().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lokacija odjela je obavezna!");
+            if (dto.departmentLocation()== null || dto.departmentLocation().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department location is necessary!");
             }
-            if (dto.tvrtkaSifra() != null) {
+            if (dto.companyId() != null) {
                 try {
-                    tvrtkaService.getBySifra(dto.tvrtkaSifra());
+                    companyService.getById(dto.companyId());
                 } catch (Exception e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
                 }
             }
-            DepartmentResponseDTO azuriraniOdjel = odjelService.put(dto, sifra);
-            return new ResponseEntity<>(azuriraniOdjel, HttpStatus.OK);
+            DepartmentResponseDTO updatedDepartment = departmentService.put(dto, id);
+            return new ResponseEntity<>(updatedDepartment, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
@@ -134,7 +134,7 @@ public class DepartmentController {
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Greška prilikom ažuriranja" + " " + e.getMessage(),
+                    "Error upon updating" + " " + e.getMessage(),
                     e
             );
         }
@@ -143,41 +143,62 @@ public class DepartmentController {
     @PutMapping("/softDelete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> softDelete(
-            @RequestParam int sifra
+            @RequestParam int id
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be less than 0!");
             }
-            odjelService.softDelete(sifra);
+            departmentService.softDelete(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon soft deletion" + " " + e.getMessage(), e);
         }
     }
     
-    @GetMapping("/getByNaziv")
+    @GetMapping("/getByName")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<DepartmentResponseDTO>> getByNaziv(
-            @RequestParam String naziv
+    public ResponseEntity<List<DepartmentResponseDTO>> getByName(
+            @RequestParam String name
     ) {
         try {
-            if (naziv == null || naziv.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
+            if (name == null || name.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is necessary");
             }
-            List<DepartmentResponseDTO> odjeli = odjelService.getByNaziv(naziv);
-            if (odjeli == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Odjeli s navedenim nazivom" + " " + naziv + " " + "ne postoje!");
+            List<DepartmentResponseDTO> departments = departmentService.getByName(name);
+            if (departments == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Departments with the following name" + " " + name + " " + "don't exist!");
             }
-            return new ResponseEntity<>(odjeli, HttpStatus.OK);
+            return new ResponseEntity<>(departments, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
+        }
+    }
+    
+    @GetMapping("/getByLocation")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<DepartmentResponseDTO>> getByLocation(
+            @RequestParam String location
+    ){
+        try {
+            if (location == null || location.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location is necessary");
+            }
+            List<DepartmentResponseDTO> departments = departmentService.getByLocation(location);
+            if (departments == null) {
+               throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Departments with the following location" + " " + location + " " + "don't exist!"); 
+            }
+            return new ResponseEntity<>(departments, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
 }

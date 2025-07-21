@@ -184,4 +184,25 @@ public class CompanyController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
+    
+    @GetMapping("/getByLocation")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<CompanyResponseDTO>> getByLocation(
+            @RequestParam String location
+    ) {
+        try {
+            if (location == null || location.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location is necessary");
+            }
+            List<CompanyResponseDTO> companies = companyService.getByLocation(location);
+            if (companies == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Companies with the following location" + " " + location + " " + "don't exist!");
+            }
+            return new ResponseEntity<>(companies, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
+        }
+    }
 }

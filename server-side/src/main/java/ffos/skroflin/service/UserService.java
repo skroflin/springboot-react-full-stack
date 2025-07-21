@@ -135,7 +135,7 @@ public class UserService extends MainService{
         }
     }
     
-    public UserResponseDTO registracijaKorisnika(UserRegistrationDTO o){
+    public UserResponseDTO userRegistration(UserRegistrationDTO o){
         Users newUser = new Users();
         session.beginTransaction();
         newUser.setUserName(o.userName());
@@ -148,8 +148,9 @@ public class UserService extends MainService{
         return mapToResponseDTO(newUser);
     }
     
-    public UserResponseDTO prijavaKorisnika(UserSignUpDTO o){
-        Users user = session.createQuery("from User u where u.userName = :userName "
+    public UserResponseDTO userSignUp(UserSignUpDTO o){
+        Users user = session.createQuery(
+                "from User u where u.userName = :userName "
                         + "and u.active = true", 
                 Users.class)
                 .setParameter("userName", o.userName())

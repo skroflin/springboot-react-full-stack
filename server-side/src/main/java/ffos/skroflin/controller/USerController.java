@@ -37,16 +37,16 @@ import org.springframework.web.server.ResponseStatusException;
  * @author svenk
  */
 @RestController
-@RequestMapping("/api/skroflin/korisnik")
+@RequestMapping("/api/skroflin/user")
 public class UserController {
 
-    private final UserService korisnikService;
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final UsersDetailsService userDetailsService;
 
-    public UserController(UserService korisnikService, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, UsersDetailsService userDetailsService) {
-        this.korisnikService = korisnikService;
+    public UserController(UserService userService, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, UsersDetailsService userDetailsService) {
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
@@ -56,50 +56,58 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getAll(){
         try {
-            return new ResponseEntity<>(korisnikService.getAll(), HttpStatus.OK);
+            return new ResponseEntity<>(userService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
         }
     }
     
-    @GetMapping("/getBySifra")
+    @GetMapping("/getById")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDTO> getBySifa(
-            @RequestParam int sifra
+    public ResponseEntity<UserResponseDTO> getById(
+            @RequestParam int id
     ){
         try {
-            if (sifra <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lessr than 0!");
             }
-            UserResponseDTO korisnik = korisnikService.getBySifra(sifra);
-            if (korisnik == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnik s navedenom šifrom" + " " + sifra + " " + "nije pronađen!");
+            UserResponseDTO user = userService.getById(id);
+            if (user == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with the following id" + " " + id + " " + "wasn't found!");
             }
-            return new ResponseEntity<>(korisnik, HttpStatus.OK);
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
         }
     }
     
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> put(
-            @RequestParam int sifra,
+            @RequestParam int id,
             @RequestBody(required = true) UserDTO dto
     ){
         try {
-            if (sifra <= 0) {
+            if (id <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
             }
             if (dto.email() == null || dto.email().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email korisnika je obavezan!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User email is necessary!");
             }
-            if (dto.korisnickoIme() == null || dto.korisnickoIme().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Korisničko ime je obavezno!");
+            if (dto.userName()== null || dto.userName().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is necessary!");
             }
-            UserResponseDTO azuriraniKorisnik = korisnikService.put(dto, sifra);
+            UserResponseDTO azuriraniKorisnik = userService.put(dto, id);
             return new ResponseEntity<>(azuriraniKorisnik, HttpStatus.OK);
         } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -108,7 +116,7 @@ public class UserController {
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Greška prilikom ažuriranja" + " " + e.getMessage(),
+                    "Error upon updating" + " " + e.getMessage(),
                     e
             );
         }
@@ -117,85 +125,97 @@ public class UserController {
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
-            @RequestParam int sifra
+            @RequestParam int id
     ){
         try {
-            if (sifra <= 0){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
+            if (id <= 0){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lesser than 0!");
             }
-            korisnikService.delete(sifra);
+            userService.delete(id);
             return new ResponseEntity<>(HttpStatus.OK);
                 } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom logičkog brisanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon deletion" + " " + e.getMessage(), 
+                    e
+            );
         }
     }
     
-    @GetMapping("/getByNaziv")
+    @GetMapping("/getByName")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDTO>> getByNaziv(
-            @RequestParam String naziv
+    public ResponseEntity<List<UserResponseDTO>> getByName(
+            @RequestParam String name
     ){
         try {
-            if (naziv == null || naziv.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Naziv je obavezan");
+            if (name == null || name.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is necessary");
             }
-            List<UserResponseDTO> korisnici = korisnikService.getByNaziv(naziv);
-            if (korisnici == null || korisnici.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnici s navedenim nazivima" + " " + naziv + " " + "ne postoje!");
+            List<UserResponseDTO> users = userService.getByName(name);
+            if (users == null || users.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Users with the following name" + " " + name + " " + "don't exist!");
             }
-            return new ResponseEntity<>(korisnici, HttpStatus.OK);
+            return new ResponseEntity<>(users, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Greška prilikom dohvaćanja" + " " + e.getMessage(), 
+                    e
+            );
         }
     }
     
-    @GetMapping("/getAktivneKorisnike")
+    @GetMapping("/getActiveUsers")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDTO>> getAktivneKorisnike(
-            @RequestParam boolean aktivan
+    public ResponseEntity<List<UserResponseDTO>> getActiveUsers(
+            @RequestParam boolean active
     ){
         try {
-            List<UserResponseDTO> korisnici = korisnikService.getAktivneKorisnike(aktivan);
-            if (korisnici == null || korisnici.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnici s navedenim uvjetom" + " " + aktivan + " " + "ne postoje!");
+            List<UserResponseDTO> users = userService.getActiveUsers(active);
+            if (users == null || users.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Users with the following status" + " " + active + " " + "don't exist!");
             }
-            return new ResponseEntity<>(korisnici, HttpStatus.OK);
+            return new ResponseEntity<>(users, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom dohvaćanja" + " " + e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
         }
     }
     
-    @PostMapping("/registracija")
-    public ResponseEntity<UserResponseDTO> registracija(
+    @PostMapping("/userRegistartion")
+    public ResponseEntity<UserResponseDTO> userRegistration(
             @Valid @RequestBody(required = true) UserRegistrationDTO dto
     ) {
-        UserResponseDTO odgovor = korisnikService.registracijaKorisnika(dto);
-        return new ResponseEntity<>(odgovor, HttpStatus.CREATED);
+        UserResponseDTO response = userService.userRegistration(dto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/prijava")
-    public ResponseEntity<?> prijava(
+    @PostMapping("/userSignUp")
+    public ResponseEntity<?> userSignUp(
             @Valid @RequestBody(required = true) UserSignUpDTO dto
     ) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            dto.korisnickoIme(), dto.lozinka()
+                            dto.userName(), dto.password()
                     )
             );
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>("Netočno korisničko ime ili lozinka!", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Incorrect username or password!", HttpStatus.UNAUTHORIZED);
         }
         final UserDetails userDetails = userDetailsService
-                .loadUserByUsername(dto.korisnickoIme());
+                .loadUserByUsername(dto.userName());
         final String jwt = jwtTokenUtil.generateToken(userDetails);
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername()));
     }

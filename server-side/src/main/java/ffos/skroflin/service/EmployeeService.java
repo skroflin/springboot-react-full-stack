@@ -198,7 +198,7 @@ public class EmployeeService extends MainService {
     }
 
     @Transactional
-    public List<EmployeeResponseDTO> getByImePrezime(String name) {
+    public List<EmployeeResponseDTO> getByName(String name) {
         try {
             List<Employee> djelatnici = session.createQuery(
                     "select d from Employee e left join fetch e.department"
@@ -216,7 +216,7 @@ public class EmployeeService extends MainService {
         }
     }
 
-    public List<EmployeeResponseDTO> getByPocetakRada(Date timestamp) {
+    public List<EmployeeResponseDTO> getByBeginningOfWork(Date timestamp) {
         try {
             List<Employee> djelatnici = session.createQuery(
                     "select d from Employee e left join fetch e.department"
