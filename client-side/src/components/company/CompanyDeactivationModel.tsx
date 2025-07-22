@@ -39,7 +39,7 @@ export function CompanyDeactivationModel({ show, onHide, company, onSuccess, aut
 
             await axios.put(`http://localhost:8080/api/skroflin/company/softDelete?id=${company.id}`, null, { headers });
 
-            toast.success(`Company ${company.companyName} successfully!`);
+            toast.success(`Company ${company.companyName} successfully deactivated!`);
             onSuccess();
             onHide();
         } catch (err: any) {

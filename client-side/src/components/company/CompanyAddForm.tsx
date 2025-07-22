@@ -27,7 +27,7 @@ export function CompanyAddForm({ authToken, onSuccess, onCancel }: CompanyFormPr
             };
 
             try {
-                const checkResponse = await axios.get(`http://localhost:8080/api/skroflin/tvrtka/getByName?name=${encodeURIComponent(companyName)}`, { headers });
+                const checkResponse = await axios.get(`http://localhost:8080/api/skroflin/company/getByName?name=${encodeURIComponent(companyName)}`, { headers });
 
                 if (checkResponse.data && checkResponse.data.length > 0) {
                     setErrorMessage(`Company with the name "${companyName}" already exists.`);

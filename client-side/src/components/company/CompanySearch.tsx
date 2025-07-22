@@ -26,7 +26,7 @@ export function CompanySearch({ authToken, onSearchResults, onClearSearch }: Com
             const headers = {
                 Authorization: `Bearer ${authToken}`,
             };
-            const response = await axios.get<CompanyResponseDTO[]>(`http://localhost:8080/api/skroflin/tvrtka/getByName?name=${encodeURIComponent(searchTerm)}`, { headers });
+            const response = await axios.get<CompanyResponseDTO[]>(`http://localhost:8080/api/skroflin/company/getByName?name=${encodeURIComponent(searchTerm)}`, { headers });
 
             onSearchResults(response.data);
             toast.success(`Found ${response.data.length} companies for '${searchTerm}'`);
