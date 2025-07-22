@@ -1,6 +1,6 @@
 export interface UserResponseDTO {
     id: number;
-    username: string;
+    userName: string;
     email: string;
     active: boolean;
     dateCreated: string;

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { UserResponseDTO } from "../../types/Users";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { UserViewDetails } from "./UserViewDetails";
 
 interface UsersListProps {
     authToken: string;
@@ -11,6 +12,8 @@ export function UsersList({ authToken }: UsersListProps) {
     const [allUsers, setAllUsers] = useState<UserResponseDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedUser, setSelectedUser] = useState<UserResponseDTO | null>(null);
+    const [showDetails, setShowDetails] = useState<boolean>(false);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -46,6 +49,16 @@ export function UsersList({ authToken }: UsersListProps) {
         fetchUsers();
     }, [fetchUsers]);
 
+    const handleViewDetails = (user: UserResponseDTO) => {
+        setSelectedUser(user);
+        setShowDetails(true);
+    };
+
+    const handleCloseDetails = () => {
+        setShowDetails(false);
+        setSelectedUser(null);
+    };
+
     return (
         <div className="container mx-auto p-4 mt-8">
             <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-black-600 w-fit">Popis Korisnika</h2>
@@ -64,18 +77,59 @@ export function UsersList({ authToken }: UsersListProps) {
 
             {!loading && !error && (
                 <>
-                    <div className="grid grid-cels-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {allUsers.map(user => (
-                            <div key={user.id} className="bg-white shadow-md rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-gray-900">{user.username}</h3>
-                                <p className="text-gray-700">Email: {user.email}</p>
-                                <p className={`text-sm ${user.active ? 'text-green-600' : 'text-red-600'}`}>
-                                    Status: {user.active ? 'Aktivan' : 'Neaktivan'}
-                                </p>
-                                <p className="text-gray-700">Role: {user.role}</p>
-                            </div>
-                        ))}
-                    </div>
+                    {allUsers.map(user => (
+                        <div key={user.id} className="relative overflow-x-auto">
+                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead className="text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3">
+                                            Korisničko ime
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Korisnički email
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Status
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Uloga
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                        <th onClick={() => handleViewDetails(user)}
+                                            scope="row" className="hover:underline px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {user.userName}
+                                        </th>
+                                        <td className="px-6 py-4">
+                                            {user.email}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {user.active ? (
+                                                <span className="text-green-600">Aktivan</span>
+                                            ) : (
+                                                <span className="text-red-600">Neaktivan</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 capitalize">
+                                            {user.role}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            {showDetails && selectedUser?.id === user.id && (
+                                <UserViewDetails
+                                    authToken={authToken}
+                                    user={selectedUser}
+                                    show={showDetails}
+                                    onClose={handleCloseDetails}
+                                />
+                            )}
+                        </div>
+                    ))}
+
                 </>
             )}
         </div>
