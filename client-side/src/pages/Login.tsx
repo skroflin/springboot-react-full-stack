@@ -16,25 +16,25 @@ export function Login({ onLoginSuccess }: LoginProps) {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:8080/api/skroflin/korisnik/prijava', {
-                korisnickoIme: username,
-                lozinka: password,
+            const response = await axios.post('http://localhost:8080/api/skroflin/user/userSignUp', {
+                userName: username,
+                password: password,
             });
             const data = response.data;
             const jwtToken = data.jwt;
-            const loggedInUsername = data.korisnickoIme ?? ''; // Koristimo nullish coalescing operator
+            const loggedInUsername = data.userName ?? '';
 
             onLoginSuccess(jwtToken, loggedInUsername);
-            toast.success('Prijava uspješna!');
+            toast.success('Login successful!');
             navigate('/home');
 
         } catch (err: any) {
-            console.error('Greška pri prijavi:', err);
+            console.error('Error upon logging in:', err);
             if (axios.isAxiosError(err)) {
-                const errorMessage = err.response?.data || 'Netočno korisničko ime ili lozinka.';
-                toast.error(`Greška pri prijavi: ${errorMessage}`);
+                const errorMessage = err.response?.data || 'Wrong username or pasword.';
+                toast.error(`Error upon logging in: ${errorMessage}`);
             } else {
-                toast.error('Došlo je do neočekivane greške pri prijavi.');
+                toast.error('Unexpected error whilst logging in.');
             }
         }
     };

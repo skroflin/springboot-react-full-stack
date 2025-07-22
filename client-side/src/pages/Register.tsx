@@ -8,8 +8,8 @@ export function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [email, setEmail] = useState('');
-    const [uloga, setUloga] = useState('user');
-    const [aktivan, setAktivan] = useState(true);
+    const [role, setRole] = useState('user');
+    const [active, setActive] = useState(true);
 
     const navigate = useNavigate();
 
@@ -17,31 +17,31 @@ export function Register() {
         e.preventDefault();
 
         if (password !== confirmPassword) {
-            toast.error('Lozinke se ne podudaraju!');
+            toast.error(`Passwords aren't matching!`);
             return;
         }
 
         try {
-            await axios.post('http://localhost:8080/api/skroflin/korisnik/registracija', {
-                korisnickoIme: username,
-                lozinka: password,
+            await axios.post('http://localhost:8080/api/skroflin/user/userRegistration', {
+                userName: username,
+                password: password,
                 email: email,
-                uloga: uloga,
-                aktivan: aktivan,
+                role: role,
+                active: active,
             });
 
-            toast.success('Registracija uspješna! Preusmjeravam na stranicu za prijavu...');
+            toast.success('Registration successful! Heading over to the login form...');
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
 
         } catch (err: any) {
-            console.error('Greška pri registraciji:', err);
+            console.error('Error whilst registration:', err);
             if (axios.isAxiosError(err)) {
-                const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Greška pri registraciji.';
-                toast.error(`Greška pri registraciji: ${errorMessage}`);
+                const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Error whilst registration.';
+                toast.error(`Error whilst registration: ${errorMessage}`);
             } else {
-                toast.error('Došlo je do neočekivane greške pri registraciji.');
+                toast.error('Unexpected error whilst registration.');
             }
         }
     };
@@ -112,13 +112,13 @@ export function Register() {
                         />
                     </div>
                     <div className="mb-4">
-                        <label htmlFor="uloga" className="block text-gray-700 text-sm font-bold mb-2">
+                        <label htmlFor="role" className="block text-gray-700 text-sm font-bold mb-2">
                             Uloga:
                         </label>
                         <select
-                            id="uloga"
-                            value={uloga}
-                            onChange={(e) => setUloga(e.target.value)}
+                            id="role"
+                            value={role}
+                            onChange={(e) => setRole(e.target.value)}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         >
@@ -129,13 +129,13 @@ export function Register() {
                     <div className="mb-6 flex items-center">
                         <input
                             type="checkbox"
-                            id="aktivan"
-                            checked={aktivan}
-                            onChange={(e) => setAktivan(e.target.checked)}
+                            id="active"
+                            checked={active}
+                            onChange={(e) => setActive(e.target.checked)}
                             className="mr-2 leading-tight"
                         />
-                        <label htmlFor="aktivan" className="text-sm text-gray-700">
-                            Želim biti aktivan korisnik
+                        <label htmlFor="active" className="text-sm text-gray-700">
+                            Želim biti active korisnik
                         </label>
                     </div>
                     <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-400">

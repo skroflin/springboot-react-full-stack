@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { Login } from './components/Login';
-import { Register } from './components/Register';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { HomePage } from './pages/HomePage';
 import { EmployeeList } from './components/employee/EmployeeList';
 import { DepartmentList } from './components/department/DepartmentList';
