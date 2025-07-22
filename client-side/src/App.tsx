@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
 import { HomePage } from './pages/HomePage';
-import { DjelatnikList } from './components/djelatnik/DjelatnikList';
-import { OdjelList } from './components/odjel/OdjelList';
-import { TvrtkaList } from './components/tvrtka/TvrtkaList';
+import { EmployeeList } from './components/employee/EmployeeList';
+import { DepartmentList } from './components/department/DepartmentList';
+import { CompanyList } from './components/company/CompanyList';
 import Navbar from './components/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -84,7 +84,7 @@ const App: React.FC = () => {
                   path="/djelatnici"
                   element={
                     isAuthenticated
-                      ? <DjelatnikList authToken={authToken!} />
+                      ? <EmployeeList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }
                 />
@@ -92,7 +92,7 @@ const App: React.FC = () => {
                   path="/odjeli"
                   element={
                     isAuthenticated
-                      ? <OdjelList authToken={authToken!} />
+                      ? <DepartmentList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }
                 />
@@ -100,7 +100,7 @@ const App: React.FC = () => {
                   path="/tvrtke"
                   element={
                     isAuthenticated
-                      ? <TvrtkaList authToken={authToken!} />
+                      ? <CompanyList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }
                 />

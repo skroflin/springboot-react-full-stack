@@ -1,22 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash, FaPlus } from 'react-icons/fa'; // Dodali smo FaPlus
-import type { OdjelOdgovorDTO } from '../../types/Odjel';
-import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
-import { OdjelDodajObrazac } from './OdjelDodajObrazac';
+import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import type { DepartmentResponseDTO } from '../../types/Department';
+import type { CompanyResponseDTO } from '../../types/Company';
+import { DepartmentAddForm } from './DepartmentAddForm';
 
-interface OdjelListProps {
+interface Department  {
     authToken: string;
 }
 
-export function OdjelList({ authToken }: OdjelListProps) {
-    const [odjeli, setOdjeli] = useState<OdjelOdgovorDTO[]>([]);
-    const [tvrtkaMap, setTvrtkaMap] = useState<Map<number, string>>(new Map());
+export function DepartmentList({ authToken }: Department ) {
+    const [department, setDepartment] = useState<DepartmentResponseDTO[]>([]);
+    const [company, setCompanyMap] = useState<Map<number, string>>(new Map());
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
-    const [showAddOdjelForm, setShowAddOdjelForm] = useState<boolean>(false);
+    const [showAddDepartmentForm, setShowAddDepartmentForm] = useState<boolean>(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -25,24 +24,24 @@ export function OdjelList({ authToken }: OdjelListProps) {
         try {
             const headers = { 'Authorization': `Bearer ${authToken}` };
 
-            const odjeliResponse = await axios.get<OdjelOdgovorDTO[]>('http://localhost:8080/api/skroflin/odjel/get', { headers });
-            setOdjeli(odjeliResponse.data);
+            const departmentResponse = await axios.get<DepartmentResponseDTO[]>('http://localhost:8080/api/skroflin/department/get', { headers });
+            setDepartment(departmentResponse.data);
 
-            const tvrtkeResponse = await axios.get<TvrtkaOdgovorDTO[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers });
-            const newTvrtkaMap = new Map<number, string>();
-            tvrtkeResponse.data.forEach(tvrtka => {
-                newTvrtkaMap.set(tvrtka.sifra, tvrtka.nazivTvrtke);
+            const tvrtkeResponse = await axios.get<CompanyResponseDTO[]>('http://localhost:8080/api/skroflin/company/get', { headers });
+            const newcompany = new Map<number, string>();
+            tvrtkeResponse.data.forEach(company => {
+                newcompany.set(company.id, company.companyLocation);
             });
-            setTvrtkaMap(newTvrtkaMap);
+            setCompanyMap(newcompany);
 
         } catch (err: any) {
-            console.error('Greška pri dohvatu podataka za odjele:', err);
+            console.error('Error upon fetching data for departments:', err);
             if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka za odjele.');
-                toast.error(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka za odjele.');
+                setError(err.response?.data?.message || err.message || 'Error upon fetching data for departments.');
+                toast.error(err.response?.data?.message || err.message || 'Error upon fetching data for departments.');
             } else {
-                setError(err.message || 'Došlo je do neočekivane greške.');
-                toast.error(err.message || 'Došlo je do neočekivane greške pri dohvatu podataka za odjele.');
+                setError(err.message || 'Unexpected error.');
+                toast.error(err.message || 'Unexpected error whilst fetching data for departments.');
             }
         } finally {
             setLoading(false);
@@ -53,37 +52,37 @@ export function OdjelList({ authToken }: OdjelListProps) {
         fetchData();
     }, [fetchData]);
 
-    const handleDelete = async (sifra: number) => {
-        if (!window.confirm('Jeste li sigurni da želite obrisati ovaj odjel?')) {
+    const handleSoftDelete = async (id: number) => {
+        if (!window.confirm('Are you sure you want to deactivate this department?')) {
             return;
         }
         try {
             const headers = { 'Authorization': `Bearer ${authToken}` };
-            await axios.put(`http://localhost:8080/api/skroflin/odjel/softDelete/${sifra}`, {}, { headers });
+            await axios.put(`http://localhost:8080/api/skroflin/department/softDelete/${id}`, {}, { headers });
 
-            setOdjeli(prevOdjeli => prevOdjeli.filter(o => o.sifra !== sifra));
-            toast.success('Odjel uspješno obrisan (logički)!');
+            setDepartment(prevdepartment => prevdepartment.filter(d => d.companyId !== id));
+            toast.success('Department successfully deactivated!');
         } catch (err: any) {
-            console.error('Greška pri logičkom brisanju odjela:', err);
+            console.error('Error upon deactivating department:', err);
             if (axios.isAxiosError(err)) {
-                toast.error(err.response?.data?.message || err.message || 'Greška pri brisanju odjela.');
+                toast.error(err.response?.data?.message || err.message || 'Error upon deactivating department.');
             } else {
-                toast.error(err.message || 'Došlo je do neočekivane greške pri brisanju odjela.');
+                toast.error(err.message || 'Unexpected error whilst deactivating department.');
             }
         }
     };
 
-    const handleEdit = (odjel: OdjelOdgovorDTO) => {
-        toast.info(`Uređivanje odjela: ${odjel.nazivOdjela}`);
-        console.log('Uredi odjel:', odjel);
+    const handleEdit = (department: DepartmentResponseDTO) => {
+        toast.info(`Editing department: ${department.departmentName}`);
+        console.log('Edit department:', department);
     };
 
-    const handleShowAddOdjelForm = () => {
-        setShowAddOdjelForm(true);
+    const handleShowAddDepartmentForm = () => {
+        setShowAddDepartmentForm(true);
     };
 
-    const handleHideAddOdjelForm = () => {
-        setShowAddOdjelForm(false);
+    const handleHideAddDepartmentForm = () => {
+        setShowAddDepartmentForm(false);
         fetchData();
     };
 
@@ -106,21 +105,21 @@ export function OdjelList({ authToken }: OdjelListProps) {
 
             <div className="flex justify-end mb-6">
                 <button
-                    onClick={handleShowAddOdjelForm}
+                    onClick={handleShowAddDepartmentForm}
                     className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
                 >
                     <FaPlus className="mr-2" /> Dodaj novi odjel
                 </button>
             </div>
 
-            {odjeli.length === 0 && (
+            {department.length === 0 && (
                 <div className="text-center text-lg mt-8 text-gray-600">Nema pronađenih odjela.</div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                {odjeli.map((odjel) => (
+                {department.map((department) => (
                     <div
-                        key={odjel.sifra}
+                        key={department.id}
                         className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col justify-between"
                     >
                         <div>
@@ -128,22 +127,22 @@ export function OdjelList({ authToken }: OdjelListProps) {
                                 <FaBuilding />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 text-center mb-3 mt-2 pt-2 border-t border-gray-500">
-                                {odjel.nazivOdjela}
+                                {department.departmentName}
                             </h2>
-                            {odjel.lokacijaOdjela && (
+                            {department.departmentLocation && (
                                 <p className="text-md text-gray-700 text-center mb-1 flex items-center justify-center">
-                                    <FaMapMarkerAlt className="mr-2 text-blue-600" /> Lokacija: {odjel.lokacijaOdjela}
+                                    <FaMapMarkerAlt className="mr-2 text-blue-600" /> Lokacija: {department.departmentLocation}
                                 </p>
                             )}
-                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${odjel.jeAktivan ? 'text-green-600' : 'text-red-600'}`}>
-                                {odjel.jeAktivan ? <FaCheckCircle className="mr-2" /> : <FaTimesCircle className="mr-2" />}
-                                {odjel.jeAktivan ? 'Aktivan' : 'Neaktivan'}
+                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${department.active ? 'text-green-600' : 'text-red-600'}`}>
+                                {department.active ? <FaCheckCircle className="mr-2" /> : <FaTimesCircle className="mr-2" />}
+                                {department.active ? 'Aktivan' : 'Neaktivan'}
                             </p>
 
                             <p className="text-sm text-gray-600 text-center mb-1 flex items-center justify-center">
                                 <FaBuilding className="mr-2 text-orange-500" /> Tvrtka: {
-                                    odjel.tvrtkaSifra !== null
-                                        ? tvrtkaMap.get(odjel.tvrtkaSifra) || 'N/A'
+                                    department.companyId !== null
+                                        ? company.get(department.companyId) || 'N/A'
                                         : 'Nije dodijeljeno'
                                 }
                             </p>
@@ -152,17 +151,17 @@ export function OdjelList({ authToken }: OdjelListProps) {
                         <div className="flex justify-around mt-6 pt-4 border-t border-gray-100">
                             <button
                                 disabled
-                                onClick={() => handleEdit(odjel)}
+                                onClick={() => handleEdit(department)}
                                 className="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
-                                title="Uredi odjel"
+                                title="Uredi department"
                             >
                                 <FaEdit className="mr-1" /> Uredi
                             </button>
                             <button
                                 disabled
-                                onClick={() => handleDelete(odjel.sifra)}
+                                onClick={() => handleSoftDelete(department.id)}
                                 className="text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
-                                title="Obriši odjel"
+                                title="Obriši department"
                             >
                                 <FaTrash className="mr-1" /> Obriši
                             </button>
@@ -171,11 +170,11 @@ export function OdjelList({ authToken }: OdjelListProps) {
                 ))}
             </div>
 
-            {showAddOdjelForm && (
-                <OdjelDodajObrazac
+            {showAddDepartmentForm && (
+                <DepartmentAddForm
                     authToken={authToken}
-                    onSuccess={handleHideAddOdjelForm}
-                    onCancel={handleHideAddOdjelForm}
+                    onSuccess={handleHideAddDepartmentForm}
+                    onCancel={handleHideAddDepartmentForm}
                 />
             )}
         </div>

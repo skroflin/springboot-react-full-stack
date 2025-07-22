@@ -1,27 +1,27 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from 'react-toastify'
-import type { DjelatnikOdgovorDTO } from '../../types/Djelatnik';
+import type { EmployeeResponseDTO } from '../../types/Employee';
 
-interface DjelatnikDeaktivacijaModalProps {
+interface EmployeeDeactivationModelProps {
     show: boolean;
     onHide: () => void;
-    djelatnik: DjelatnikOdgovorDTO | null;
+    employee: EmployeeResponseDTO | null;
     onSuccess: () => void;
     authToken: string;
 }
 
-export function DjelatnikDeaktivacijaModal({ show, onHide, djelatnik, onSuccess, authToken }: DjelatnikDeaktivacijaModalProps) {
+export function EmployeeDeactivationModel({ show, onHide, employee, onSuccess, authToken }: EmployeeDeactivationModelProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    if (!show || !djelatnik) {
+    if (!show || !employee) {
         return null;
     }
 
     const handleDeactivate = async () => {
-        if (djelatnik === null || djelatnik.sifra === null) {
-            setError("Nije odabran djelatnik za otkaz.");
+        if (employee === null || employee.id === null) {
+            setError("Employee wasn't selected for termination.");
             return;
         }
 
@@ -37,15 +37,15 @@ export function DjelatnikDeaktivacijaModal({ show, onHide, djelatnik, onSuccess,
                 Authorization: `Bearer ${authToken}`
             };
 
-            await axios.put(`http://localhost:8080/api/skroflin/djelatnik/softDelete?sifra=${djelatnik.sifra}`, null, { headers });
+            await axios.put(`http://localhost:8080/api/skroflin/employee/softDelete?sifra=${employee.id}`, null, { headers });
 
-            toast.success(`Djelatnik ${djelatnik.imeDjelatnika} ${djelatnik.prezimeDjelatnika} uspješno otpušten!`);
+            toast.success(`Employee ${employee.employeeName} ${employee.employeeSurname} sucessfully terminated!`);
             onSuccess();
             onHide();
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || "Nepoznata greška prilikom deaktivacije tvrtke.";
+            const errorMessage = err.response?.data?.message || err.message || `Unknown error upon terminating employee ${employee.employeeName} ${employee.employeeSurname}.`;
             setError(errorMessage);
-            toast.error(`Otpuštanje djelatnika ${djelatnik.imeDjelatnika} ${djelatnik.prezimeDjelatnika} neuspješno: ${errorMessage}`);
+            toast.error(`Termination of employee ${employee.employeeName} ${employee.employeeSurname} unsucessful: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -66,7 +66,7 @@ export function DjelatnikDeaktivacijaModal({ show, onHide, djelatnik, onSuccess,
 
                 <div className="mb-4">
                     {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-                    <p className="text-gray-700">Jeste li sigurni da želite otpustiti djelatnika <strong className="font-bold">{djelatnik.imeDjelatnika} {djelatnik.prezimeDjelatnika}</strong>?</p>
+                    <p className="text-gray-700">Jeste li sigurni da želite otpustiti djelatnika <strong className="font-bold">{employee.employeeName} {employee.employeeSurname}</strong>?</p>
                 </div>
 
                 <div className="flex justify-end space-x-3">

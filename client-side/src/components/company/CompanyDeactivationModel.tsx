@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
+import type { CompanyResponseDTO } from '../../types/Company';
 
-interface TvrtkaDeaktivacijaModalProps {
+interface CompanyDeactivationModelProps {
     show: boolean;
     onHide: () => void;
-    tvrtka: TvrtkaOdgovorDTO | null;
+    company: CompanyResponseDTO | null;
     onSuccess: () => void;
     authToken: string;
 }
 
-export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtka, onSuccess, authToken }: TvrtkaDeaktivacijaModalProps) {
+export function CompanyDeactivationModel({ show, onHide, company, onSuccess, authToken }: CompanyDeactivationModelProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    if (!show || !tvrtka) {
+    if (!show || !company) {
         return null;
     }
 
     const handleDeactivate = async () => {
-        if (tvrtka === null || tvrtka.sifra === null) {
-            setError("Nije odabrana tvrtka za deaktivaciju.");
+        if (company === null || company.id === null) {
+            setError("No company for deactivation was selected.");
             return;
         }
 
@@ -37,15 +37,15 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtka, onSuccess, authT
                 Authorization: `Bearer ${authToken}`,
             };
 
-            await axios.put(`http://localhost:8080/api/skroflin/tvrtka/softDelete?sifra=${tvrtka.sifra}`, null, { headers });
+            await axios.put(`http://localhost:8080/api/skroflin/company/softDelete?id=${company.id}`, null, { headers });
 
-            toast.success(`Tvrtka ${tvrtka.nazivTvrtke} uspješno deaktivirana!`);
+            toast.success(`Company ${company.companyName} successfully!`);
             onSuccess();
             onHide();
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || "Nepoznata greška prilikom deaktivacije tvrtke.";
+            const errorMessage = err.response?.data?.message || err.message || "Unknown error upon company deactivation.";
             setError(errorMessage);
-            toast.error(`Deaktivacija tvrtke ${tvrtka.nazivTvrtke} neuspješna: ${errorMessage}`);
+            toast.error(`Deaktivacija tvrtke ${company.companyName} neuspješna: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -66,7 +66,7 @@ export function TvrtkaDeaktivacijaModal({ show, onHide, tvrtka, onSuccess, authT
 
                 <div className="mb-4">
                     {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-                    <p className="text-gray-700">Jeste li sigurni da želite deaktivirati tvrtku <strong className="font-bold">{tvrtka.nazivTvrtke}</strong>?</p>
+                    <p className="text-gray-700">Jeste li sigurni da želite deaktivirati tvrtku <strong className="font-bold">{company.companyName}</strong>?</p>
                 </div>
 
                 <div className="flex justify-end space-x-3">

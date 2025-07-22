@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import type { DjelatnikOdgovorDTO } from '../../types/Djelatnik';
+import type { EmployeeResponseDTO } from '../../types/Employee';
 
-interface DjelatnikBrisanjeModalProps {
+interface EmployeeDeleteModelProps {
     show: boolean;
     onClose: () => void;
-    djelatnik: DjelatnikOdgovorDTO | null;
+    employee: EmployeeResponseDTO | null;
     authToken: string;
     onSuccess: () => void;
 }
 
-export function DjelatnikBrisanjeModal({ show, onClose, djelatnik, authToken, onSuccess }: DjelatnikBrisanjeModalProps) {
+export function EmployeeDeleteModel({ show, onClose, employee, authToken, onSuccess }: EmployeeDeleteModelProps) {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    if (!show || !djelatnik) {
+    if (!show || !employee) {
         return null;
     }
 
@@ -24,14 +24,14 @@ export function DjelatnikBrisanjeModal({ show, onClose, djelatnik, authToken, on
         setError(null);
         try {
             const headers = { Authorization: `Bearer ${authToken}` };
-            await axios.delete(`http://localhost:8080/api/skroflin/djelatnik/delete?sifra=${djelatnik.sifra}`, { headers });
+            await axios.delete(`http://localhost:8080/api/skroflin/employee/delete?sifra=${employee.id}`, { headers });
 
-            toast.success(`Djelatnik ${djelatnik.imeDjelatnika} ${djelatnik.prezimeDjelatnika} trajno obrisan.`);
+            toast.success(`Employee ${employee.employeeName} ${employee.employeeSurname} deleted!`);
             onSuccess();
             onClose();
         } catch (err: any) {
-            console.error('Greška pri trajnom brisanju djelatnika:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Došlo je do greške pri trajnom brisanju djelatnika.';
+            console.error('Error upon deleting employee', err);
+            const errorMessage = err.response?.data?.message || err.message || `Error upon deleting employee ${employee.employeeName} ${employee.employeeSurname}.`;
             setError(errorMessage);
             toast.error(errorMessage);
         } finally {
@@ -44,8 +44,8 @@ export function DjelatnikBrisanjeModal({ show, onClose, djelatnik, authToken, on
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-4">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">Potvrdite Trajno Brisanje</h3>
                 <p className="text-gray-700 text-center mb-6">
-                    Jeste li sigurni da želite trajno obrisati djelatnika <strong className="font-bold">{djelatnik.imeDjelatnika} {djelatnik.prezimeDjelatnika}</strong>?
-                    Ova radnja je nepovratna i djelatnik će biti potpuno uklonjen iz sustava.
+                    Jeste li sigurni da želite trajno obrisati employeea <strong className="font-bold">{employee.employeeName} {employee.employeeSurname}</strong>?
+                    Ova radnja je nepovratna i employee će biti potpuno uklonjen iz sustava.
                 </p>
 
                 {error && (

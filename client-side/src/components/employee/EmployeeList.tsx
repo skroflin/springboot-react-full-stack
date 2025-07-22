@@ -3,42 +3,42 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight, FaTimesCircle } from 'react-icons/fa';
-import { DjelatnikPlacaDetalji } from './DjelatnikPlacaDetalji';
-import { DjelatnikDeaktivacijaModal } from './DjelatnikDeaktivacijaModal';
-import { DjelatnikBrisanjeModal } from './DjelatnikBrisanjeModal';
-import type { DjelatnikOdgovorDTO, PlacaOdgovorDTO } from '../../types/Djelatnik';
-import type { OdjelOdgovorDTO } from '../../types/Odjel';
-import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
+import { EmployeeSalaryDetails } from './EmployeeSalaryDetails';
+import { EmployeeDeactivationModel } from './EmployeeDeactivationModel';
+import { EmployeeDeleteModel } from './EmployeeDeleteModel';
+import type { EmployeeResponseDTO, SalaryResponseDTO } from '../../types/Employee';
+import type { DepartmentResponseDTO } from '../../types/Department';
+import type { CompanyResponseDTO } from '../../types/Company';
 
-interface DjelatnikListProps {
+interface EmployeeListProps {
     authToken: string;
 }
 
-export function DjelatnikList({ authToken }: DjelatnikListProps) {
-    const [djelatnici, setDjelatnici] = useState<DjelatnikOdgovorDTO[]>([]);
-    const [selectedDjelatnik, setSelectedDjelatnik] = useState<DjelatnikOdgovorDTO | null>(null);
-    const [placaData, setPlacaData] = useState<{
-        sifraDjelatnika: number;
-        brutoPlaca: number;
-        mirovinsko1Stup: number;
-        mirovinsko2Stup: number;
-        zdravstvenoOsiguranje: number;
-        poreznaOsnovica: number;
-        ukupniPorezPrirezi: number;
-        netoPlaca: number;
+export function EmployeeList({ authToken }: EmployeeListProps) {
+    const [employees, setEmployees] = useState<EmployeeResponseDTO[]>([]);
+    const [selectedEmployee, setSelectedEmployee] = useState<EmployeeResponseDTO | null>(null);
+    const [salaryData, setSalaryData] = useState<{
+        employeeId: number;
+        grossSalary: number;
+        pension1Pillar: number;
+        pension2Pillar: number;
+        healthInsurance: number;
+        taxBase: number;
+        totalTaxSurtax: number;
+        netSalary: number;
     } | null>(null);
-    const [brutoOsnovicaInput, setBrutoOsnovicaInput] = useState<string>('1000.00');
+    const [grossBasisInput, setGrossBasisInput] = useState<string>('1000.00');
 
-    const [tvrtkaMap, setTvrtkaMap] = useState<Map<number, string>>(new Map());
-    const [odjelMap, setOdjelMap] = useState<Map<number, string>>(new Map());
+    const [companyMap, setCompanyMap] = useState<Map<number, string>>(new Map());
+    const [departmentMap, setDepartmentMap] = useState<Map<number, string>>(new Map());
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const [showDeaktivacijaModal, setShowDeaktivacijaModal] = useState<boolean>(false);
-    const [djelatnikForDeaktivacija, setDjelatnikForDeaktivacija] = useState<DjelatnikOdgovorDTO | null>(null);
+    const [showDeactivationModel, setShowDeactivationModel] = useState<boolean>(false);
+    const [employeeForDeactivation, setEmployeeForDeactivation] = useState<EmployeeResponseDTO | null>(null);
 
-    const [showBrisanjeModal, setShowBrisanjeModal] = useState<boolean>(false);
-    const [djelatnikForBrisanje, setDjelatnikForBrisanje] = useState<DjelatnikOdgovorDTO | null>(null);
+    const [showDeleteModel, setShowDeleteModel] = useState<boolean>(false);
+    const [employeeForDeletion, setEmployeeForDeletion] = useState<EmployeeResponseDTO | null>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(4);
@@ -50,7 +50,7 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         setError(null);
 
         if (!authToken) {
-            toast.error('Niste prijavljeni. Molimo prijavite se.');
+            toast.error(`You aren't logged in. Please log in!`);
             navigate('/login');
             setLoading(false);
             return;
@@ -59,34 +59,34 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         try {
             const headers = { 'Authorization': `Bearer ${authToken}` };
 
-            const [djelatniciResponse, tvrtkeResponse, odjeliResponse] = await Promise.all([
-                axios.get<DjelatnikOdgovorDTO[]>('http://localhost:8080/api/skroflin/djelatnik/get', { headers }),
-                axios.get<TvrtkaOdgovorDTO[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers }),
-                axios.get<OdjelOdgovorDTO[]>('http://localhost:8080/api/skroflin/odjel/get', { headers })
+            const [employeesResponse, tvrtkeResponse, odjeliResponse] = await Promise.all([
+                axios.get<EmployeeResponseDTO[]>('http://localhost:8080/api/skroflin/employee/get', { headers }),
+                axios.get<CompanyResponseDTO[]>('http://localhost:8080/api/skroflin/company/get', { headers }),
+                axios.get<DepartmentResponseDTO[]>('http://localhost:8080/api/skroflin/department/get', { headers })
             ]);
 
-            setDjelatnici(djelatniciResponse.data);
+            setEmployees(employeesResponse.data);
 
-            const newTvrtkaMap = new Map<number, string>();
-            tvrtkeResponse.data.forEach(tvrtka => {
-                newTvrtkaMap.set(tvrtka.sifra, tvrtka.nazivTvrtke);
+            const newCompanyMap = new Map<number, string>();
+            tvrtkeResponse.data.forEach(company => {
+                newCompanyMap.set(company.id, company.companyName);
             });
-            setTvrtkaMap(newTvrtkaMap);
+            setCompanyMap(newCompanyMap);
 
-            const newOdjelMap = new Map<number, string>();
-            odjeliResponse.data.forEach(odjel => {
-                newOdjelMap.set(odjel.sifra, odjel.nazivOdjela);
+            const newDepartmentMap = new Map<number, string>();
+            odjeliResponse.data.forEach(department => {
+                newDepartmentMap.set(department.id, department.departmentName);
             });
-            setOdjelMap(newOdjelMap);
+            setDepartmentMap(newDepartmentMap);
 
         } catch (err: any) {
-            console.error('Greška pri dohvatu podataka:', err);
+            console.error('Error upon fetching data:', err);
             if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka.');
-                toast.error(err.response?.data?.message || err.message || 'Greška pri dohvatu podataka.');
+                setError(err.response?.data?.message || err.message || 'Error upon fetching data.');
+                toast.error(err.response?.data?.message || err.message || 'Error upon fetching data.');
             } else {
-                setError(err.message || 'Došlo je do neočekivane greške.');
-                toast.error(err.message || 'Došlo je do neočekivane greške pri dohvatu podataka.');
+                setError(err.message || 'Unexpected error.');
+                toast.error(err.message || 'Unexpected error upon fetching data.');
             }
         } finally {
             setLoading(false);
@@ -97,94 +97,94 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         fetchData();
     }, [fetchData]);
 
-    const handleShowDeaktivacijaModal = (djelatnik: DjelatnikOdgovorDTO) => {
-        setDjelatnikForDeaktivacija(djelatnik);
-        setShowDeaktivacijaModal(true);
+    const handleShowDeactivationModel = (djelatnik: EmployeeResponseDTO) => {
+        setEmployeeForDeactivation(djelatnik);
+        setShowDeactivationModel(true);
     };
 
     const handleHideDeaktivacijaModal = () => {
-        setShowDeaktivacijaModal(false);
-        setDjelatnikForDeaktivacija(null);
+        setShowDeactivationModel(false);
+        setEmployeeForDeactivation(null);
         fetchData();
     };
 
-    const handleShowBrisanjeModal = (djelatnik: DjelatnikOdgovorDTO) => {
-        setDjelatnikForBrisanje(djelatnik);
-        setShowBrisanjeModal(true);
+    const handleshowDeleteModel = (djelatnik: EmployeeResponseDTO) => {
+        setEmployeeForDeletion(djelatnik);
+        setShowDeleteModel(true);
     };
 
     const handleHideBrisanjeModal = () => {
-        setShowBrisanjeModal(false);
-        setDjelatnikForBrisanje(null);
+        setShowDeleteModel(false);
+        setEmployeeForDeletion(null);
         fetchData();
     };
 
-    const fetchPlaca = useCallback(async (sifra: number, brutoOsnovica: string) => {
-        const parsedBruto = parseFloat(brutoOsnovica);
+    const fetchSalary = useCallback(async (id: number, grossBasis: string) => {
+        const parsedBruto = parseFloat(grossBasis);
         if (isNaN(parsedBruto) || parsedBruto <= 0) {
-            setPlacaData(null);
+            setSalaryData(null);
             return;
         }
 
         if (!authToken) {
-            toast.error('Niste prijavljeni. Molimo prijavite se.');
+            toast.error(`You aren't logged in. Please log in!`);
             navigate('/login');
             return;
         }
 
         try {
             const headers = { 'Authorization': `Bearer ${authToken}` };
-            const response = await axios.get<PlacaOdgovorDTO>(`http://localhost:8080/api/skroflin/djelatnik/izracunajPlacu/${sifra}?brutoOsnovica=${brutoOsnovica}`, { headers });
+            const response = await axios.get<SalaryResponseDTO>(`http://localhost:8080/api/skroflin/employee/calculatePay/${id}?grossBasis=${grossBasis}`, { headers });
 
             const rawData = response.data;
             const convertedData = {
-                sifraDjelatnika: rawData.sifraDjelatnika,
-                brutoPlaca: parseFloat(rawData.brutoPlaca),
-                mirovinsko1Stup: parseFloat(rawData.mirovinsko1Stup),
-                mirovinsko2Stup: parseFloat(rawData.mirovinsko2Stup),
-                zdravstvenoOsiguranje: parseFloat(rawData.zdravstvenoOsiguranje),
-                poreznaOsnovica: parseFloat(rawData.poreznaOsnovica),
-                ukupniPorezPrirezi: parseFloat(rawData.ukupniPorezPrirezi),
-                netoPlaca: parseFloat(rawData.netoPlaca),
+                employeeId: rawData.employeeId,
+                grossSalary: parseFloat(rawData.grossSalary),
+                pension1Pillar: parseFloat(rawData.pension1Pillar),
+                pension2Pillar: parseFloat(rawData.pension2Pillar),
+                healthInsurance: parseFloat(rawData.healthInsurance),
+                taxBase: parseFloat(rawData.taxBase),
+                totalTaxSurtax: parseFloat(rawData.totalTaxSurtax),
+                netSalary: parseFloat(rawData.netSalary),
             };
-            setPlacaData(convertedData);
+            setSalaryData(convertedData);
         } catch (error: any) {
-            console.error('Greška pri izračunu plaće:', error);
+            console.error('Error whilst calculating salary:', error);
             if (axios.isAxiosError(error)) {
-                toast.error(error.response?.data?.message || error.message || 'Greška pri izračunu plaće.');
+                toast.error(error.response?.data?.message || error.message || 'Error whilst calculating salary.');
             } else {
-                toast.error(error.message || 'Došlo je do neočekivane greške pri izračunu plaće.');
+                toast.error(error.message || 'Unexpected error whilst calculating pay.');
             }
-            setPlacaData(null);
+            setSalaryData(null);
         }
     }, [authToken, navigate]);
 
     useEffect(() => {
-        if (selectedDjelatnik && brutoOsnovicaInput) {
-            fetchPlaca(selectedDjelatnik.sifra, brutoOsnovicaInput);
+        if (selectedEmployee && grossBasisInput) {
+            fetchSalary(selectedEmployee.id, grossBasisInput);
         } else {
-            setPlacaData(null);
+            setSalaryData(null);
         }
-    }, [selectedDjelatnik, brutoOsnovicaInput, fetchPlaca]);
+    }, [selectedEmployee, grossBasisInput, fetchSalary]);
 
-    const handleEdit = (djelatnik: DjelatnikOdgovorDTO) => {
-        toast.info(`Uređivanje djelatnika: ${djelatnik.imeDjelatnika} ${djelatnik.prezimeDjelatnika}`);
+    const handleEdit = (employee: EmployeeResponseDTO) => {
+        toast.info(`Uređivanje djelatnika: ${employee.employeeName} ${employee.employeeSurname}`);
     };
 
-    const handleDelete = (djelatnik: DjelatnikOdgovorDTO) => {
-        handleShowBrisanjeModal(djelatnik);
+    const handleDelete = (employee: EmployeeResponseDTO) => {
+        handleshowDeleteModel(employee);
     };
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentDjelatnici = djelatnici.slice(indexOfFirstItem, indexOfLastItem);
+    const currentemployees = employees.slice(indexOfFirstItem, indexOfLastItem);
 
-    const totalPages = Math.ceil(djelatnici.length / itemsPerPage);
+    const totalPages = Math.ceil(employees.length / itemsPerPage);
 
     const paginate = (pageNumber: number) => {
         setCurrentPage(pageNumber);
-        setSelectedDjelatnik(null);
-        setPlacaData(null);
+        setSelectedEmployee(null);
+        setSalaryData(null);
     };
 
     const handleNextPage = () => {
@@ -207,20 +207,20 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
         return <div className="text-center text-red-600 text-lg mt-8">Greška: {error}</div>;
     }
 
-    if (djelatnici.length === 0 && !loading) {
+    if (employees.length === 0 && !loading) {
         return (
             <div className="flex flex-col md:flex-row p-4 min-h-screen bg-gray-100">
                 <div className="w-full md:w-1/2 pr-0 md:pr-4 mb-4 md:mb-0 bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Popis djelatnika</h2>
                     <div className="mb-6">
-                        <label htmlFor="brutoOsnovica" className="block text-gray-700 text-sm font-bold mb-2">
+                        <label htmlFor="grossBasis" className="block text-gray-700 text-sm font-bold mb-2">
                             Bruto osnovica za izračun plaće (EUR):
                         </label>
                         <input
                             type="number"
-                            id="brutoOsnovica"
-                            value={brutoOsnovicaInput}
-                            onChange={(e) => setBrutoOsnovicaInput(e.target.value)}
+                            id="grossBasis"
+                            value={grossBasisInput}
+                            onChange={(e) => setGrossBasisInput(e.target.value)}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             placeholder="Unesite bruto osnovicu"
                             min="0"
@@ -243,14 +243,14 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Popis djelatnika</h2>
 
                 <div className="mb-6">
-                    <label htmlFor="brutoOsnovica" className="block text-gray-700 text-sm font-bold mb-2">
+                    <label htmlFor="grossBasis" className="block text-gray-700 text-sm font-bold mb-2">
                         Bruto osnovica za izračun plaće (EUR):
                     </label>
                     <input
                         type="number"
-                        id="brutoOsnovica"
-                        value={brutoOsnovicaInput}
-                        onChange={(e) => setBrutoOsnovicaInput(e.target.value)}
+                        id="grossBasis"
+                        value={grossBasisInput}
+                        onChange={(e) => setGrossBasisInput(e.target.value)}
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         placeholder="Unesite bruto osnovicu"
                         min="0"
@@ -259,33 +259,33 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                    {currentDjelatnici.map((djelatnik) => (
+                    {currentemployees.map((employee) => (
                         <div
-                            key={djelatnik.sifra}
-                            className={`p-4 border rounded-lg cursor-pointer ${selectedDjelatnik?.sifra === djelatnik.sifra ? 'bg-blue-50 border-blue-400 shadow-inner' : 'bg-white hover:bg-gray-100 border-gray-200'} transition-all duration-200`}
-                            onClick={() => setSelectedDjelatnik(djelatnik)}
+                            key={employee.id}
+                            className={`p-4 border rounded-lg cursor-pointer ${selectedEmployee?.id === employee.id ? 'bg-blue-50 border-blue-400 shadow-inner' : 'bg-white hover:bg-gray-100 border-gray-200'} transition-all duration-200`}
+                            onClick={() => setSelectedEmployee(employee)}
                         >
                             <h3 className="text-lg font-semibold text-gray-800 flex items-center mb-2">
                                 <FaUser className="mr-2 text-gray-600" />
-                                {djelatnik.imeDjelatnika} {djelatnik.prezimeDjelatnika}
+                                {employee.employeeName} {employee.employeeSurname}
                             </h3>
                             <p className="text-sm text-gray-600 mb-1 flex items-center">
                                 <FaBuilding className="mr-2 text-purple-500" />
-                                Odjel: {djelatnik.odjelSifra !== null ? odjelMap.get(djelatnik.odjelSifra) || 'Nije dodijeljeno' : 'Nije dodijeljeno'}
+                                Odjel: {employee.departmentId !== null ? departmentMap.get(employee.departmentId) || 'Nije dodijeljeno' : 'Nije dodijeljeno'}
                             </p>
                             <p className="text-sm text-gray-600 mb-1 flex items-center">
                                 <FaCity className="mr-2 text-red-500" />
-                                Tvrtka: {djelatnik.tvrtkaSifra !== null ? tvrtkaMap.get(djelatnik.tvrtkaSifra) || 'Nije dodijeljeno' : 'Nije dodijeljeno'}
+                                Tvrtka: {employee.companyId !== null ? companyMap.get(employee.companyId) || 'Nije dodijeljeno' : 'Nije dodijeljeno'}
                             </p>
                             <p className="text-sm text-gray-600 flex items-center">
                                 <FaBriefcase className="mr-2 text-blue-500" />
-                                Plaća: {djelatnik.placaDjelatnika.toFixed(2)} EUR
+                                Plaća: {employee.employeeSalary.toFixed(2)} EUR
                             </p>
                             <div className="border-t border-gray-700 flex justify-end mt-3 space-x-2">
                                 <div className="border-r border-gray-700">
                                     <button
                                         disabled
-                                        onClick={(e) => { e.stopPropagation(); handleEdit(djelatnik); }}
+                                        onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
                                         className="mx-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center text-sm"
                                         title="Uredi"
                                     >
@@ -294,17 +294,17 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
                                 </div>
                                 <div>
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); handleDelete(djelatnik); }}
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(employee); }}
                                         className="mx-2 text-red-600 hover:text-red-800 transition-colors duration-200 flex items-center text-sm"
                                         title="Obriši Trajno"
                                     >
                                         <FaTrash className="mr-1" /> Obriši
                                     </button>
                                 </div>
-                                {djelatnik.jeZaposlen && (
+                                {employee.employeed && (
                                     <div className="border-l border-gray-700">
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); handleShowDeaktivacijaModal(djelatnik); }}
+                                            onClick={(e) => { e.stopPropagation(); handleShowDeactivationModel(employee); }}
                                             className="mx-2 text-yellow-600 hover:text-yellow-800 transition-colors duration-200 flex items-center text-sm"
                                             title="Otpusti"
                                         >
@@ -340,26 +340,26 @@ export function DjelatnikList({ authToken }: DjelatnikListProps) {
 
             <div className="w-full md:w-1/2 pl-0 md:pl-4 md:ml-4 bg-white p-6 rounded-lg shadow-md md:border-l border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-800 ml-2 mb-4">Detalji plaće</h2>
-                <DjelatnikPlacaDetalji
-                    selectedDjelatnik={selectedDjelatnik}
-                    placaData={placaData}
-                    tvrtkaMap={tvrtkaMap}
-                    odjelMap={odjelMap}
+                <EmployeeSalaryDetails
+                    selectedEmployee={selectedEmployee}
+                    salaryData={salaryData}
+                    companyMap={companyMap}
+                    departmentMap={departmentMap}
                 />
             </div>
 
-            <DjelatnikDeaktivacijaModal
-                show={showDeaktivacijaModal}
+            <EmployeeDeactivationModel
+                show={showDeactivationModel}
                 onHide={handleHideDeaktivacijaModal}
-                djelatnik={djelatnikForDeaktivacija}
+                employee={employeeForDeactivation}
                 onSuccess={fetchData}
                 authToken={authToken}
             />
 
-            <DjelatnikBrisanjeModal
-                show={showBrisanjeModal}
+            <EmployeeDeleteModel
+                show={showDeleteModel}
                 onClose={handleHideBrisanjeModal}
-                djelatnik={djelatnikForBrisanje}
+                employee={employeeForDeletion}
                 onSuccess={fetchData}
                 authToken={authToken}
             />

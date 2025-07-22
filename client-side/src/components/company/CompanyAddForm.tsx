@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-interface TvrtkaFormProps {
+interface CompanyFormProps {
     authToken: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export function TvrtkaDodajObrazac({ authToken, onSuccess, onCancel }: TvrtkaFormProps) {
-    const [nazivTvrtke, setNazivTvrtke] = useState<string>('');
-    const [sjedisteTvrtke, setSjedisteTvrtke] = useState<string>('');
-    const [uStjecaju, setUStjecaju] = useState<boolean>(false);
+export function CompanyAddForm({ authToken, onSuccess, onCancel }: CompanyFormProps) {
+    const [companyName, setCompanyName] = useState<string>('');
+    const [companyLocation, setCompanyLocation] = useState<string>('');
+    const [bankruptcy, setBankruptcy] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -27,37 +27,36 @@ export function TvrtkaDodajObrazac({ authToken, onSuccess, onCancel }: TvrtkaFor
             };
 
             try {
-                const checkResponse = await axios.get(`http://localhost:8080/api/skroflin/tvrtka/getByNaziv?naziv=${encodeURIComponent(nazivTvrtke)}`, { headers });
+                const checkResponse = await axios.get(`http://localhost:8080/api/skroflin/tvrtka/getByName?name=${encodeURIComponent(companyName)}`, { headers });
 
                 if (checkResponse.data && checkResponse.data.length > 0) {
-                    setErrorMessage('Tvrtka s ovim nazivom već postoji!');
-                    toast.error('Tvrtka s ovim nazivom već postoji!');
+                    setErrorMessage(`Company with the name "${companyName}" already exists.`);
+                    toast.error(`Company with the name "${companyName}" already exists.`);
                     setLoading(false);
                     return;
                 }
             } catch (checkError: any) {
                 if (axios.isAxiosError(checkError) && checkError.response?.status !== 404) {
-                    throw new Error(checkError.response?.data?.message || 'Greška pri provjeri naziva tvrtke.');
+                    throw new Error(checkError.response?.data?.message || 'Error upon checking company name.');
                 }
             }
 
-            await axios.post('http://localhost:8080/api/skroflin/tvrtka/post', {
-                nazivTvrtke,
-                sjedisteTvrtke,
-                uStjecaju,
-                jeAktivan: true
+            await axios.post('http://localhost:8080/api/skroflin/company/post', {
+                companyName,
+                companyLocation,
+                bankruptcy,
             }, { headers });
 
-            toast.success('Tvrtka uspješno dodana!');
+            toast.success('Company successfully added!');
             onSuccess();
         } catch (err: any) {
-            console.error('Greška pri dodavanju tvrtke:', err);
+            console.error('Error upon creating new company:', err);
             if (axios.isAxiosError(err)) {
-                setErrorMessage(err.response?.data?.message || err.message || 'Došlo je do greške pri dodavanju tvrtke.');
-                toast.error(err.response?.data?.message || err.message || 'Došlo je do greške pri dodavanju tvrtke.');
+                setErrorMessage(err.response?.data?.message || err.message || 'Error upon creating new company.');
+                toast.error(err.response?.data?.message || err.message || 'Error upon creating new company.');
             } else {
-                setErrorMessage('Došlo je do neočekivane greške.');
-                toast.error('Došlo je do neočekivane greške pri dodavanju tvrtke.');
+                setErrorMessage('Unexpected error.');
+                toast.error('Unexpected error upon creating new company.');
             }
         } finally {
             setLoading(false);
@@ -70,23 +69,23 @@ export function TvrtkaDodajObrazac({ authToken, onSuccess, onCancel }: TvrtkaFor
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Dodaj novu tvrtku</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label htmlFor="nazivTvrtke" className="block text-sm font-medium text-gray-700">Naziv tvrtke:</label>
+                        <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">Naziv tvrtke:</label>
                         <input
                             type="text"
-                            id="nazivTvrtke"
-                            value={nazivTvrtke}
-                            onChange={(e) => setNazivTvrtke(e.target.value)}
+                            id="companyName"
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         />
                     </div>
                     <div>
-                        <label htmlFor="sjedisteTvrtke" className="block text-sm font-medium text-gray-700">Sjedište tvrtke:</label>
+                        <label htmlFor="companyLocation" className="block text-sm font-medium text-gray-700">Sjedište tvrtke:</label>
                         <input
                             type="text"
-                            id="sjedisteTvrtke"
-                            value={sjedisteTvrtke}
-                            onChange={(e) => setSjedisteTvrtke(e.target.value)}
+                            id="companyLocation"
+                            value={companyLocation}
+                            onChange={(e) => setCompanyLocation(e.target.value)}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         />
@@ -94,12 +93,12 @@ export function TvrtkaDodajObrazac({ authToken, onSuccess, onCancel }: TvrtkaFor
                     <div className="flex items-center">
                         <input
                             type="checkbox"
-                            id="uStjecaju"
-                            checked={uStjecaju}
-                            onChange={(e) => setUStjecaju(e.target.checked)}
+                            id="bankruptcy"
+                            checked={bankruptcy}
+                            onChange={(e) => setBankruptcy(e.target.checked)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
-                        <label htmlFor="uStjecaju" className="ml-2 block text-sm text-gray-900">
+                        <label htmlFor="bankruptcy" className="ml-2 block text-sm text-gray-900">
                             U stečaju
                         </label>
                     </div>

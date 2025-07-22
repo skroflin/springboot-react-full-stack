@@ -1,26 +1,26 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { TvrtkaDeaktivacijaModal } from './TvrtkaDeaktivacijaModal';
+import type { CompanyResponseDTO } from '../../types/Company';
 import { FaArrowLeft, FaArrowRight, FaPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { TvrtkaSearch } from './TvrtkaSearch';
-import { TvrtkaDodajObrazac } from './TvrtkaDodajObrazac';
-import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
+import { CompanySearch } from './CompanySearch';
+import { CompanyAddForm } from './CompanyAddForm';
+import { CompanyDeactivationModel } from './CompanyDeactivationModel';
 
-interface TvrtkaListProps {
+interface CompanyListProps {
     authToken: string;
 }
 
-export function TvrtkaList({ authToken }: TvrtkaListProps) {
-    const [allTvrtke, setAllTvrtke] = useState<TvrtkaOdgovorDTO[]>([]);
-    const [displayedTvrtke, setDisplayedTvrtke] = useState<TvrtkaOdgovorDTO[]>([]);
+export function CompanyList({ authToken }: CompanyListProps) {
+    const [allTvrtke, setAllTvrtke] = useState<CompanyResponseDTO[]>([]);
+    const [displayedTvrtke, setDisplayedTvrtke] = useState<CompanyResponseDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const [showDeaktivacijaModal, setShowDeaktivacijaModal] = useState<boolean>(false);
-    const [selectedTvrtka, setSelectedTvrtka] = useState<TvrtkaOdgovorDTO | null>(null);
+    const [showDeactivationModel, setShowDeactivationModel] = useState<boolean>(false);
+    const [selectedCompany, setSelectedCompany] = useState<CompanyResponseDTO | null>(null);
 
-    const [showAddTvrtkaForm, setShowAddTvrtkaForm] = useState<boolean>(false);
+    const [showAddCompanyForm, setShowAddCompanyForm] = useState<boolean>(false);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(4);
@@ -37,19 +37,19 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                 Authorization: `Bearer ${authToken}`,
             };
 
-            const response = await axios.get<TvrtkaOdgovorDTO[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers });
+            const response = await axios.get<CompanyResponseDTO[]>('http://localhost:8080/api/skroflin/company/get', { headers });
             setAllTvrtke(response.data);
             setDisplayedTvrtke(response.data);
         } catch (err: any) {
             if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || "Greška prilikom dohvaćanja tvrtki.");
-                toast.error(err.response?.data?.message || "Greška prilikom dohvaćanja tvrtki.");
+                setError(err.response?.data?.message || "Error upon fetching companies.");
+                toast.error(err.response?.data?.message || "Error upon fetching companies.");
             } else if (err.request) {
-                setError("Nema odgovora sa servera. Provjerite mrežnu vezu.");
-                toast.error("Nema odgovora sa servera. Provjerite mrežnu vezu.");
+                setError("No response from the server, check your connection.");
+                toast.error("No response from the server, check your connection.");
             } else {
-                setError(err.message || "Nepoznata greška.");
-                toast.error(err.message || "Nepoznata greška.");
+                setError(err.message || "Unknown error.");
+                toast.error(err.message || "Unknown error.");
             }
         } finally {
             setLoading(false);
@@ -60,18 +60,18 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
         fetchTvrtke();
     }, [fetchTvrtke]);
 
-    const handleShowDeaktivacijaModal = (tvrtka: TvrtkaOdgovorDTO) => {
-        setSelectedTvrtka(tvrtka);
-        setShowDeaktivacijaModal(true);
+    const handleShowDeactivationModel = (tvrtka: CompanyResponseDTO) => {
+        setSelectedCompany(tvrtka);
+        setShowDeactivationModel(true);
     };
 
-    const handleHideDeaktivacijaModal = () => {
-        setShowDeaktivacijaModal(false);
-        setSelectedTvrtka(null);
+    const handleHideDeactivationModel = () => {
+        setShowDeactivationModel(false);
+        setSelectedCompany(null);
         fetchTvrtke();
     };
 
-    const handleSearchResults = (results: TvrtkaOdgovorDTO[]) => {
+    const handleSearchResults = (results: CompanyResponseDTO[]) => {
         setDisplayedTvrtke(results);
         setCurrentPage(1);
     };
@@ -108,14 +108,14 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
 
             <div className="flex justify-end mb-6">
                 <button
-                    onClick={() => setShowAddTvrtkaForm(true)}
+                    onClick={() => setShowAddCompanyForm(true)}
                     className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
                 >
                     <FaPlus className="mr-2" /> Dodaj novu tvrtku
                 </button>
             </div>
 
-            <TvrtkaSearch
+            <CompanySearch
                 authToken={authToken}
                 onSearchResults={handleSearchResults}
                 onClearSearch={handleClearSearch}
@@ -146,25 +146,25 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                         </p>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {currentTvrtke.map((tvrtka) => (
-                                <div key={tvrtka.sifra} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                            {currentTvrtke.map((company) => (
+                                <div key={company.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-l font-semibold text-gray-900 mb-2 border-b border-gray-600">{tvrtka.nazivTvrtke}</h3>
+                                        <h3 className="text-l font-semibold text-gray-900 mb-2 border-b border-gray-600">{company.companyName}</h3>
                                         <p className="text-gray-700 mb-1">
-                                            <span className="font-medium">Sjedište:</span> {tvrtka.sjedisteTvrtke}
+                                            <span className="font-medium">Sjedište:</span> {company.companyLocation}
                                         </p>
                                         <p className="text-gray-700">
                                             <span className="font-medium">U stečaju:</span>{' '}
-                                            <span className={tvrtka.uStjecaju ? 'text-red-600 font-bold' : 'text-green-600'}>
-                                                {tvrtka.uStjecaju ? 'Da' : 'Ne'}
+                                            <span className={company.bankruptcy ? 'text-red-600 font-bold' : 'text-green-600'}>
+                                                {company.bankruptcy ? 'Da' : 'Ne'}
                                             </span>
                                         </p>
                                     </div>
                                     <div className="mt-4">
                                         <button
-                                            onClick={() => handleShowDeaktivacijaModal(tvrtka)}
-                                            disabled={tvrtka.uStjecaju}
-                                            className={`w-full px-4 py-2 text-sm rounded-md transition-colors duration-200 ${tvrtka.uStjecaju
+                                            onClick={() => handleShowDeactivationModel(company)}
+                                            disabled={company.bankruptcy}
+                                            className={`w-full px-4 py-2 text-sm rounded-md transition-colors duration-200 ${company.bankruptcy
                                                 ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                                                 : 'bg-yellow-500 text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-75'
                                                 }`}
@@ -201,21 +201,21 @@ export function TvrtkaList({ authToken }: TvrtkaListProps) {
                 </>
             )}
 
-            {showAddTvrtkaForm && (
-                <TvrtkaDodajObrazac
+            {showAddCompanyForm && (
+                <CompanyAddForm
                     authToken={authToken}
                     onSuccess={() => {
-                        setShowAddTvrtkaForm(false);
+                        setShowAddCompanyForm(false);
                         fetchTvrtke();
                     }}
-                    onCancel={() => setShowAddTvrtkaForm(false)}
+                    onCancel={() => setShowAddCompanyForm(false)}
                 />
             )}
 
-            <TvrtkaDeaktivacijaModal
-                show={showDeaktivacijaModal}
-                onHide={handleHideDeaktivacijaModal}
-                tvrtka={selectedTvrtka}
+            <CompanyDeactivationModel
+                show={showDeactivationModel}
+                onHide={handleHideDeactivationModel}
+                company={selectedCompany}
                 onSuccess={fetchTvrtke}
                 authToken={authToken}
             />

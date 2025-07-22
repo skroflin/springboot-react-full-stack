@@ -3,15 +3,15 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaSearch } from 'react-icons/fa';
 
-import type { TvrtkaOdgovorDTO } from '../../types/Tvrtka';
+import type { CompanyResponseDTO } from '../../types/Company';
 
-interface TvrtkaSearchProps {
+interface CompanySearchProps {
     authToken: string;
-    onSearchResults: (results: TvrtkaOdgovorDTO[]) => void;
+    onSearchResults: (results: CompanyResponseDTO[]) => void;
     onClearSearch: () => void;
 }
 
-export function TvrtkaSearch({ authToken, onSearchResults, onClearSearch }: TvrtkaSearchProps) {
+export function CompanySearch({ authToken, onSearchResults, onClearSearch }: CompanySearchProps) {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
 
@@ -26,26 +26,26 @@ export function TvrtkaSearch({ authToken, onSearchResults, onClearSearch }: Tvrt
             const headers = {
                 Authorization: `Bearer ${authToken}`,
             };
-            const response = await axios.get<TvrtkaOdgovorDTO[]>(`http://localhost:8080/api/skroflin/tvrtka/getByNaziv?naziv=${encodeURIComponent(searchTerm)}`, { headers });
+            const response = await axios.get<CompanyResponseDTO[]>(`http://localhost:8080/api/skroflin/tvrtka/getByName?name=${encodeURIComponent(searchTerm)}`, { headers });
 
             onSearchResults(response.data);
-            toast.success(`Pronađeno ${response.data.length} tvrtki za '${searchTerm}'`);
+            toast.success(`Found ${response.data.length} companies for '${searchTerm}'`);
 
         } catch (err: any) {
-            console.error("Greška pri pretraživanju tvrtki:", err);
+            console.error("Error upon company searching:", err);
             onSearchResults([]);
             if (err.response) {
                 if (err.response.status === 404) {
-                    toast.info(`Nema pronađenih tvrtki za naziv '${searchTerm}'.`);
+                    toast.info(`No companies found for the name '${searchTerm}'.`);
                 } else if (err.response.status === 400) {
-                    toast.error(err.response.data.message || "Naziv je obavezan za pretragu.");
+                    toast.error(err.response.data.message || "Name is necessary for search.");
                 } else {
-                    toast.error(err.response.data.message || "Greška pri pretraživanju tvrtki.");
+                    toast.error(err.response.data.message || "Error upon searching for companies.");
                 }
             } else if (err.request) {
-                toast.error("Nema odgovora sa servera. Provjerite mrežnu vezu.");
+                toast.error("No response from the server, check your connection.");
             } else {
-                toast.error("Nepoznata greška pri pretraživanju.");
+                toast.error("Unknown error whilst searching.");
             }
         } finally {
             setLoadingSearch(false);

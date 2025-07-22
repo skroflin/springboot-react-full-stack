@@ -1,50 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import type { OdjelOdgovorDTO } from '../../types/Odjel';
+import type { DepartmentResponseDTO } from '../../types/Department';
 
-interface TvrtkaDropdownItem {
-    sifra: number;
-    nazivTvrtke: string;
+interface CompanyDropdownItem {
+    id: number;
+    companyName: string;
 }
 
-interface OdjelDodajObrazacProps {
+interface CompanyAddFormProps {
     authToken: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export function OdjelDodajObrazac({ authToken, onSuccess, onCancel }: OdjelDodajObrazacProps) {
-    const [nazivOdjela, setNazivOdjela] = useState<string>('');
-    const [lokacijaOdjela, setLokacijaOdjela] = useState<string>('');
-    const [tvrtkaSifra, setTvrtkaSifra] = useState<number | null>(null);
-    const [tvrtke, setTvrtke] = useState<TvrtkaDropdownItem[]>([]);
+export function DepartmentAddForm({ authToken, onSuccess, onCancel }: CompanyAddFormProps) {
+    const [departmentName, setDepartmentName] = useState<string>('');
+    const [departmentLocation, setDepartmentLocation] = useState<string>('');
+    const [companyId, setCompanyId] = useState<number | null>(null);
+    const [company, setCompany] = useState<CompanyDropdownItem[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [fetchingTvrtke, setFetchingTvrtke] = useState<boolean>(true);
+    const [fetchingcompany, setFetchingCompany] = useState<boolean>(true);
 
     useEffect(() => {
-        const fetchTvrtkeForDropdown = async () => {
-            setFetchingTvrtke(true);
+        const fetchcompanyForDropdown = async () => {
+            setFetchingCompany(true);
             try {
                 const headers = { Authorization: `Bearer ${authToken}` };
-                const response = await axios.get<TvrtkaDropdownItem[]>('http://localhost:8080/api/skroflin/tvrtka/get', { headers });
-                setTvrtke(response.data);
+                const response = await axios.get<CompanyDropdownItem[]>('http://localhost:8080/api/skroflin/company/get', { headers });
+                setCompany(response.data);
                 if (response.data.length > 0) {
-                    setTvrtkaSifra(response.data[0].sifra);
+                    setCompanyId(response.data[0].id);
                 } else {
-                    setTvrtkaSifra(null);
+                    setCompanyId(null);
                 }
             } catch (err: any) {
-                console.error('Greška pri dohvatu tvrtki za dropdown:', err);
-                toast.error('Greška pri dohvatu popisa tvrtki.');
-                setErrorMessage('Nije moguće dohvatiti popis tvrtki. Pokušajte ponovo.');
+                console.error('Error upon fetching companies for dropdown:', err);
+                toast.error('Error upon fetching company list.');
+                setErrorMessage('Unable to fetch company list. Try again.');
             } finally {
-                setFetchingTvrtke(false);
+                setFetchingCompany(false);
             }
         };
 
-        fetchTvrtkeForDropdown();
+        fetchcompanyForDropdown();
     }, [authToken]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -52,9 +52,9 @@ export function OdjelDodajObrazac({ authToken, onSuccess, onCancel }: OdjelDodaj
         setLoading(true);
         setErrorMessage(null);
 
-        if (tvrtkaSifra === null) {
-            setErrorMessage('Molimo odaberite tvrtku.');
-            toast.error('Molimo odaberite tvrtku.');
+        if (companyId === null) {
+            setErrorMessage('Please choose a company.');
+            toast.error('Please choose a company.');
             setLoading(false);
             return;
         }
@@ -65,47 +65,47 @@ export function OdjelDodajObrazac({ authToken, onSuccess, onCancel }: OdjelDodaj
                 'Content-Type': 'application/json',
             };
 
-            let odjeliSistimNazivom: OdjelOdgovorDTO[] = [];
+            let sameDepartmentName: DepartmentResponseDTO[] = [];
             try {
-                const checkResponse = await axios.get<OdjelOdgovorDTO[]>(`http://localhost:8080/api/skroflin/odjel/getByNaziv?naziv=${encodeURIComponent(nazivOdjela)}`, { headers });
-                odjeliSistimNazivom = checkResponse.data;
+                const checkResponse = await axios.get<DepartmentResponseDTO[]>(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
+                sameDepartmentName = checkResponse.data;
             } catch (checkError: any) {
                 if (axios.isAxiosError(checkError) && checkError.response?.status === 404) {
                 } else if (axios.isAxiosError(checkError) && checkError.response?.status === 401) {
-                    throw new Error(checkError.response?.data?.message || 'Neuspjela autorizacija prilikom provjere odjela.');
+                    throw new Error(checkError.response?.data?.message || 'Unsuccesful authorization upon checking department.');
                 } else {
-                    throw new Error(checkError.response?.data?.message || 'Greška pri provjeri naziva odjela.');
+                    throw new Error(checkError.response?.data?.message || 'Error upon checking department name.');
                 }
             }
 
-            const existingOdjelInSelectedTvrtka = odjeliSistimNazivom.find(
-                odjel => odjel.tvrtkaSifra === tvrtkaSifra
+            const existingDepartmetnInSelectedTvrtka = sameDepartmentName.find(
+                odjel => odjel.companyId === companyId
             );
 
-            if (existingOdjelInSelectedTvrtka) {
-                setErrorMessage(`Odjel s nazivom '${nazivOdjela}' već postoji unutar odabrane tvrtke.`);
-                toast.error(`Odjel s nazivom '${nazivOdjela}' već postoji unutar odabrane tvrtke.`);
+            if (existingDepartmetnInSelectedTvrtka) {
+                setErrorMessage(`Department with name '${departmentName}' already exists in the the following company.`);
+                toast.error(`Department with name '${departmentName}' already exists in the the following company.`);
                 setLoading(false);
                 return;
             }
 
-            await axios.post('http://localhost:8080/api/skroflin/odjel/post', {
-                nazivOdjela,
-                lokacijaOdjela,
-                tvrtkaSifra,
-                jeAktivan: true
+            await axios.post('http://localhost:8080/api/skroflin/department/post', {
+                departmentName,
+                departmentLocation,
+                companyId,
+                active: true,
             }, { headers });
 
-            toast.success('Odjel uspješno dodan!');
+            toast.success('Department succefully added!');
             onSuccess();
         } catch (err: any) {
-            console.error('Greška pri dodavanju odjela:', err);
+            console.error('Error upon adding new department:', err);
             if (axios.isAxiosError(err)) {
-                setErrorMessage(err.response?.data?.message || err.message || 'Došlo je do greške pri dodavanju odjela.');
-                toast.error(err.response?.data?.message || err.message || 'Došlo je do greške pri dodavanju odjela.');
+                setErrorMessage(err.response?.data?.message || err.message || 'Error occured upon adding new department.');
+                toast.error(err.response?.data?.message || err.message || 'Error occured upon adding new department.');
             } else {
-                setErrorMessage('Došlo je do neočekivane greške.');
-                toast.error('Došlo je do neočekivane greške pri dodavanju odjela.');
+                setErrorMessage('Unexpected error occured.');
+                toast.error('Unexpected error occured whilst adding a department.');
             }
         } finally {
             setLoading(false);
@@ -118,43 +118,43 @@ export function OdjelDodajObrazac({ authToken, onSuccess, onCancel }: OdjelDodaj
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Dodaj novi odjel</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label htmlFor="nazivOdjela" className="block text-sm font-medium text-gray-700">Naziv odjela:</label>
+                        <label htmlFor="departmentName" className="block text-sm font-medium text-gray-700">Naziv odjela:</label>
                         <input
                             type="text"
-                            id="nazivOdjela"
-                            value={nazivOdjela}
-                            onChange={(e) => setNazivOdjela(e.target.value)}
+                            id="departmentName"
+                            value={departmentName}
+                            onChange={(e) => setDepartmentName(e.target.value)}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         />
                     </div>
                     <div>
-                        <label htmlFor="lokacijaOdjela" className="block text-sm font-medium text-gray-700">Lokacija odjela:</label>
+                        <label htmlFor="departmentLocation" className="block text-sm font-medium text-gray-700">Lokacija odjela:</label>
                         <input
                             type="text"
-                            id="lokacijaOdjela"
-                            value={lokacijaOdjela}
-                            onChange={(e) => setLokacijaOdjela(e.target.value)}
+                            id="departmentLocation"
+                            value={departmentLocation}
+                            onChange={(e) => setDepartmentLocation(e.target.value)}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         />
                     </div>
                     <div>
-                        <label htmlFor="tvrtka" className="block text-sm font-medium text-gray-700">Tvrtka:</label>
-                        {fetchingTvrtke ? (
+                        <label htmlFor="company" className="block text-sm font-medium text-gray-700">Company:</label>
+                        {fetchingcompany ? (
                             <p className="text-gray-500 mt-1">Učitavanje tvrtki...</p>
-                        ) : tvrtke.length > 0 ? (
+                        ) : company.length > 0 ? (
                             <select
-                                id="tvrtka"
-                                value={tvrtkaSifra === null ? '' : tvrtkaSifra}
-                                onChange={(e) => setTvrtkaSifra(Number(e.target.value) || null)}
+                                id="company"
+                                value={companyId === null ? '' : companyId}
+                                onChange={(e) => setCompanyId(Number(e.target.value) || null)}
                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                                 required
                             >
                                 <option value="" className="text-gray-500">Odaberite tvrtku</option>
-                                {tvrtke.map((tvrtka) => (
-                                    <option key={tvrtka.sifra} value={tvrtka.sifra}>
-                                        {tvrtka.nazivTvrtke}
+                                {company.map((company) => (
+                                    <option key={company.id} value={company.id}>
+                                        {company.companyName}
                                     </option>
                                 ))}
                             </select>
@@ -179,7 +179,7 @@ export function OdjelDodajObrazac({ authToken, onSuccess, onCancel }: OdjelDodaj
                         <button
                             type="submit"
                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                            disabled={loading || tvrtke.length === 0 || tvrtkaSifra === null}
+                            disabled={loading || company.length === 0 || companyId === null}
                         >
                             {loading ? (
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
