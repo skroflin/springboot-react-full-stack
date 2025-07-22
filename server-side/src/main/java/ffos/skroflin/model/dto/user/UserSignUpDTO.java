@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 public record UserSignUpDTO(
         @Schema(example = "1")
-        int sifra,
+        int id,
         @Schema(example = "skroflin")
         String userName,
         @Schema(example = "lozinka123")

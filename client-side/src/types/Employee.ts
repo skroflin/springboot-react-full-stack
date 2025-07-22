@@ -10,17 +10,6 @@ export interface EmployeeResponseDTO {
     companyId: number | null
 }
 
-export interface EmployeeDTO {
-    employeeName: string,
-    employeeSurname: string,
-    employeeSalary: number,
-    beginningOfWork: string,
-    dateOfBirth: string,
-    employeed: boolean,
-    departmentId: number | null,
-    companyId: number | null
-}
-
 export interface SalaryResponseDTO {
     employeeId: number;
     grossSalary: string;

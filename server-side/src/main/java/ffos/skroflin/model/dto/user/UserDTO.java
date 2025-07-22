@@ -13,6 +13,7 @@ import java.util.Date;
  * @author svenk
  */
 public record UserDTO(
+        int id,
         @Schema(example = "skroflin")
         String userName,
         @Schema(example = "skroflin@gmail.com")

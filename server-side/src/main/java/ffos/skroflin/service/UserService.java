@@ -30,7 +30,7 @@ public class UserService extends MainService{
     }
     
     private UserResponseDTO mapToResponseDTO(Users user){
-        return new UserResponseDTO(user.getUserName(), user.getEmail(), user.isActive(), user.getDateCreated(), user.getDateUpdated(), user.getRole());
+        return new UserResponseDTO(user.getId(), user.getUserName(), user.getEmail(), user.isActive(), user.getDateCreated(), user.getDateUpdated(), user.getRole());
     }
     
     @Transactional
@@ -54,7 +54,7 @@ public class UserService extends MainService{
     }
     
     public List<UserResponseDTO> getAll(){
-        List<Users> users = session.createQuery("from User", Users.class).list();
+        List<Users> users = session.createQuery("from Users", Users.class).list();
         return users.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
@@ -72,7 +72,7 @@ public class UserService extends MainService{
         }
         if (!u.getUserName().equals(o.userName())) {
             Long count = session.createQuery(
-                    "select count(*) from User u "
+                    "select count(*) from Users u "
                             + "where u.userName= :name", Long.class)
                     .getSingleResult();
             if (count > 0) {
@@ -89,14 +89,14 @@ public class UserService extends MainService{
     public void delete(int id){
         Users user = session.get(Users.class, id);
         if (user == null) {
-            throw new NoResultException("User with id" + " " + id + " " + "doesn't exist!");
+            throw new NoResultException("Users with id" + " " + id + " " + "doesn't exist!");
         }
         session.remove(user);
     }
     
     @Transactional
     public List<UserResponseDTO> getActiveUsers(boolean active){
-        List<Users> users = session.createQuery("from User u where u.active = :active", Users.class)
+        List<Users> users = session.createQuery("from Users u where u.active = :active", Users.class)
                 .setParameter("active", active)
                 .getResultList();
         return users.stream()
@@ -107,7 +107,7 @@ public class UserService extends MainService{
     @Transactional
     public List<UserResponseDTO> getByName(String name) {
         try {
-            List<Users> users = session.createQuery("select u from User u "
+            List<Users> users = session.createQuery("select u from Users u "
                     + "where lower (u.userName) like lower (:name)",
                 Users.class)
                 .setParameter("name", "%" + name + "%")

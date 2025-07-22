@@ -65,29 +65,29 @@ export function DepartmentAddForm({ authToken, onSuccess, onCancel }: CompanyAdd
                 'Content-Type': 'application/json',
             };
 
-            let sameDepartmentName: DepartmentResponseDTO[] = [];
-            try {
-                const checkResponse = await axios.get<DepartmentResponseDTO[]>(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
-                sameDepartmentName = checkResponse.data;
-            } catch (checkError: any) {
-                if (axios.isAxiosError(checkError) && checkError.response?.status === 404) {
-                } else if (axios.isAxiosError(checkError) && checkError.response?.status === 401) {
-                    throw new Error(checkError.response?.data?.message || 'Unsuccesful authorization upon checking department.');
-                } else {
-                    throw new Error(checkError.response?.data?.message || 'Error upon checking department name.');
-                }
-            }
+            // let sameDepartmentName: DepartmentResponseDTO[] = [];
+            // try {
+            //     const checkResponse = await axios.get<DepartmentResponseDTO[]>(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
+            //     sameDepartmentName = checkResponse.data;
+            // } catch (checkError: any) {
+            //     if (axios.isAxiosError(checkError) && checkError.response?.status === 404) {
+            //     } else if (axios.isAxiosError(checkError) && checkError.response?.status === 401) {
+            //         throw new Error(checkError.response?.data?.message || 'Unsuccesful authorization upon checking department.');
+            //     } else {
+            //         throw new Error(checkError.response?.data?.message || 'Error upon checking department name.');
+            //     }
+            // }
 
-            const existingDepartmetnInSelectedTvrtka = sameDepartmentName.find(
-                odjel => odjel.companyId === companyId
-            );
+            // const existingDepartmetnInSelectedTvrtka = sameDepartmentName.find(
+            //     department => department.companyId === companyId
+            // );
 
-            if (existingDepartmetnInSelectedTvrtka) {
-                setErrorMessage(`Department with name '${departmentName}' already exists in the the following company.`);
-                toast.error(`Department with name '${departmentName}' already exists in the the following company.`);
-                setLoading(false);
-                return;
-            }
+            // if (existingDepartmetnInSelectedTvrtka) {
+            //     setErrorMessage(`Department with name '${departmentName}' already exists in the the following company.`);
+            //     toast.error(`Department with name '${departmentName}' already exists in the the following company.`);
+            //     setLoading(false);
+            //     return;
+            // }
 
             await axios.post('http://localhost:8080/api/skroflin/department/post', {
                 departmentName,

@@ -9,6 +9,7 @@ import { CompanyList } from './components/company/CompanyList';
 import Navbar from './components/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { UsersList } from './components/user/UserList';
 
 const App: React.FC = () => {
   const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('jwtToken'));
@@ -101,6 +102,14 @@ const App: React.FC = () => {
                   element={
                     isAuthenticated
                       ? <CompanyList authToken={authToken!} />
+                      : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
+                  path="/korisnici"
+                  element={
+                    isAuthenticated
+                      ? <UsersList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }
                 />

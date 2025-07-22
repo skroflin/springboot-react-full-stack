@@ -20,6 +20,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, isAuthenticated, onLogout }) 
                     <Link to="/djelatnici" className="text-white hover:text-blue-400 transition-colors duration-200">Djelatnici</Link>
                     <Link to="/odjeli" className="text-white hover:text-blue-400 transition-colors duration-200">Odjeli</Link>
                     <Link to="/tvrtke" className="text-white hover:text-blue-400 transition-colors duration-200">Tvrtke</Link>
+                    <Link to="/korisnici" className="text-white hover:text-blue-400 transition-colors duration-200">Korisnici</Link>
                 </div>
                 <div className="flex items-center">
                     <button
