@@ -19,7 +19,10 @@ const Navbar: React.FC<NavbarProps> = ({ username, isAuthenticated, onLogout }) 
             <div className="mx-auto max-w-screen-xl flex justify-between">
                 <div className="flex items-center space-x-6">
                     {username && <span className="font-bold text-xl mr-4">Dobrodošli, {username}!</span>}
-                    <Link to="/home" className="text-white hover:text-blue-400 transition-colors duration-200">Home<FaHome /></Link>
+                    <Link to="/home" className="text-white hover:text-blue-400 transition-colors duration-200 flex items-center">
+                        Home
+                        <FaHome className="ml-2" />
+                    </Link>
                     <Link to="/djelatnici" className="text-white hover:text-blue-400 transition-colors duration-200">Djelatnici</Link>
                     <Link to="/odjeli" className="text-white hover:text-blue-400 transition-colors duration-200">Odjeli</Link>
                     <Link to="/tvrtke" className="text-white hover:text-blue-400 transition-colors duration-200">Tvrtke</Link>
@@ -28,10 +31,10 @@ const Navbar: React.FC<NavbarProps> = ({ username, isAuthenticated, onLogout }) 
                 <div className="flex items-center">
                     <button
                         onClick={onLogout}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded transition-colors duration-200"
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded transition-colors duration-200 flex items-center"
                     >
                         Odjava!
-                        <RiLogoutBoxRFill />
+                        <RiLogoutBoxRFill className="ml-2"/>
                     </button>
                 </div>
             </div>

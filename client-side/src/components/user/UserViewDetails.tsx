@@ -62,7 +62,7 @@ export function UserViewDetails({ authToken, user, onClose }: UserDetailProps) {
                         </p>
                         <p className="text-gray-700">
                             <span className="font-medium">Status</span>{' '}
-                            <span className={userDetails.active ? 'text-red-600 font-bold' : 'text-green-600'}>
+                            <span className={userDetails.active ? 'text-green-600' : 'text-red-600'}>
                                 {userDetails.active ? 'Aktivan' : 'Neaktivan'}
                             </span>
                         </p>
@@ -85,7 +85,7 @@ export function UserViewDetails({ authToken, user, onClose }: UserDetailProps) {
                             {userDetails.role}
                         </p>
                     </div>
-                    <div className="flex justify-end space-x-3 mt-6">
+                    <div className="flex justify-center space-x-3 mt-6">
                         <button
                             type="button"
                             onClick={onClose}
