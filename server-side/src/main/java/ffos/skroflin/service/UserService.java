@@ -4,6 +4,7 @@
  */
 package ffos.skroflin.service;
 
+import com.github.javafaker.Faker;
 import ffos.skroflin.model.Users;
 import ffos.skroflin.model.dto.user.UserDTO;
 import ffos.skroflin.model.dto.user.UserResponseDTO;
@@ -11,6 +12,7 @@ import ffos.skroflin.model.dto.user.UserSignUpDTO;
 import ffos.skroflin.model.dto.user.UserRegistrationDTO;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -160,4 +162,19 @@ public class UserService extends MainService{
         }
         return mapToResponseDTO(user);
     }
+    
+    /*
+    public UserResponseDTO massiveInsert(UserDTO o, int number){
+        Users u;
+        Faker f = new Faker();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyy-MM-dd");
+        session.beginTransaction();
+        for (int i = 0; i < number; i++) {
+            u = new Users(f.name().username(), bCryptPasswordEncoder.encode(f.internet().password()), f.internet().emailAddress(). );
+            session.persist(u);
+        }
+        session.getTransaction().commit();
+        return mapToResponseDTO(u);
+    }
+    */
 }

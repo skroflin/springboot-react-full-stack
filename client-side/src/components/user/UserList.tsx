@@ -3,6 +3,7 @@ import type { UserResponseDTO } from "../../types/Users";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { UserViewDetails } from "./UserViewDetails";
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 
 interface UsersListProps {
     authToken: string;
@@ -14,6 +15,8 @@ export function UsersList({ authToken }: UsersListProps) {
     const [error, setError] = useState<string | null>(null);
     const [selectedUser, setSelectedUser] = useState<UserResponseDTO | null>(null);
     const [showDetails, setShowDetails] = useState<boolean>(false);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [usersPerPage] = useState<number>(3);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -59,6 +62,27 @@ export function UsersList({ authToken }: UsersListProps) {
         setSelectedUser(null);
     };
 
+    const indexOfLastItem = currentPage * usersPerPage;
+    const indexOfFirstItem = indexOfLastItem - usersPerPage;
+    const currentUsers = allUsers.slice(indexOfFirstItem, indexOfLastItem)
+    const totalPages = Math.ceil(allUsers.length / usersPerPage);
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            handlePageChange(currentPage + 1);
+        }
+    }
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            handlePageChange(currentPage - 1);
+        }
+    }
+
     return (
         <div className="container mx-auto p-4 mt-8">
             <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-black-600 w-fit">Popis Korisnika</h2>
@@ -77,7 +101,7 @@ export function UsersList({ authToken }: UsersListProps) {
 
             {!loading && !error && (
                 <>
-                    {allUsers.map(user => (
+                    {currentUsers.map(user => (
                         <div key={user.id} className="relative overflow-x-auto">
                             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead className="text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -129,7 +153,27 @@ export function UsersList({ authToken }: UsersListProps) {
                             )}
                         </div>
                     ))}
-
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center mt-8 space-x-2">
+                            <button
+                                onClick={handlePrevPage}
+                                disabled={currentPage === 1}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            >
+                                <FaArrowLeft className="mr-2" /> Prethodna
+                            </button>
+                            <span className="px-4 py-2 text-gray-700 font-semibold">
+                                Stranica {currentPage} od {totalPages}
+                            </span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            >
+                                Sljedeća <FaArrowRight className="ml-2" />
+                            </button>
+                        </div>
+                    )}
                 </>
             )}
         </div>

@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { CompanySearch } from './CompanySearch';
 import { CompanyAddForm } from './CompanyAddForm';
 import { CompanyDeactivationModel } from './CompanyDeactivationModel';
+import { CompanyViewDetails } from './CompanyViewDetails';
 
 interface CompanyListProps {
     authToken: string;
@@ -13,19 +14,20 @@ interface CompanyListProps {
 
 export function CompanyList({ authToken }: CompanyListProps) {
     const [allTvrtke, setAllTvrtke] = useState<CompanyResponseDTO[]>([]);
-    const [displayedTvrtke, setDisplayedTvrtke] = useState<CompanyResponseDTO[]>([]);
+    const [displayedCompanies, setDisplayedCompanies] = useState<CompanyResponseDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     const [showDeactivationModel, setShowDeactivationModel] = useState<boolean>(false);
     const [selectedCompany, setSelectedCompany] = useState<CompanyResponseDTO | null>(null);
+    const [showDetails, setShowDetails] = useState<boolean>(false);
 
     const [showAddCompanyForm, setShowAddCompanyForm] = useState<boolean>(false);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(4);
 
-    const fetchTvrtke = useCallback(async () => {
+    const fetchCompanies = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -39,7 +41,7 @@ export function CompanyList({ authToken }: CompanyListProps) {
 
             const response = await axios.get<CompanyResponseDTO[]>('http://localhost:8080/api/skroflin/company/get', { headers });
             setAllTvrtke(response.data);
-            setDisplayedTvrtke(response.data);
+            setDisplayedCompanies(response.data);
         } catch (err: any) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || "Error upon fetching companies.");
@@ -57,8 +59,18 @@ export function CompanyList({ authToken }: CompanyListProps) {
     }, [authToken]);
 
     useEffect(() => {
-        fetchTvrtke();
-    }, [fetchTvrtke]);
+        fetchCompanies();
+    }, [fetchCompanies]);
+
+    const handleShowDetails = (tvrtka: CompanyResponseDTO) => {
+        setSelectedCompany(tvrtka);
+        setShowDetails(true);
+    };
+
+    const handleCloseDetails = () => {
+        setShowDetails(false);
+        setSelectedCompany(null);
+    };
 
     const handleShowDeactivationModel = (tvrtka: CompanyResponseDTO) => {
         setSelectedCompany(tvrtka);
@@ -68,23 +80,23 @@ export function CompanyList({ authToken }: CompanyListProps) {
     const handleHideDeactivationModel = () => {
         setShowDeactivationModel(false);
         setSelectedCompany(null);
-        fetchTvrtke();
+        fetchCompanies();
     };
 
     const handleSearchResults = (results: CompanyResponseDTO[]) => {
-        setDisplayedTvrtke(results);
+        setDisplayedCompanies(results);
         setCurrentPage(1);
     };
 
     const handleClearSearch = () => {
-        setDisplayedTvrtke(allTvrtke);
+        setDisplayedCompanies(allTvrtke);
         setCurrentPage(1);
     };
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentTvrtke = displayedTvrtke.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(displayedTvrtke.length / itemsPerPage);
+    const currentTvrtke = displayedCompanies.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(displayedCompanies.length / itemsPerPage);
 
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
@@ -136,7 +148,7 @@ export function CompanyList({ authToken }: CompanyListProps) {
 
             {!loading && !error && (
                 <>
-                    {displayedTvrtke.length === 0 ? (
+                    {displayedCompanies.length === 0 ? (
                         <p className="text-center text-gray-600">
                             {
                                 currentTvrtke.length === 0 && allTvrtke.length > 0
@@ -149,16 +161,12 @@ export function CompanyList({ authToken }: CompanyListProps) {
                             {currentTvrtke.map((company) => (
                                 <div key={company.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-l font-semibold text-gray-900 mb-2 border-b border-gray-600">{company.companyName}</h3>
-                                        <p className="text-gray-700 mb-1">
-                                            <span className="font-medium">Sjedište:</span> {company.companyLocation}
-                                        </p>
-                                        <p className="text-gray-700">
-                                            <span className="font-medium">U stečaju:</span>{' '}
-                                            <span className={company.bankruptcy ? 'text-red-600 font-bold' : 'text-green-600'}>
-                                                {company.bankruptcy ? 'Da' : 'Ne'}
-                                            </span>
-                                        </p>
+                                        <h3
+                                            onClick={() => handleShowDetails(company)}
+                                            className="hover:underline text-l font-semibold text-gray-900 mb-2 text-center"
+                                        >
+                                            {company.companyName}
+                                        </h3>
                                     </div>
                                     <div className="mt-4">
                                         <button
@@ -174,6 +182,14 @@ export function CompanyList({ authToken }: CompanyListProps) {
                                     </div>
                                 </div>
                             ))}
+                            {showDetails && selectedCompany?.id == selectedCompany?.id && (
+                                <CompanyViewDetails
+                                    authToken={authToken}
+                                    company={selectedCompany}
+                                    show={showDetails}
+                                    onClose={handleCloseDetails}
+                                />
+                            )}
                         </div>
                     )}
 
@@ -206,7 +222,7 @@ export function CompanyList({ authToken }: CompanyListProps) {
                     authToken={authToken}
                     onSuccess={() => {
                         setShowAddCompanyForm(false);
-                        fetchTvrtke();
+                        fetchCompanies();
                     }}
                     onCancel={() => setShowAddCompanyForm(false)}
                 />
@@ -216,7 +232,7 @@ export function CompanyList({ authToken }: CompanyListProps) {
                 show={showDeactivationModel}
                 onHide={handleHideDeactivationModel}
                 company={selectedCompany}
-                onSuccess={fetchTvrtke}
+                onSuccess={fetchCompanies}
                 authToken={authToken}
             />
         </div>

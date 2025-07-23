@@ -47,13 +47,11 @@ public class Users extends MainEntity {
     public Users() {
     }
 
-    public Users(String userName, String password, String email, boolean active, Date dateCreated, Date dateUpdated, Role role) {
+    public Users(String userName, String password, String email, boolean active, Role role) {
         this.userName = userName;
         this.password = password;
         this.email = email;
         this.active = active;
-        this.dateCreated = dateCreated;
-        this.dateUpdated = dateUpdated;
         this.role = role;
     }
 
