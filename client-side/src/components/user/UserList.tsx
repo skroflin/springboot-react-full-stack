@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { UserViewDetails } from "./UserViewDetails";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { UserSearch } from "./UserSearch";
 
 interface UsersListProps {
     authToken: string;
@@ -17,6 +18,7 @@ export function UsersList({ authToken }: UsersListProps) {
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [usersPerPage] = useState<number>(3);
+    const [displayedUsers, setDisplayedUsers] = useState<UserResponseDTO[]>([]);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -32,6 +34,7 @@ export function UsersList({ authToken }: UsersListProps) {
 
             const response = await axios.get<UserResponseDTO[]>('http://localhost:8080/api/skroflin/user/get', { headers });
             setAllUsers(response.data);
+            setDisplayedUsers(response.data);
         } catch (err: any) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || "Error upon fetching users.");
@@ -62,10 +65,20 @@ export function UsersList({ authToken }: UsersListProps) {
         setSelectedUser(null);
     };
 
+    const handleSearchResults = (results: UserResponseDTO[]) => {
+        setDisplayedUsers(results);
+        setCurrentPage(1);
+    };
+
+    const handleClearSearch = () => {
+        setDisplayedUsers(allUsers);
+        setCurrentPage(1);
+    };
+
     const indexOfLastItem = currentPage * usersPerPage;
     const indexOfFirstItem = indexOfLastItem - usersPerPage;
-    const currentUsers = allUsers.slice(indexOfFirstItem, indexOfLastItem)
-    const totalPages = Math.ceil(allUsers.length / usersPerPage);
+    const currentUsers = displayedUsers.slice(indexOfFirstItem, indexOfLastItem)
+    const totalPages = Math.ceil(displayedUsers.length / usersPerPage);
 
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
@@ -86,6 +99,11 @@ export function UsersList({ authToken }: UsersListProps) {
     return (
         <div className="container mx-auto p-4 mt-8">
             <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-black-600 w-fit">Popis Korisnika</h2>
+            <UserSearch
+                authToken={authToken}
+                onSearchResults={handleSearchResults}
+                onClearSearch={handleClearSearch}
+            />
             {loading && (
                 <div className="flex justify-center items-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -101,58 +119,71 @@ export function UsersList({ authToken }: UsersListProps) {
 
             {!loading && !error && (
                 <>
-                    {currentUsers.map(user => (
-                        <div key={user.id} className="relative overflow-x-auto">
-                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                <thead className="text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                    <tr>
-                                        <th scope="col" className="px-6 py-3">
-                                            Korisničko ime
-                                        </th>
-                                        <th scope="col" className="px-6 py-3">
-                                            Korisnički email
-                                        </th>
-                                        <th scope="col" className="px-6 py-3">
-                                            Status
-                                        </th>
-                                        <th scope="col" className="px-6 py-3">
-                                            Uloga
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                        <th onClick={() => handleViewDetails(user)}
-                                            scope="row" className="hover:underline px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            {user.userName}
-                                        </th>
-                                        <td className="px-6 py-4">
-                                            {user.email}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {user.active ? (
-                                                <span className="text-green-600">Aktivan</span>
-                                            ) : (
-                                                <span className="text-red-600">Neaktivan</span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 capitalize">
-                                            {user.role}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    {displayedUsers.length === 0 ? (
+                        <p className="text-center text-gray-600">
+                            {
+                                currentUsers.length === 0 && allUsers.length > 0
+                                    ? "Nema pronađenih korisnika koje odgovaraju kriterijima pretraživanja."
+                                    : "Nema unesenih korisnika."
+                            }
+                        </p>
+                    ) : (
+                        <div>
+                            {currentUsers.map(user => (
+                                <div key={user.id} className="relative overflow-x-auto">
+                                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                        <thead className="text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                            <tr>
+                                                <th scope="col" className="px-6 py-3">
+                                                    Korisničko ime
+                                                </th>
+                                                <th scope="col" className="px-6 py-3">
+                                                    Korisnički email
+                                                </th>
+                                                <th scope="col" className="px-6 py-3">
+                                                    Status
+                                                </th>
+                                                <th scope="col" className="px-6 py-3">
+                                                    Uloga
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                                <th onClick={() => handleViewDetails(user)}
+                                                    scope="row" className="hover:underline px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                    {user.userName}
+                                                </th>
+                                                <td className="px-6 py-4">
+                                                    {user.email}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {user.active ? (
+                                                        <span className="text-green-600">Aktivan</span>
+                                                    ) : (
+                                                        <span className="text-red-600">Neaktivan</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 capitalize">
+                                                    {user.role}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
 
-                            {showDetails && selectedUser?.id === user.id && (
-                                <UserViewDetails
-                                    authToken={authToken}
-                                    user={selectedUser}
-                                    show={showDetails}
-                                    onClose={handleCloseDetails}
-                                />
-                            )}
+                                    {showDetails && selectedUser?.id === user.id && (
+                                        <UserViewDetails
+                                            authToken={authToken}
+                                            user={selectedUser}
+                                            show={showDetails}
+                                            onClose={handleCloseDetails}
+                                        />
+                                    )}
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
+
                     {totalPages > 1 && (
                         <div className="flex justify-center items-center mt-8 space-x-2">
                             <button

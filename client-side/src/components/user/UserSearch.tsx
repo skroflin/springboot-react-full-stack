@@ -11,7 +11,7 @@ interface UserSearchProps {
     onClearSearch: () => void;
 }
 
-export function CompanySearch({ authToken, onSearchResults, onClearSearch }: UserSearchProps) {
+export function UserSearch({ authToken, onSearchResults, onClearSearch }: UserSearchProps) {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
 
@@ -29,18 +29,18 @@ export function CompanySearch({ authToken, onSearchResults, onClearSearch }: Use
             const response = await axios.get<UserResponseDTO[]>(`http://localhost:8080/api/skroflin/user/getByName?name=${encodeURIComponent(searchTerm)}`, { headers });
 
             onSearchResults(response.data);
-            toast.success(`Found ${response.data.length} companies for '${searchTerm}'`);
+            toast.success(`Found ${response.data.length} users for '${searchTerm}'`);
 
         } catch (err: any) {
-            console.error("Error upon company searching:", err);
+            console.error("Error upon users searching:", err);
             onSearchResults([]);
             if (err.response) {
                 if (err.response.status === 404) {
-                    toast.info(`No companies found for the name '${searchTerm}'.`);
+                    toast.info(`No users found for the name '${searchTerm}'.`);
                 } else if (err.response.status === 400) {
                     toast.error(err.response.data.message || "Name is necessary for search.");
                 } else {
-                    toast.error(err.response.data.message || "Error upon searching for companies.");
+                    toast.error(err.response.data.message || "Error upon searching for users.");
                 }
             } else if (err.request) {
                 toast.error("No response from the server, check your connection.");
@@ -60,7 +60,7 @@ export function CompanySearch({ authToken, onSearchResults, onClearSearch }: Use
 
     return (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">Pretraži tvrtke po nazivu</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">Pretraži korisnika po nazivu</h3>
             <div className="flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
@@ -86,7 +86,7 @@ export function CompanySearch({ authToken, onSearchResults, onClearSearch }: Use
                     onClick={() => {
                         setSearchTerm('');
                         onClearSearch();
-                        toast.info("Pretraga je resetirana, prikazuju se sve tvrtke.");
+                        toast.info("Pretraga je resetirana, prikazuju se svi korisnici.");
                     }}
                     className="px-5 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition-colors duration-200 flex items-center justify-center"
                 >

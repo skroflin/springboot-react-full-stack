@@ -136,7 +136,7 @@ public class EmployeeService extends MainService {
             Employee employee = convertToEntity(o);
             session.beginTransaction();
             session.persist(employee);
-            session.flush();
+            session.getTransaction().commit();
             return convertToResponseDTO(employee);
         } catch (Exception e) {
             throw new RuntimeException("Error upon creating employee: " + e.getMessage(), e);

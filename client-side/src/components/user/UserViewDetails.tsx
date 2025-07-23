@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
+import { FaUser } from "react-icons/fa";
 
 interface UserDetailProps {
     authToken: string;
@@ -56,7 +57,7 @@ export function UserViewDetails({ authToken, user, onClose }: UserDetailProps) {
             {userDetails && (
                 <div key={userDetails.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
                     <div>
-                        <h3 className="text-center text-2xl font-bold text-gray-900 mb-4 border-b border-gray-600">{userDetails.userName}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4 border-b border-gray-600 flex items-center">{userDetails.userName}<FaUser className="ml-2" /></h3>
                         <p className="text-gray-700">
                             <span className="font-medium">Korisnički email</span> {userDetails.email}
                         </p>
@@ -70,19 +71,21 @@ export function UserViewDetails({ authToken, user, onClose }: UserDetailProps) {
                             <span className="font-medium">
                                 Datum kreiranja{' '}
                             </span>
-                            {format(new Date(userDetails.dateCreated), 'dd.MM.yyyy HH:mm:ss', { locale: hr })}
+                            {format(new Date(userDetails.dateCreated), 'dd.MM.yyyy', { locale: hr })}
                         </p>
                         <p className="text-gray-700">
                             <span className="font-medium">
                                 Datum ažuriranja{' '}
                             </span>
-                            {format(new Date(userDetails.dateUpdated), 'dd.MM.yyyy HH:mm:ss', { locale: hr })}
+                            {format(new Date(userDetails.dateUpdated), 'dd.MM.yyyy', { locale: hr })}
                         </p>
                         <p className="text-gray-700">
                             <span className="font-medium">
                                 Uloga{' '}
                             </span>
-                            {userDetails.role}
+                            <span className="capitalize text-blue-600">
+                                {userDetails.role}
+                            </span>
                         </p>
                     </div>
                     <div className="flex justify-center space-x-3 mt-6">

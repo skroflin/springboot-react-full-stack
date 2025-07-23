@@ -37,7 +37,7 @@ export function EmployeeDeactivationModel({ show, onHide, employee, onSuccess, a
                 Authorization: `Bearer ${authToken}`
             };
 
-            await axios.put(`http://localhost:8080/api/skroflin/employee/softDelete?sifra=${employee.id}`, null, { headers });
+            await axios.put(`http://localhost:8080/api/skroflin/employee/softDelete?id=${employee.id}`, null, { headers });
 
             toast.success(`Employee ${employee.employeeName} ${employee.employeeSurname} sucessfully terminated!`);
             onSuccess();
