@@ -56,7 +56,7 @@ public class UserService extends MainService{
     }
     
     public List<UserResponseDTO> getAll(){
-        List<Users> users = session.createQuery("from Users", Users.class).list();
+        List<Users> users = session.createQuery("from Users u where u.role = 'user'", Users.class).list();
         return users.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());

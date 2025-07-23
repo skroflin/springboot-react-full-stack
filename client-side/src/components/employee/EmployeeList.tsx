@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaBriefcase, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight, FaTimesCircle } from 'react-icons/fa';
+import { FaUser, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight, FaTimesCircle } from 'react-icons/fa';
 import { EmployeeSalaryDetails } from './EmployeeSalaryDetails';
 import { EmployeeDeactivationModel } from './EmployeeDeactivationModel';
 import { EmployeeDeleteModel } from './EmployeeDeleteModel';
@@ -240,7 +240,7 @@ export function EmployeeList({ authToken }: EmployeeListProps) {
     return (
         <div className="flex flex-col md:flex-row p-4 min-h-screen">
             <div className="w-full md:w-1/2 pr-0 md:pr-4 mb-4 md:mb-0 bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Popis djelatnika</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 capitalize">Popis djelatnika</h2>
 
                 <div className="mb-6">
                     <label htmlFor="grossBasis" className="block text-gray-700 text-sm font-bold mb-2">
@@ -270,16 +270,12 @@ export function EmployeeList({ authToken }: EmployeeListProps) {
                                 {employee.employeeName} {employee.employeeSurname}
                             </h3>
                             <p className="text-sm text-gray-600 mb-1 flex items-center">
-                                <FaBuilding className="mr-2 text-purple-500" />
+                                <FaBuilding className="mr-2 text-gray-600" />
                                 Odjel: {employee.departmentId !== null ? departmentMap.get(employee.departmentId) || 'Nije dodijeljeno' : 'Nije dodijeljeno'}
                             </p>
                             <p className="text-sm text-gray-600 mb-1 flex items-center">
-                                <FaCity className="mr-2 text-red-500" />
+                                <FaCity className="mr-2 text-gray-600" />
                                 Tvrtka: {employee.companyId !== null ? companyMap.get(employee.companyId) || 'Nije dodijeljeno' : 'Nije dodijeljeno'}
-                            </p>
-                            <p className="text-sm text-gray-600 flex items-center">
-                                <FaBriefcase className="mr-2 text-blue-500" />
-                                Plaća: {employee.employeeSalary.toFixed(2)} EUR
                             </p>
                             <div className="border-t border-gray-700 flex justify-end mt-3 space-x-2">
                                 <div className="border-r border-gray-700">

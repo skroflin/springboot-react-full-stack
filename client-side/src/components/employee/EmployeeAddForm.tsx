@@ -8,20 +8,27 @@ interface CompanyDropdownItem {
     companyName: string;
 }
 
-interface DepartmentFormProps {
+interface DepartmentDropdownItem {
+    id: number;
+    departmentName: string;
+}
+
+interface CompanyAddFormProps {
     authToken: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export function DepartmentAddForm({ authToken, onSuccess, onCancel }: DepartmentFormProps) {
+export function DepartmentAddForm({ authToken, onSuccess, onCancel }: CompanyAddFormProps) {
     const [departmentName, setDepartmentName] = useState<string>('');
     const [departmentLocation, setDepartmentLocation] = useState<string>('');
     const [companyId, setCompanyId] = useState<number | null>(null);
     const [company, setCompany] = useState<CompanyDropdownItem[]>([]);
+    const [department, setDepartment] = useState<DepartmentDropdownItem[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [fetchingcompany, setFetchingCompany] = useState<boolean>(true);
+    const [fetchingDepartment, setFetchingDepartment] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchcompanyForDropdown = async () => {
@@ -65,30 +72,29 @@ export function DepartmentAddForm({ authToken, onSuccess, onCancel }: Department
                 'Content-Type': 'application/json',
             };
 
-            let sameDepartmentName: DepartmentResponseDTO[] = [];
-            try {
-                const checkResponse = await axios.get<DepartmentResponseDTO[]>(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
-                sameDepartmentName = checkResponse.data;
-                console.log("Same department name:", sameDepartmentName);
-            } catch (checkError: any) {
-                if (axios.isAxiosError(checkError) && checkError.response?.status === 404) {
-                } else if (axios.isAxiosError(checkError) && checkError.response?.status === 401) {
-                    throw new Error(checkError.response?.data?.message || 'Unsuccesful authorization upon checking department.');
-                } else {
-                    throw new Error(checkError.response?.data?.message || 'Error upon checking department name.');
-                }
-            }
+            // let sameDepartmentName: DepartmentResponseDTO[] = [];
+            // try {
+            //     const checkResponse = await axios.get<DepartmentResponseDTO[]>(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
+            //     sameDepartmentName = checkResponse.data;
+            // } catch (checkError: any) {
+            //     if (axios.isAxiosError(checkError) && checkError.response?.status === 404) {
+            //     } else if (axios.isAxiosError(checkError) && checkError.response?.status === 401) {
+            //         throw new Error(checkError.response?.data?.message || 'Unsuccesful authorization upon checking department.');
+            //     } else {
+            //         throw new Error(checkError.response?.data?.message || 'Error upon checking department name.');
+            //     }
+            // }
 
-            const existingDepartmetnInSelectedTvrtka = sameDepartmentName.find(
-                department => department.companyId === companyId
-            );
+            // const existingDepartmetnInSelectedTvrtka = sameDepartmentName.find(
+            //     department => department.companyId === companyId
+            // );
 
-            if (existingDepartmetnInSelectedTvrtka) {
-                setErrorMessage(`Department with name '${departmentName}' already exists in the the following company.`);
-                toast.error(`Department with name '${departmentName}' already exists in the the following company.`);
-                setLoading(false);
-                return;
-            }
+            // if (existingDepartmetnInSelectedTvrtka) {
+            //     setErrorMessage(`Department with name '${departmentName}' already exists in the the following company.`);
+            //     toast.error(`Department with name '${departmentName}' already exists in the the following company.`);
+            //     setLoading(false);
+            //     return;
+            // }
 
             await axios.post('http://localhost:8080/api/skroflin/department/post', {
                 departmentName,
@@ -149,9 +155,10 @@ export function DepartmentAddForm({ authToken, onSuccess, onCancel }: Department
                                 id="company"
                                 value={companyId === null ? '' : companyId}
                                 onChange={(e) => setCompanyId(Number(e.target.value) || null)}
-                                className="shadow appearance-none border border-gray-300 rounded-md shadow-sm w-full py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                                 required
                             >
+                                <option value="" className="text-gray-500">Odaberite tvrtku</option>
                                 {company.map((company) => (
                                     <option key={company.id} value={company.id}>
                                         {company.companyName}

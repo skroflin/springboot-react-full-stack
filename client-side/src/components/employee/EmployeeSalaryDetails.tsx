@@ -87,17 +87,17 @@ export function EmployeeSalaryDetails({ selectedEmployee, salaryData, companyMap
             )}
 
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h4 className="text-lg font-semibold mb-3 text-gray-700">Podaci o djelatniku:</h4>
+                <h4 className="text-lg font-semibold mb-3 text-gray-700 border-b border-gray-200">Podaci o djelatniku:</h4>
                 <p className="text-md text-gray-700 mb-1 flex items-center">
-                    <FaUser className="mr-2 text-gray-500" />
+                    <FaUser className="mr-2 text-gray-600" />
                     <span className="font-semibold mr-1">Ime i Prezime:</span> {selectedEmployee.employeeName} {selectedEmployee.employeeSurname}
                 </p>
                 <p className="text-md text-gray-700 mb-1 flex items-center">
-                    <FaBriefcase className="mr-2 text-blue-500" />
+                    <FaBriefcase className="mr-2 text-gray-600" />
                     <span className="font-semibold mr-1">Plaća djelatnika:</span> {selectedEmployee.employeeSalary.toFixed(2)} EUR
                 </p>
                 <p className="text-md text-gray-700 mb-1 flex items-center">
-                    <FaBuilding className="mr-2 text-purple-500" />
+                    <FaBuilding className="mr-2 text-gray-600" />
                     <span className="font-semibold mr-1">Odjel:</span> {
                         selectedEmployee.departmentId !== null
                             ? departmentMap.get(selectedEmployee.departmentId) || 'Nije dodijeljeno'
@@ -105,7 +105,7 @@ export function EmployeeSalaryDetails({ selectedEmployee, salaryData, companyMap
                     }
                 </p>
                 <p className="text-md text-gray-700 mb-1 flex items-center">
-                    <FaCity className="mr-2 text-red-500" />
+                    <FaCity className="mr-2 text-gray-600" />
                     <span className="font-semibold mr-1">Tvrtka:</span> {
                         selectedEmployee.companyId !== null
                             ? companyMap.get(selectedEmployee.companyId) || 'Nije dodijeljeno'
@@ -114,14 +114,14 @@ export function EmployeeSalaryDetails({ selectedEmployee, salaryData, companyMap
                 </p>
                 {selectedEmployee.dateOfBirth && (
                     <p className="text-md text-gray-700 mb-1 flex items-center">
-                        <FaBirthdayCake className="mr-2 text-pink-500" />
+                        <FaBirthdayCake className="mr-2 text-gray-600" />
                         <span className="font-semibold mr-1">Datum rođenja:</span> {
                             format(new Date(selectedEmployee.dateOfBirth), 'dd.MM.yyyy', { locale: hr })
                         }
                     </p>
                 )}
                 <p className="text-md text-gray-700 mb-1 flex items-center">
-                    <FaCalendarAlt className="mr-2 text-gray-500" />
+                    <FaCalendarAlt className="mr-2 text-gray-600" />
                     <span className="font-semibold mr-1">Početak rada:</span> {
                         format(new Date(selectedEmployee.beginningOfWork), 'dd.MM.yyyy', { locale: hr })
                     }

@@ -24,7 +24,7 @@ export function EmployeeDeleteModel({ show, onClose, employee, authToken, onSucc
         setError(null);
         try {
             const headers = { Authorization: `Bearer ${authToken}` };
-            await axios.delete(`http://localhost:8080/api/skroflin/employee/delete?sifra=${employee.id}`, { headers });
+            await axios.delete(`http://localhost:8080/api/skroflin/employee/delete?id=${employee.id}`, { headers });
 
             toast.success(`Employee ${employee.employeeName} ${employee.employeeSurname} deleted!`);
             onSuccess();
@@ -42,7 +42,7 @@ export function EmployeeDeleteModel({ show, onClose, employee, authToken, onSucc
     return (
         <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-4">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">Potvrdite Trajno Brisanje</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">Potvrdite brisanje</h3>
                 <p className="text-gray-700 text-center mb-6">
                     Jeste li sigurni da želite trajno obrisati employeea <strong className="font-bold">{employee.employeeName} {employee.employeeSurname}</strong>?
                     Ova radnja je nepovratna i employee će biti potpuno uklonjen iz sustava.
@@ -70,7 +70,7 @@ export function EmployeeDeleteModel({ show, onClose, employee, authToken, onSucc
                         {loading ? (
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                         ) : (
-                            'Obriši Trajno'
+                            'Obriši'
                         )}
                     </button>
                 </div>

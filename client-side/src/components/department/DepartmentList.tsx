@@ -5,17 +5,19 @@ import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTra
 import type { DepartmentResponseDTO } from '../../types/Department';
 import type { CompanyResponseDTO } from '../../types/Company';
 import { DepartmentAddForm } from './DepartmentAddForm';
+import { DepartmentEditForm } from './DepartmentEditForm';
 
-interface Department  {
+interface Department {
     authToken: string;
 }
 
-export function DepartmentList({ authToken }: Department ) {
+export function DepartmentList({ authToken }: Department) {
     const [department, setDepartment] = useState<DepartmentResponseDTO[]>([]);
     const [company, setCompanyMap] = useState<Map<number, string>>(new Map());
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showAddDepartmentForm, setShowAddDepartmentForm] = useState<boolean>(false);
+    const [showEditDepartmentForm, setShowEditDepartmentForm] = useState<boolean>(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -72,11 +74,6 @@ export function DepartmentList({ authToken }: Department ) {
         }
     };
 
-    const handleEdit = (department: DepartmentResponseDTO) => {
-        toast.info(`Editing department: ${department.departmentName}`);
-        console.log('Edit department:', department);
-    };
-
     const handleShowAddDepartmentForm = () => {
         setShowAddDepartmentForm(true);
     };
@@ -85,6 +82,15 @@ export function DepartmentList({ authToken }: Department ) {
         setShowAddDepartmentForm(false);
         fetchData();
     };
+
+    const handleShowEditDepartmentForm = () => {
+        setShowEditDepartmentForm(true);
+    }
+
+    const handleHideEditDepartmentForm = () => {
+        setShowEditDepartmentForm(false);
+        fetchData();
+    }
 
     if (loading) {
         return (
@@ -131,7 +137,7 @@ export function DepartmentList({ authToken }: Department ) {
                             </h2>
                             {department.departmentLocation && (
                                 <p className="text-md text-gray-700 text-center mb-1 flex items-center justify-center">
-                                    <FaMapMarkerAlt className="mr-2 text-blue-600" /> Lokacija: {department.departmentLocation}
+                                    <FaMapMarkerAlt className="mr-2 text-gray-600" /> Lokacija: {department.departmentLocation}
                                 </p>
                             )}
                             <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${department.active ? 'text-green-600' : 'text-red-600'}`}>
@@ -140,7 +146,7 @@ export function DepartmentList({ authToken }: Department ) {
                             </p>
 
                             <p className="text-sm text-gray-600 text-center mb-1 flex items-center justify-center">
-                                <FaBuilding className="mr-2 text-orange-500" /> Tvrtka: {
+                                <FaBuilding className="mr-2 mr-2 text-gray-600" /> Tvrtka: {
                                     department.companyId !== null
                                         ? company.get(department.companyId) || 'N/A'
                                         : 'Nije dodijeljeno'
@@ -150,8 +156,7 @@ export function DepartmentList({ authToken }: Department ) {
 
                         <div className="flex justify-around mt-6 pt-4 border-t border-gray-100">
                             <button
-                                disabled
-                                onClick={() => handleEdit(department)}
+                                onClick={() => handleShowEditDepartmentForm()}
                                 className="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center px-3 py-1 rounded-md"
                                 title="Uredi department"
                             >
@@ -175,6 +180,16 @@ export function DepartmentList({ authToken }: Department ) {
                     authToken={authToken}
                     onSuccess={handleHideAddDepartmentForm}
                     onCancel={handleHideAddDepartmentForm}
+                />
+            )}
+
+            {showEditDepartmentForm && (
+                <DepartmentEditForm
+                    show={showEditDepartmentForm}
+                    department={department.length > 0 ? department[0] : null}
+                    authToken={authToken}
+                    onSuccess={handleHideEditDepartmentForm}
+                    onCancel={handleHideEditDepartmentForm}
                 />
             )}
         </div>

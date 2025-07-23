@@ -154,7 +154,7 @@ public class DepartmentService extends MainService {
     public List<DepartmentResponseDTO> getByName(String name) {
         try {
             List<Department> odjeli = session.createQuery(
-                    "select d from Department d left join fetch d.company"
+                    "select d from Department d left join fetch d.company "
                     + "where lower(d.departmentName) like lower(:name)",
                     Department.class)
                     .setParameter("name", "%" + name + "%")
@@ -170,7 +170,7 @@ public class DepartmentService extends MainService {
     public List<DepartmentResponseDTO> getByLocation(String location){
         try {
             List<Department> odjeli = session.createQuery(
-                    "select d from Department d left join fetch d.company"
+                    "select d from Department d left join fetch d.company "
                     + "where lower(d.departmentLocation) like lower(:location)",
                     Department.class)
                     .setParameter("location", "%" + location + "%")
