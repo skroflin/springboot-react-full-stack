@@ -19,7 +19,7 @@ interface CompanyAddFormProps {
     onCancel: () => void;
 }
 
-export function DepartmentAddForm({ authToken, onSuccess, onCancel }: CompanyAddFormProps) {
+export function EmployeeAddForm({ authToken, onSuccess, onCancel }: CompanyAddFormProps) {
     const [departmentName, setDepartmentName] = useState<string>('');
     const [departmentLocation, setDepartmentLocation] = useState<string>('');
     const [companyId, setCompanyId] = useState<number | null>(null);

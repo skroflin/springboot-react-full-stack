@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -11,7 +11,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UsersList } from './components/user/UserList';
 
-const App: React.FC = () => {
+export function App() {
   const [authToken, setAuthToken] = useState<string | null>(() => localStorage.getItem('jwtToken'));
   const [username, setUsername] = useState<string | null>(() => localStorage.getItem('username'));
   const location = useLocation();
@@ -123,5 +123,3 @@ const App: React.FC = () => {
     </>
   );
 };
-
-export default App;
