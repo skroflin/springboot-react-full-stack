@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { UserViewDetails } from "./UserViewDetails";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { UserSearch } from "./UserSearch";
+import { Footer } from "../misc/Footer";
 
 interface UsersListProps {
     authToken: string;
@@ -207,6 +208,7 @@ export function UsersList({ authToken }: UsersListProps) {
                     )}
                 </>
             )}
+            <Footer />
         </div>
     )
 }

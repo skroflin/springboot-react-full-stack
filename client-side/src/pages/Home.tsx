@@ -1,5 +1,7 @@
 import React from 'react';
+import { FaHandSpock } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { Footer } from '../components/misc/Footer';
 
 interface HomePageProps {
     authToken: string | null;
@@ -21,12 +23,8 @@ export function HomePage({ authToken, username }: HomePageProps) {
 
     return (
         <div className="w-full max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Dobrodošli{username ? `, ${username}` : ''}!</h1>
-            <p className="text-lg text-gray-700">
-                Ovo je početna stranica vaše aplikacije. Koristite navigacijsku traku
-                iznad za pregled djelatnika, odjela ili tvrtki. Aplikacija pruža mogućnosti jednostavnog i efikasnog upravljanja
-                djelatnicima, odjelima i tvrtkama.
-            </p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6 flex justify-start">Dobrodošli{username ? `, ${username}` : ''}! <FaHandSpock className="ml-6"/></h1>
+            <Footer />
         </div>
     );
 }

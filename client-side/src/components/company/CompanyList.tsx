@@ -7,6 +7,7 @@ import { CompanySearch } from './CompanySearch';
 import { CompanyAddForm } from './CompanyAddForm';
 import { CompanyDeactivationModel } from './CompanyDeactivationModel';
 import { CompanyViewDetails } from './CompanyViewDetails';
+import { Footer } from '../misc/Footer';
 
 interface CompanyListProps {
     authToken: string;
@@ -235,6 +236,7 @@ export function CompanyList({ authToken }: CompanyListProps) {
                 onSuccess={fetchCompanies}
                 authToken={authToken}
             />
+            <Footer />
         </div>
     );
 }

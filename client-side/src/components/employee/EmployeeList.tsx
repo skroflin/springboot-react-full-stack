@@ -9,6 +9,7 @@ import { EmployeeDeleteModel } from './EmployeeDeleteModel';
 import type { EmployeeResponseDTO, SalaryResponseDTO } from '../../types/Employee';
 import type { DepartmentResponseDTO } from '../../types/Department';
 import type { CompanyResponseDTO } from '../../types/Company';
+import { Footer } from '../misc/Footer';
 
 interface EmployeeListProps {
     authToken: string;
@@ -359,6 +360,7 @@ export function EmployeeList({ authToken }: EmployeeListProps) {
                 onSuccess={fetchData}
                 authToken={authToken}
             />
+            <Footer />
         </div>
     );
 }

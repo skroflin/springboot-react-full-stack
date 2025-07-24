@@ -6,6 +6,7 @@ import type { DepartmentResponseDTO } from '../../types/Department';
 import type { CompanyResponseDTO } from '../../types/Company';
 import { DepartmentAddForm } from './DepartmentAddForm';
 import { DepartmentEditForm } from './DepartmentEditForm';
+import { Footer } from '../misc/Footer';
 
 interface Department {
     authToken: string;
@@ -192,6 +193,7 @@ export function DepartmentList({ authToken }: Department) {
                     onCancel={handleHideEditDepartmentForm}
                 />
             )}
+            <Footer />
         </div>
     );
 }
