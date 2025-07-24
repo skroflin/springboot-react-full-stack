@@ -146,8 +146,8 @@ export function DepartmentEditForm({ authToken, onSuccess, onCancel, department 
 
     return (
         <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Dodaj novi odjel</h2>
+            <div key={departmentData?.id} className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Uredi odjel "{departmentData?.departmentName}"</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="departmentName" className="block text-sm font-medium text-gray-700">Naziv odjela:</label>

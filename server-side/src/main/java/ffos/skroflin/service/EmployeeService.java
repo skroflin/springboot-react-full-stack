@@ -1,5 +1,6 @@
 package ffos.skroflin.service;
 
+import com.github.javafaker.Faker;
 import ffos.skroflin.model.Employee;
 import ffos.skroflin.model.Department;
 import ffos.skroflin.model.Company;
@@ -10,14 +11,22 @@ import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeService extends MainService {
 
+    private final Faker f;
+
+    public EmployeeService(Faker f) {
+        this.f = f;
+    }
+    
     @Transactional
     private EmployeeResponseDTO convertToResponseDTO(Employee employee) {
         if (employee == null) {
@@ -231,6 +240,46 @@ public class EmployeeService extends MainService {
         } catch (Exception e) {
             throw new RuntimeException("Error upon fetching all employees: " + e.getMessage(), e);
         }
+    }
+    
+    public List<EmployeeResponseDTO> massiveInsert(EmployeeDTO o, int number){
+        List<EmployeeResponseDTO> insertedEmployees = new ArrayList<>();
+        try {
+            for (int i = 0; i < number; i++) {
+                Employee newEmployee = new Employee();
+                String newEmployeeFirstName = f.name().firstName();
+                String newEmployeeLastName = f.name().lastName();
+                BigDecimal newEmployeeSalary = BigDecimal.valueOf(f.number().randomDouble(2, 1500, 2000));
+                Date newEmployeeBirtOfBirth = f.date().birthday();
+                Date newEmployeeNoticeDate = f.date().future(1, TimeUnit.DAYS);
+                boolean newEmployeeEmployment = f.bool().bool();
+                int maxNumOfDep = 5;
+                int employeeDep = f.number().numberBetween(1, maxNumOfDep);
+                Department newEmployeeDep = session.get(Department.class, employeeDep);
+                int maxNumOfComp = 26;
+                int employeeComp = f.number().numberBetween(1, maxNumOfComp);
+                Company newEmployeeComp = session.get(Company.class, employeeComp);
+                
+                newEmployee.setEmployeeName(newEmployeeLastName);
+                newEmployee.setEmployeeSurname(newEmployeeLastName);
+                newEmployee.setEmployeeSalary(newEmployeeSalary);
+                newEmployee.setDateOfBirth(newEmployeeBirtOfBirth);
+                newEmployee.setBeginningOfWork(newEmployeeNoticeDate);
+                newEmployee.setEmployeed(newEmployeeEmployment);
+                newEmployee.setDepartment(newEmployeeDep);
+                newEmployee.setCompany(newEmployeeComp);
+                
+                session.beginTransaction();
+                session.persist(newEmployee);
+                session.flush();
+                session.refresh(newEmployee);
+                session.getTransaction().commit();
+                insertedEmployees.add(convertToResponseDTO(newEmployee));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error upon multiple employee insertion" + " " + e.getMessage(), e);
+        }
+        return insertedEmployees;
     }
 
     @Transactional

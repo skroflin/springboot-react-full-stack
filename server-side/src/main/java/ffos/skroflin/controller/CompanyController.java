@@ -205,4 +205,30 @@ public class CompanyController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
+    
+    @PostMapping("/massiveInsert")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<CompanyResponseDTO>> massiveInsert(
+            @RequestParam int number,
+            @RequestBody(required = true) CompanyDTO dto
+    ){
+        try {
+            if (number < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Number of n companies musn't be lesser than 0");
+            }
+            if (dto == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Body of the request template musn't be null");
+            }
+            List<CompanyResponseDTO> insertedCompanies = companyService.massiveInsert(dto, number);
+            return new ResponseEntity<>(insertedCompanies, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon inserting" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
 }

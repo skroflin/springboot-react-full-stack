@@ -1,7 +1,9 @@
 package ffos.skroflin.security;
 
+import com.github.javafaker.Faker;
 import ffos.skroflin.service.UsersDetailsService;
 import java.util.Arrays;
+import java.util.Locale;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -36,6 +38,11 @@ public class SecurityConfig {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
 
+    @Bean
+    public Faker faker(){
+        return new Faker(Locale.of("hr", "HR"));
+    }
+    
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();

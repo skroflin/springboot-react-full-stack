@@ -4,12 +4,15 @@
  */
 package ffos.skroflin.service;
 
+import com.github.javafaker.Faker;
 import ffos.skroflin.model.Company;
 import ffos.skroflin.model.dto.company.CompanyDTO;
 import ffos.skroflin.model.dto.company.CompanyResponseDTO;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CompanyService extends MainService {
 
+    private final Faker f;
+
+    public CompanyService(Faker f) {
+        this.f = f;
+    }
+    
     private CompanyResponseDTO convertToResponseDTO(Company company) {
 
         return new CompanyResponseDTO(
@@ -142,7 +151,7 @@ public class CompanyService extends MainService {
             throw new RuntimeException("Error upon searching for companies: " + e.getMessage(), e);
         }
     }
-    
+
     public List<CompanyResponseDTO> getByLocation(String location) {
         try {
             List<Company> tvrtke = session.createQuery(
@@ -157,5 +166,40 @@ public class CompanyService extends MainService {
         } catch (Exception e) {
             throw new RuntimeException("Error upon searching for companies: " + e.getMessage(), e);
         }
+    }
+
+    public List<CompanyResponseDTO> massiveInsert(CompanyDTO o, int number) {
+        List<CompanyResponseDTO> insertedCompanies = new ArrayList<>();
+        try {
+            for (int i = 0; i < number; i++) {
+                Company newCompany = new Company();
+                String newCompanyName = f.company().name();
+                String newCompanyLocation = f.address().cityName();
+                boolean newCompanyBankruptcyStatus = f.bool().bool();
+                
+                Long nameCount = session.createQuery(
+                        "select count(*) from Company c where c.companyName = :name", Long.class)
+                        .setParameter("name", o.companyName())
+                        .getSingleResult();
+
+                if (nameCount > 0) {
+                    newCompanyName = f.company().name() + " " + "-" + System.currentTimeMillis();
+                }
+
+                newCompany.setCompanyName(newCompanyName);
+                newCompany.setCompanyLocation(newCompanyLocation);
+                newCompany.setBankruptcy(newCompanyBankruptcyStatus);
+                
+                session.beginTransaction();
+                session.persist(newCompany);
+                session.flush();
+                session.refresh(newCompany);
+                session.getTransaction().commit();
+                insertedCompanies.add(convertToResponseDTO(newCompany));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error upon creating a new company" + " " + e.getMessage(), e);
+        }
+        return insertedCompanies;
     }
 }
