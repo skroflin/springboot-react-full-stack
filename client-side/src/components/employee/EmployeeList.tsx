@@ -41,7 +41,7 @@ export function EmployeeList({ authToken }: EmployeeListProps) {
     const [employeeForDeletion, setEmployeeForDeletion] = useState<EmployeeResponseDTO | null>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [itemsPerPage] = useState<number>(4);
+    const [itemsPerPage] = useState<number>(6);
 
     const navigate = useNavigate();
 
@@ -231,7 +231,7 @@ export function EmployeeList({ authToken }: EmployeeListProps) {
                 </div>
                 <div className="w-full md:w-1/2 pl-0 md:pl-4 bg-white p-6 rounded-lg shadow-md md:border-l border-gray-200">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Detalji plaće</h2>
-                    <p className="text-gray-600 italic">Odaberite djelatnika s popisa da vidite detalje plaće i grafikon.</p>
+                    <p className="text-m text-gray-600 italic">Odaberite djelatnika s popisa da vidite detalje plaće i grafikon.</p>
                 </div>
             </div>
         );
@@ -258,7 +258,7 @@ export function EmployeeList({ authToken }: EmployeeListProps) {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 border-t border-b border-gray-200 py-6">
                     {currentemployees.map((employee) => (
                         <div
                             key={employee.id}

@@ -31,7 +31,7 @@ export function EmployeeSalaryDetails({ selectedEmployee, salaryData, companyMap
     return (
         <div className="bg-white p-4 rounded-lg">
             <h3 className="text-xl font-semibold mb-4 text-gray-700">
-                Plaća za: {selectedEmployee.employeeName} {selectedEmployee.employeeSurname}
+                Plaća za: <span className="italic">{selectedEmployee.employeeName} {selectedEmployee.employeeSurname}</span>
             </h3>
             {salaryData ? (
                 <div>

@@ -319,7 +319,7 @@ public class EmployeeController {
     }
     
     @PostMapping("/massiveInsert")
-    @PreAuthorize("hasRole('ADMIN)")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<EmployeeResponseDTO>> massiveInsert(
             @RequestParam int number,
             @RequestBody(required = true) EmployeeDTO dto
