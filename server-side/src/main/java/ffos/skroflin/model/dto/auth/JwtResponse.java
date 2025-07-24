@@ -4,20 +4,24 @@
  */
 package ffos.skroflin.model.dto.auth;
 
+import ffos.skroflin.model.enums.Role;
+
 /**
  *
  * @author svenk
  */
 public class JwtResponse {
     private String jwt;
-    private String korisnickoIme;
+    private String userName;
+    private Role role;
 
     public JwtResponse() {
     }
 
-    public JwtResponse(String jwt, String korisnickoIme) {
+    public JwtResponse(String jwt, String userName, Role role) {
         this.jwt = jwt;
-        this.korisnickoIme = korisnickoIme;
+        this.userName = userName;
+        this.role = role;
     }
 
     public String getJwt() {
@@ -28,12 +32,19 @@ public class JwtResponse {
         this.jwt = jwt;
     }
 
-    public String getKorisnickoIme() {
-        return korisnickoIme;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setKorisnickoIme(String korisnickoIme) {
-        this.korisnickoIme = korisnickoIme;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
-    
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }

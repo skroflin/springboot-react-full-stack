@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
-import { HomePage } from './pages/HomePage';
+import { HomePage } from './pages/Home';
 import { EmployeeList } from './components/employee/EmployeeList';
 import { DepartmentList } from './components/department/DepartmentList';
 import { CompanyList } from './components/company/CompanyList';
@@ -12,8 +12,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { UsersList } from './components/user/UserList';
 
 const App: React.FC = () => {
-  const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('jwtToken'));
-  const [username, setUsername] = useState<string | null>(localStorage.getItem('username'));
+  const [authToken, setAuthToken] = useState<string | null>(() => localStorage.getItem('jwtToken'));
+  const [username, setUsername] = useState<string | null>(() => localStorage.getItem('username'));
   const location = useLocation();
   const isAuthenticated = !!authToken;
 

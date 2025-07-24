@@ -9,12 +9,14 @@ import ffos.skroflin.model.dto.user.UserDTO;
 import ffos.skroflin.model.dto.user.UserResponseDTO;
 import ffos.skroflin.model.dto.user.UserSignUpDTO;
 import ffos.skroflin.model.dto.user.UserRegistrationDTO;
+import ffos.skroflin.model.enums.Role;
 import ffos.skroflin.security.JwtTokenUtil;
 import ffos.skroflin.service.UserService;
 import ffos.skroflin.service.UsersDetailsService;
 import jakarta.persistence.NoResultException;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,23 +56,23 @@ public class UserController {
 
     @GetMapping("/get")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDTO>> getAll(){
+    public ResponseEntity<List<UserResponseDTO>> getAll() {
         try {
             return new ResponseEntity<>(userService.getAll(), HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, 
-                    "Error upon fetching" + " " + e.getMessage(), 
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon fetching" + " " + e.getMessage(),
                     e
             );
         }
     }
-    
+
     @GetMapping("/getById")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> getById(
             @RequestParam int id
-    ){
+    ) {
         try {
             if (id <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lessr than 0!");
@@ -84,19 +86,19 @@ public class UserController {
             throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, 
-                    "Error upon fetching" + " " + e.getMessage(), 
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon fetching" + " " + e.getMessage(),
                     e
             );
         }
     }
-    
+
     @PutMapping("/put")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> put(
             @RequestParam int id,
             @RequestBody(required = true) UserDTO dto
-    ){
+    ) {
         try {
             if (id <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Šifra ne smije biti manja od 0");
@@ -104,7 +106,7 @@ public class UserController {
             if (dto.email() == null || dto.email().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User email is necessary!");
             }
-            if (dto.userName()== null || dto.userName().isEmpty()) {
+            if (dto.userName() == null || dto.userName().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is necessary!");
             }
             UserResponseDTO azuriraniKorisnik = userService.put(dto, id);
@@ -121,36 +123,36 @@ public class UserController {
             );
         }
     }
-    
+
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
             @RequestParam int id
-    ){
+    ) {
         try {
-            if (id <= 0){
+            if (id <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id musn't be lesser than 0!");
             }
             userService.delete(id);
             return new ResponseEntity<>(HttpStatus.OK);
-                } catch (NoResultException e) {
+        } catch (NoResultException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error upon deletion" + " " + e.getMessage(), 
+                    "Error upon deletion" + " " + e.getMessage(),
                     e
             );
         }
     }
-    
+
     @GetMapping("/getByName")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getByName(
             @RequestParam String name
-    ){
+    ) {
         try {
             if (name == null || name.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is necessary");
@@ -164,18 +166,18 @@ public class UserController {
             throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, 
-                    "Greška prilikom dohvaćanja" + " " + e.getMessage(), 
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Greška prilikom dohvaćanja" + " " + e.getMessage(),
                     e
             );
         }
     }
-    
+
     @GetMapping("/getActiveUsers")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getActiveUsers(
             @RequestParam boolean active
-    ){
+    ) {
         try {
             List<UserResponseDTO> users = userService.getActiveUsers(active);
             if (users == null || users.isEmpty()) {
@@ -186,13 +188,13 @@ public class UserController {
             throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, 
-                    "Error upon fetching" + " " + e.getMessage(), 
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon fetching" + " " + e.getMessage(),
                     e
             );
         }
     }
-    
+
     @PostMapping("/userRegistration")
     public ResponseEntity<UserResponseDTO> userRegistration(
             @Valid @RequestBody(required = true) UserRegistrationDTO dto
@@ -216,7 +218,23 @@ public class UserController {
         }
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(dto.userName());
+        
+        Role userRole = null;
+        if (userDetails.getAuthorities() != null && !userDetails.getAuthorities().isEmpty()) {
+            String authorityString = userDetails.getAuthorities().iterator().next().getAuthority();
+            String roleName = authorityString.replaceFirst("ROLE_", "").toLowerCase(Locale.ROOT);
+            try {
+                userRole = Role.valueOf(roleName);
+            } catch (Exception e) {
+                throw new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Error upon fetching role" + " " + e.getMessage(),
+                        e
+                );
+            }
+        }
+        
         final String jwt = jwtTokenUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername()));
+        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userRole));
     }
 }
