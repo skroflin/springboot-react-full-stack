@@ -6,7 +6,7 @@ import { HomePage } from './pages/Home';
 import { EmployeeList } from './components/employee/EmployeeList';
 import { DepartmentList } from './components/department/DepartmentList';
 import { CompanyList } from './components/company/CompanyList';
-import Navbar from './components/Navbar';
+import Navbar from './components/misc/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UsersList } from './components/user/UserList';
