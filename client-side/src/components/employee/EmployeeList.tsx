@@ -41,7 +41,7 @@ export function EmployeeList({ authToken }: EmployeeListProps) {
     const [employeeForDeletion, setEmployeeForDeletion] = useState<EmployeeResponseDTO | null>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [itemsPerPage] = useState<number>(6);
+    const [itemsPerPage] = useState<number>(8);
 
     const navigate = useNavigate();
 
