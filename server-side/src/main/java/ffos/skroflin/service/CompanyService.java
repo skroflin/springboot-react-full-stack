@@ -198,7 +198,7 @@ public class CompanyService extends MainService {
                 insertedCompanies.add(convertToResponseDTO(newCompany));
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error upon creating a new company" + " " + e.getMessage(), e);
+            throw new RuntimeException("Error upon multiple company insertion" + " " + e.getMessage(), e);
         }
         return insertedCompanies;
     }

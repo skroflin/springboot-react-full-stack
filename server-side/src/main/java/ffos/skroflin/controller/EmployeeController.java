@@ -317,4 +317,30 @@ public class EmployeeController {
             );
         }
     }
+    
+    @PostMapping("/massiveInsert")
+    @PreAuthorize("hasRole('ADMIN)")
+    public ResponseEntity<List<EmployeeResponseDTO>> massiveInsert(
+            @RequestParam int number,
+            @RequestBody(required = true) EmployeeDTO dto
+    ){
+        try {
+            if (number < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Number of n employees musn't be lesser than 0");
+            }
+            if (dto == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Body of the request template musn't be null");
+            }
+            List<EmployeeResponseDTO> insertedEmployees = employeeService.massiveInsert(dto, number);
+            return new ResponseEntity<>(insertedEmployees, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon inserting" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
 }
