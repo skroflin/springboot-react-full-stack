@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FaHandSpock } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/misc/Footer';
@@ -8,17 +8,20 @@ import axios from 'axios';
 interface HomePageProps {
     authToken: string | null;
     username: string | null;
+    role: string | null;
 }
 
-export function HomePage({ authToken, username }: HomePageProps) {
+export function HomePage({ authToken, username, role }: HomePageProps) {
     const navigate = useNavigate();
-    const [numOfCompanies, setNumOfCompanies] = useState<{ numOfCompanies: number; } | null>(null);
+    const [numOfCompanies, setNumOfCompanies] = useState<number | null>(null);
+    const [numOfBankruptCompanies, setNumOfBankruptCompanies] = useState<number | null>(null);
+    const [numOfNonBankruptCompanies, setNumOfNonBankruptCompanies] = useState<number | null>(null);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
-        if (!authToken) {
+    useEffect(() => {
+        if (!authToken && !role) {
             navigate('/login');
         }
     }, [authToken, navigate]);
@@ -26,6 +29,9 @@ export function HomePage({ authToken, username }: HomePageProps) {
     const fetchCompanyData = useCallback(async () => {
         setLoading(true);
         setError(null);
+        setNumOfCompanies(null);
+        setNumOfBankruptCompanies(null);
+        setNumOfNonBankruptCompanies(null);
 
         try {
             const headers = { 'Authorization': `Bearer ${authToken}` };
@@ -36,8 +42,8 @@ export function HomePage({ authToken, username }: HomePageProps) {
             ]);
 
             setNumOfCompanies(companyCountResponse.data);
-            // setNumOfBankruptCompanies(bankruptCountResponse.data);
-            // setNumOfNonBankruptCompanies(nonBankruptCountResponse.data);
+            setNumOfBankruptCompanies(bankruptCountResponse.data);
+            setNumOfNonBankruptCompanies(nonBankruptCountResponse.data);
 
         } catch (err: any) {
             if (axios.isAxiosError(err)) {
@@ -56,7 +62,9 @@ export function HomePage({ authToken, username }: HomePageProps) {
     }, [authToken]);
 
     useEffect(() => {
-        fetchCompanyData();
+        if (authToken) {
+            fetchCompanyData();
+        }
     }, [fetchCompanyData])
 
     if (loading) {
@@ -76,6 +84,32 @@ export function HomePage({ authToken, username }: HomePageProps) {
     return (
         <div className="w-full max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-800 mb-6 flex justify-start">Dobrodošli{username ? `, ${username}` : ''}! <FaHandSpock className="ml-6" /></h1>
+            <div className="flex justify-center items-center mt-8 space-x-2 border-t border-gray-200 py-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-200 py-2">Broj tvrtki</h2>
+                        <p className="text-3xl font-bold text-gray-700">{numOfCompanies}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-200 py-2">Broj tvrtki u stječaju</h2>
+                        <p className="text-3xl font-bold text-gray-700">
+                            <span className="text-gray-400">
+                                {numOfBankruptCompanies}
+                            </span>
+                            /{numOfCompanies}
+                        </p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-200 py-2">Broj tvrtki koje nisu u stječaju</h2>
+                        <p className="text-3xl font-bold text-gray-700">
+                            <span className="text-gray-500">
+                                {numOfNonBankruptCompanies}
+                            </span>
+                            /{numOfCompanies}
+                        </p>
+                    </div>
+                </div>
+            </div>
             <Footer />
         </div>
     );

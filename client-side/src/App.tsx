@@ -71,7 +71,7 @@ export function App() {
                   path="/home"
                   element={
                     isAuthenticated && role === 'admin'
-                      ? <HomePage authToken={authToken} username={username} />
+                      ? <HomePage authToken={authToken} username={username} role={role}/>
                       : <Navigate to="/login" replace />
                   }
                 />
