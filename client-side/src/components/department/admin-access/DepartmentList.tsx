@@ -141,9 +141,9 @@ export function DepartmentList({ authToken }: Department) {
                                     <FaMapMarkerAlt className="mr-2 text-gray-600" /> Lokacija: {department.departmentLocation}
                                 </p>
                             )}
-                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${department.active ? 'text-green-600' : 'text-red-600'}`}>
-                                {department.active ? <FaCheckCircle className="mr-2" /> : <FaTimesCircle className="mr-2" />}
-                                {department.active ? 'Aktivan' : 'Neaktivan'}
+                            <p className={`text-md text-gray-700 text-center mb-1 flex items-center justify-center ${department.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                                {department.isActive ? <FaCheckCircle className="mr-2" /> : <FaTimesCircle className="mr-2" />}
+                                {department.isActive ? 'Aktivan' : 'Neaktivan'}
                             </p>
 
                             <p className="text-sm text-gray-600 text-center mb-1 flex items-center justify-center">

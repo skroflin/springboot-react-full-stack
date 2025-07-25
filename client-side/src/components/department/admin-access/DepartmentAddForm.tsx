@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import type { DepartmentResponseDTO } from '../../../types/Department';
 
 interface CompanyDropdownItem {
     id: number;
@@ -19,6 +18,7 @@ export function DepartmentAddForm({ authToken, onSuccess, onCancel }: Department
     const [departmentLocation, setDepartmentLocation] = useState<string>('');
     const [companyId, setCompanyId] = useState<number | null>(null);
     const [company, setCompany] = useState<CompanyDropdownItem[]>([]);
+    const [active, setActive] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [fetchingcompany, setFetchingCompany] = useState<boolean>(true);
@@ -65,36 +65,26 @@ export function DepartmentAddForm({ authToken, onSuccess, onCancel }: Department
                 'Content-Type': 'application/json',
             };
 
-            let sameDepartmentName: DepartmentResponseDTO[] = [];
             try {
-                const checkResponse = await axios.get<DepartmentResponseDTO[]>(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
-                sameDepartmentName = checkResponse.data;
-                console.log("Same department name:", sameDepartmentName);
+                const checkResponse = await axios.get(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
+
+                if (checkResponse.data && checkResponse.data.length > 0) {
+                    setErrorMessage(`Department with the name "${departmentName}" already exists.`);
+                    toast.error(`Department with the name "${departmentName}" already exists.`);
+                    setLoading(false);
+                    return;
+                }
             } catch (checkError: any) {
-                if (axios.isAxiosError(checkError) && checkError.response?.status === 404) {
-                } else if (axios.isAxiosError(checkError) && checkError.response?.status === 401) {
-                    throw new Error(checkError.response?.data?.message || 'Unsuccesful authorization upon checking department.');
-                } else {
+                if (axios.isAxiosError(checkError) && checkError.response?.status !== 404) {
                     throw new Error(checkError.response?.data?.message || 'Error upon checking department name.');
                 }
-            }
-
-            const existingDepartmetnInSelectedTvrtka = sameDepartmentName.find(
-                department => department.companyId === companyId
-            );
-
-            if (existingDepartmetnInSelectedTvrtka) {
-                setErrorMessage(`Department with name '${departmentName}' already exists in the the following company.`);
-                toast.error(`Department with name '${departmentName}' already exists in the the following company.`);
-                setLoading(false);
-                return;
             }
 
             await axios.post('http://localhost:8080/api/skroflin/department/post', {
                 departmentName,
                 departmentLocation,
                 companyId,
-                active: true,
+                active,
             }, { headers });
 
             toast.success('Department succefully added!');
@@ -139,6 +129,18 @@ export function DepartmentAddForm({ authToken, onSuccess, onCancel }: Department
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         />
+                    </div>
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="active"
+                            checked={active}
+                            onChange={(e) => setActive(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="active" className="ml-2 block text-sm text-gray-900">
+                            Aktivan
+                        </label>
                     </div>
                     <div>
                         <label htmlFor="company" className="block text-sm font-medium text-gray-700">Company:</label>

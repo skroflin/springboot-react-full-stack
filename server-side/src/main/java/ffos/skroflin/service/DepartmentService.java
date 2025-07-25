@@ -182,4 +182,27 @@ public class DepartmentService extends MainService {
             throw new RuntimeException("Error upon searching for departments: " + e.getMessage(), e);
         }
     }
+    
+    public Long getNumOfDepartments(){
+        Long department = session.createQuery(
+                "select count(d.id) from Department d", Long.class)
+                .getSingleResult();
+        return department;
+    }
+
+    public Long getNumOfInactiveDepartments() {
+        Long department = session.createQuery(
+                "select count(d.id) from Department d "
+                + "where d.active = false", Long.class)
+                .getSingleResult();
+        return department;
+    }
+    
+    public Long getNumOfActiveDepartments(){
+        Long department = session.createQuery(
+                "select count(d.id) from Department d "
+                        + "where d.active = true", Long.class)
+                .getSingleResult();
+        return department;
+    }
 }

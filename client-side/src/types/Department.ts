@@ -2,6 +2,6 @@ export interface DepartmentResponseDTO {
     id: number,
     departmentName: string,
     departmentLocation: string,
-    active: boolean,
+    isActive: boolean,
     companyId: number | null
 }
