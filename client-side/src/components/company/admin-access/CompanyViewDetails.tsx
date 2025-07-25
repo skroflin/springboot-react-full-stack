@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { CompanyResponseDTO } from "../../types/Company";
+import type { CompanyResponseDTO } from "../../../types/Company";
 import axios from "axios";
 import { toast } from "react-toastify";
 

@@ -1,37 +1,31 @@
-import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { HomePage } from './pages/Home';
-import { EmployeeList } from './components/employee/EmployeeList';
-import { DepartmentList } from './components/department/DepartmentList';
-import { CompanyList } from './components/company/CompanyList';
-import Navbar from './components/misc/Navbar';
+import { EmployeeList } from './components/employee/admin-access/EmployeeList';
+import { DepartmentList } from './components/department/admin-access/DepartmentList';
+import { CompanyList } from './components/company/admin-access/CompanyList';
+import Navbar from './components/misc/AdminNavbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UsersList } from './components/user/UserList';
+import { useAuth } from './components/auth/AuthProvider';
 
 export function App() {
-  const [authToken, setAuthToken] = useState<string | null>(() => localStorage.getItem('jwtToken'));
-  const [username, setUsername] = useState<string | null>(() => localStorage.getItem('username'));
+  const { authToken, setAuthToken, role, setRole, username, setUsername } = useAuth();
   const location = useLocation();
   const isAuthenticated = !!authToken;
-
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isAdmin = role === 'admin' && location.pathname === '/home-page';
 
-  const handleLoginSuccess = (token: string, userIdentifier: string) => {
-    setAuthToken(token);
-    setUsername(userIdentifier);
-    localStorage.setItem('jwtToken', token);
-    localStorage.setItem('username', userIdentifier);
-  };
-
-  const handleLogout = () => {
+  function handleLogout(): void {
     setAuthToken(null);
     setUsername(null);
+    setRole(null);
     localStorage.removeItem('jwtToken');
     localStorage.removeItem('username');
-  };
+    localStorage.removeItem('role');
+  }
 
   return (
     <>
@@ -51,7 +45,7 @@ export function App() {
         <Routes>
           <Route
             path="/login"
-            element={<Login onLoginSuccess={handleLoginSuccess} />}
+            element={<Login />}
           />
           <Route
             path="/register"
@@ -67,7 +61,7 @@ export function App() {
               <Routes>
                 <Route
                   path="/login"
-                  element={<Navigate to="/home" replace />}
+                  element={isAdmin ? (<Navigate to="/home" replace />) : (<Navigate to="/home" replace />)}
                 />
                 <Route
                   path="/register"
@@ -76,39 +70,39 @@ export function App() {
                 <Route
                   path="/home"
                   element={
-                    isAuthenticated
+                    isAuthenticated && role === 'admin'
                       ? <HomePage authToken={authToken} username={username} />
                       : <Navigate to="/login" replace />
                   }
                 />
                 <Route
-                  path="/djelatnici"
+                  path="/djelatnici-admin"
                   element={
-                    isAuthenticated
+                    isAuthenticated && role === 'admin'
                       ? <EmployeeList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }
                 />
                 <Route
-                  path="/odjeli"
+                  path="/odjeli-admin"
                   element={
-                    isAuthenticated
+                    isAuthenticated && role === 'admin'
                       ? <DepartmentList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }
                 />
                 <Route
-                  path="/tvrtke"
+                  path="/tvrtke-admin"
                   element={
-                    isAuthenticated
+                    isAuthenticated && role === 'admin'
                       ? <CompanyList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }
                 />
                 <Route
-                  path="/korisnici"
+                  path="/korisnici-admin"
                   element={
-                    isAuthenticated
+                    isAuthenticated && role === 'admin'
                       ? <UsersList authToken={authToken!} />
                       : <Navigate to="/login" replace />
                   }

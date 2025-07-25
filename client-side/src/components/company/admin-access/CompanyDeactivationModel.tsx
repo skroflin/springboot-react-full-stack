@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import type { CompanyResponseDTO } from '../../types/Company';
+import type { CompanyResponseDTO } from '../../../types/Company';
 
 interface CompanyDeactivationModelProps {
     show: boolean;

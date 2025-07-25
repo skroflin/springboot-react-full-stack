@@ -3,7 +3,7 @@ import { FaUser, FaBriefcase, FaBuilding, FaBirthdayCake, FaCalendarAlt, FaCheck
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
 
-import type { EmployeeResponseDTO } from '../../types/Employee';
+import type { EmployeeResponseDTO } from '../../../types/Employee';
 
 interface EmployeeSalaryDetailsProps {
     selectedEmployee: EmployeeResponseDTO | null;

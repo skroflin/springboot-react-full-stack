@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import type { CompanyResponseDTO } from '../../types/Company';
+import type { CompanyResponseDTO } from '../../../types/Company';
 import { FaArrowLeft, FaArrowRight, FaPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { CompanySearch } from './CompanySearch';
 import { CompanyAddForm } from './CompanyAddForm';
 import { CompanyDeactivationModel } from './CompanyDeactivationModel';
 import { CompanyViewDetails } from './CompanyViewDetails';
-import { Footer } from '../misc/Footer';
+import { Footer } from '../../misc/Footer';
 
 interface CompanyListProps {
     authToken: string;

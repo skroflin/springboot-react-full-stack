@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from 'react-toastify'
-import type { EmployeeResponseDTO } from '../../types/Employee';
+import type { EmployeeResponseDTO } from '../../../types/Employee';
 
 interface EmployeeDeactivationModelProps {
     show: boolean;

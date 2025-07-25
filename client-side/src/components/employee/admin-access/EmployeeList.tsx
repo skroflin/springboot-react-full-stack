@@ -6,10 +6,10 @@ import { FaUser, FaBuilding, FaEdit, FaTrash, FaCity, FaArrowLeft, FaArrowRight,
 import { EmployeeSalaryDetails } from './EmployeeSalaryDetails';
 import { EmployeeDeactivationModel } from './EmployeeDeactivationModel';
 import { EmployeeDeleteModel } from './EmployeeDeleteModel';
-import type { EmployeeResponseDTO, SalaryResponseDTO } from '../../types/Employee';
-import type { DepartmentResponseDTO } from '../../types/Department';
-import type { CompanyResponseDTO } from '../../types/Company';
-import { Footer } from '../misc/Footer';
+import type { EmployeeResponseDTO, SalaryResponseDTO } from '../../../types/Employee';
+import type { DepartmentResponseDTO } from '../../../types/Department';
+import type { CompanyResponseDTO } from '../../../types/Company';
+import { Footer } from '../../misc/Footer';
 
 interface EmployeeListProps {
     authToken: string;

@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useAuth } from '../components/auth/AuthProvider';
 
-interface LoginProps {
-    onLoginSuccess: (token: string, username: string) => void;
-}
 
-export function Login({ onLoginSuccess }: LoginProps) {
+export function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const { setAuthToken, setUsername: setAuthUsername, setRole } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -23,10 +22,22 @@ export function Login({ onLoginSuccess }: LoginProps) {
             const data = response.data;
             const jwtToken = data.jwt;
             const loggedInUsername = data.userName ?? '';
+            const userRole = data.role ?? '';
 
-            onLoginSuccess(jwtToken, loggedInUsername);
+            setAuthToken(jwtToken);
+            setAuthUsername(loggedInUsername);
+            setRole(userRole);
+
+            localStorage.setItem('jwtToken', jwtToken);
+            localStorage.setItem('username', loggedInUsername);
+            localStorage.setItem('role', userRole);
+
             toast.success('Login successful!');
-            navigate('/home');
+            if (userRole === 'admin') {
+                navigate('/home');
+            } else (userRole === 'user');{
+                navigate('/home');
+            }
 
         } catch (err: any) {
             console.error('Error upon logging in:', err);

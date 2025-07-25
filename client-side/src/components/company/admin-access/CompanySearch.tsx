@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaSearch } from 'react-icons/fa';
 
-import type { CompanyResponseDTO } from '../../types/Company';
+import type { CompanyResponseDTO } from '../../../types/Company';
 
 interface CompanySearchProps {
     authToken: string;

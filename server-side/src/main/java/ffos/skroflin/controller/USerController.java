@@ -238,3 +238,4 @@ public class UserController {
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userRole));
     }
 }
+    

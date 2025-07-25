@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaBuilding, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-import type { DepartmentResponseDTO } from '../../types/Department';
-import type { CompanyResponseDTO } from '../../types/Company';
+import type { DepartmentResponseDTO } from '../../../types/Department';
+import type { CompanyResponseDTO } from '../../../types/Company';
 import { DepartmentAddForm } from './DepartmentAddForm';
 import { DepartmentEditForm } from './DepartmentEditForm';
-import { Footer } from '../misc/Footer';
+import { Footer } from '../../misc/Footer';
 
 interface Department {
     authToken: string;
