@@ -201,4 +201,55 @@ public class DepartmentController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error upon fetching" + " " + e.getMessage(), e);
         }
     }
+    
+    @GetMapping("/getNumOfDepartments")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfDepartments(){
+        try {
+            Long department = departmentService.getNumOfDepartments();
+            return new ResponseEntity<>(department, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
+    
+    @GetMapping("/getNumOfActiveDepartments")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfActiveDepartments(){
+        try {
+            Long department = departmentService.getNumOfActiveDepartments();
+            return new ResponseEntity<>(department, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
+    
+    @GetMapping("/getNumOfInactiveDepartments")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfInactiveDepartments(){
+        try {
+            Long department = departmentService.getNumOfInactiveDepartments();
+            return new ResponseEntity<>(department, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
 }

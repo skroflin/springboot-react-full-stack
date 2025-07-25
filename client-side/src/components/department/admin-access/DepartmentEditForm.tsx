@@ -27,7 +27,7 @@ export function DepartmentEditForm({ authToken, onSuccess, onCancel, department 
     const [departmentData, setDepartmentData] = useState<DepartmentResponseDTO | null>(null);
 
     const fetchDepartmentData = useCallback(async () => {
-        if(!department?.id) {
+        if (!department?.id) {
             setDepartmentData(null);
             setLoading(false);
             return;
@@ -35,7 +35,7 @@ export function DepartmentEditForm({ authToken, onSuccess, onCancel, department 
         setLoading(true);
         setError(null);
 
-        try{
+        try {
             const headers = { 'Authorization': `Bearer ${authToken}` };
             const response = await axios.get(`http://localhost:8080/api/skroflin/department/getById?id=${department.id}`, { headers });
             setDepartmentData(response.data);
@@ -96,32 +96,23 @@ export function DepartmentEditForm({ authToken, onSuccess, onCancel, department 
                 'Content-Type': 'application/json',
             };
 
-            let sameDepartmentName: DepartmentResponseDTO[] = [];
             try {
-                const checkResponse = await axios.get<DepartmentResponseDTO[]>(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
-                sameDepartmentName = checkResponse.data;
-                console.log("Same department name:", sameDepartmentName);
+                const checkResponse = await axios.get(`http://localhost:8080/api/skroflin/department/getByName?name=${encodeURIComponent(departmentName)}`, { headers });
+
+                if (checkResponse.data && checkResponse.data.length > 0) {
+                    setError(`Department with the name "${departmentName}" already exists.`);
+                    toast.error(`Department with the name "${departmentName}" already exists.`);
+                    setLoading(false);
+                    return;
+                }
             } catch (checkError: any) {
-                if (axios.isAxiosError(checkError) && checkError.response?.status === 404) {
-                } else if (axios.isAxiosError(checkError) && checkError.response?.status === 401) {
-                    throw new Error(checkError.response?.data?.message || 'Unsuccesful authorization upon checking department.');
-                } else {
+                if (axios.isAxiosError(checkError) && checkError.response?.status !== 404) {
                     throw new Error(checkError.response?.data?.message || 'Error upon checking department name.');
                 }
             }
 
-            const existingDepartmetnInSelectedTvrtka = sameDepartmentName.find(
-                department => department.companyId === companyId
-            );
-
-            if (existingDepartmetnInSelectedTvrtka) {
-                setError(`Department with name '${departmentName}' already exists in the the following company.`);
-                toast.error(`Department with name '${departmentName}' already exists in the the following company.`);
-                setLoading(false);
-                return;
-            }
-
             await axios.put('http://localhost:8080/api/skroflin/department/put', {
+                departmentId: departmentData?.id,
                 departmentName,
                 departmentLocation,
                 companyId,
@@ -215,7 +206,7 @@ export function DepartmentEditForm({ authToken, onSuccess, onCancel, department 
                             {loading ? (
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                             ) : (
-                                'Dodaj odjel'
+                                'Ažuriraj odjel'
                             )}
                         </button>
                     </div>
