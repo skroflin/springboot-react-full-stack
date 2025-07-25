@@ -343,4 +343,21 @@ public class EmployeeController {
             );
         }
     }
+    
+    @GetMapping("/getNumOfEmployees")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfEmployees(){
+        try {
+            Long employee = employeeService.getNumOfEmployees();
+            return new ResponseEntity<>(employee, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon inserting" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
 }
