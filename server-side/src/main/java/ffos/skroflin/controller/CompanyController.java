@@ -227,7 +227,7 @@ public class CompanyController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> getNumOfBankruptCompanies(){
         try {
-            Long company = companyService.getNumOfCompanies();
+            Long company = companyService.getNumOfBankruptCompanies();
             return new ResponseEntity<>(company, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
@@ -244,7 +244,7 @@ public class CompanyController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> getNumOfNonBankruptCompanies(){
         try {
-            Long company = companyService.getNumOfCompanies();
+            Long company = companyService.getNumOfNonBankruptCompanies();
             return new ResponseEntity<>(company, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             throw e;
