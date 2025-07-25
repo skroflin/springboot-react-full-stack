@@ -167,6 +167,29 @@ public class CompanyService extends MainService {
             throw new RuntimeException("Error upon searching for companies: " + e.getMessage(), e);
         }
     }
+    
+    public Long getNumOfCompanies() {
+        Long company = session.createQuery(
+                "select count(c.id) from Company c", Long.class)
+                .getSingleResult();
+        return company;
+    }
+    
+    public Long getNumOfBankruptCompanies() {
+        Long company = session.createQuery(
+                "select count(c.id) from Company c "
+                        + "where c.bankruptcy = 1", Long.class)
+                .getSingleResult();
+        return company;
+    }
+    
+    public Long getNumOfNonBankruptCompanies() {
+        Long company = session.createQuery(
+                "select count(c.id) from Company c "
+                        + "where c.bankruptcy = 0", Long.class)
+                .getSingleResult();
+        return company;
+    }
 
     public List<CompanyResponseDTO> massiveInsert(CompanyDTO o, int number) {
         List<CompanyResponseDTO> insertedCompanies = new ArrayList<>();

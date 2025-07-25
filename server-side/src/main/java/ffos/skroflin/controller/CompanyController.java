@@ -206,6 +206,57 @@ public class CompanyController {
         }
     }
     
+    @GetMapping("/getNumOfCompanies")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfCompanies(){
+        try {
+            Long company = companyService.getNumOfCompanies();
+            return new ResponseEntity<>(company, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
+    
+    @GetMapping("/getNumOfBankruptCompanies")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfBankruptCompanies(){
+        try {
+            Long company = companyService.getNumOfCompanies();
+            return new ResponseEntity<>(company, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
+    
+    @GetMapping("/getNumOfNonBankruptCompanies")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfNonBankruptCompanies(){
+        try {
+            Long company = companyService.getNumOfCompanies();
+            return new ResponseEntity<>(company, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
+    
     @PostMapping("/massiveInsert")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<CompanyResponseDTO>> massiveInsert(
