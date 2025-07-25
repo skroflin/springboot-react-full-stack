@@ -12,17 +12,16 @@ interface HomePageProps {
 
 export function HomePage({ authToken, username }: HomePageProps) {
     const navigate = useNavigate();
-    const [numOfCompanies, setNumOfCompanies] = useState<{numOfCompanies: number;} | null>(null);
+    const [numOfCompanies, setNumOfCompanies] = useState<{ numOfCompanies: number; } | null>(null);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    if (!authToken) {
-        toast.error(`You aren't logged in. Please log in!`);
-        navigate('/login');
-        setLoading(false);
-        return;
-    }
+    React.useEffect(() => {
+        if (!authToken) {
+            navigate('/login');
+        }
+    }, [authToken, navigate]);
 
     const fetchCompanyData = useCallback(async () => {
         setLoading(true);
@@ -31,9 +30,9 @@ export function HomePage({ authToken, username }: HomePageProps) {
         try {
             const headers = { 'Authorization': `Bearer ${authToken}` };
             const [companyCountResponse, bankruptCountResponse, nonBankruptCountResponse] = await Promise.all([
-                axios.get('http://localhost:8080/api/skroflin/company/getNumOfCompanies', {headers}),
-                axios.get('http://localhost:8080/api/skroflin/company/getNumOfBankruptCompanies', {headers}),
-                axios.get('http://localhost:8080/api/skroflin/company/getNumOfNonBankruptCompanies', {headers})
+                axios.get('http://localhost:8080/api/skroflin/company/getNumOfCompanies', { headers }),
+                axios.get('http://localhost:8080/api/skroflin/company/getNumOfBankruptCompanies', { headers }),
+                axios.get('http://localhost:8080/api/skroflin/company/getNumOfNonBankruptCompanies', { headers })
             ]);
 
             setNumOfCompanies(companyCountResponse.data);
@@ -66,17 +65,14 @@ export function HomePage({ authToken, username }: HomePageProps) {
 
     if (error) {
         return (
-        <div className="w-full max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6 flex justify-start">Dobrodošli{username ? `, ${username}` : ''}! <FaHandSpock className="ml-6" /></h1>
-            <div className="text-red-600 text-lg">{error}</div>
-            <Footer />
-        </div>
-    );
+            <div className="w-full max-w-6xl mx-auto">
+                <h1 className="text-3xl font-bold text-gray-800 mb-6 flex justify-start">Dobrodošli{username ? `, ${username}` : ''}! <FaHandSpock className="ml-6" /></h1>
+                <div className="text-red-600 text-lg">{error}</div>
+                <Footer />
+            </div>
+        );
     }
 
-    if(numOfCompanies === null && !loading) {
-
-    }
     return (
         <div className="w-full max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-800 mb-6 flex justify-start">Dobrodošli{username ? `, ${username}` : ''}! <FaHandSpock className="ml-6" /></h1>
