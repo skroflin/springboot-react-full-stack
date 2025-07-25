@@ -178,7 +178,7 @@ public class CompanyService extends MainService {
     public Long getNumOfBankruptCompanies() {
         Long company = session.createQuery(
                 "select count(c.id) from Company c "
-                        + "where c.bankruptcy = 1", Long.class)
+                        + "where c.bankruptcy = true", Long.class)
                 .getSingleResult();
         return company;
     }
@@ -186,7 +186,7 @@ public class CompanyService extends MainService {
     public Long getNumOfNonBankruptCompanies() {
         Long company = session.createQuery(
                 "select count(c.id) from Company c "
-                        + "where c.bankruptcy = 0", Long.class)
+                        + "where c.bankruptcy = false", Long.class)
                 .getSingleResult();
         return company;
     }
