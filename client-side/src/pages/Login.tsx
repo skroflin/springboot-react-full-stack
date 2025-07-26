@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -8,8 +8,18 @@ import { useAuth } from '../components/auth/AuthProvider';
 export function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const { setAuthToken, setUsername: setAuthUsername, setRole } = useAuth();
+    const { authToken, setAuthToken, setUsername: setAuthUsername, setRole, role: authRole } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (authToken) {
+            if (authRole === 'admin') {
+                navigate('/home');
+            } else if (authRole === 'user') {
+                navigate('/home');
+            }
+        }
+    }, [authToken, authRole, navigate])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,11 +42,12 @@ export function Login() {
             localStorage.setItem('username', loggedInUsername);
             localStorage.setItem('role', userRole);
 
-            toast.success('Login successful!');
             if (userRole === 'admin') {
                 navigate('/home');
-            } else (userRole === 'user');{
+                toast.success(`Login successful for ${userRole} - ${loggedInUsername}`);
+            } else if (userRole === 'user') {
                 navigate('/home');
+                toast.success(`Login successful for ${userRole} - ${loggedInUsername}`);
             }
 
         } catch (err: any) {
