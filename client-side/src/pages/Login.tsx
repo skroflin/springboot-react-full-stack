@@ -16,7 +16,7 @@ export function Login() {
             if (authRole === 'admin') {
                 navigate('/home');
             } else if (authRole === 'user') {
-                navigate('/home');
+                navigate('/home-user');
             }
         }
     }, [authToken, authRole, navigate])
@@ -43,7 +43,7 @@ export function Login() {
             localStorage.setItem('role', userRole);
 
             if (userRole === 'admin') {
-                navigate('/home');
+                navigate('/home-admin');
                 toast.success(`Login successful for ${userRole} - ${loggedInUsername}`);
             } else if (userRole === 'user') {
                 navigate('/home');

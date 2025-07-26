@@ -5,27 +5,19 @@ import { HomePage } from './pages/Home';
 import { EmployeeList } from './components/employee/admin-access/EmployeeList';
 import { DepartmentList } from './components/department/admin-access/DepartmentList';
 import { CompanyList } from './components/company/admin-access/CompanyList';
-import Navbar from './components/misc/AdminNavbar';
+import Navbar from './components/misc/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UsersList } from './components/user/UserList';
 import { useAuth } from './components/auth/AuthProvider';
+import { UserHomePage } from './pages/user-access/UserHome';
+import { UserProfile } from './pages/user-access/UserProfile';
 
 export function App() {
-  const { authToken, setAuthToken, role, setRole, username, setUsername } = useAuth();
+  const { authToken, role } = useAuth();
   const location = useLocation();
   const isAuthenticated = !!authToken;
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const isAdmin = role === 'admin' && location.pathname === '/home-page';
-
-  function handleLogout(): void {
-    setAuthToken(null);
-    setUsername(null);
-    setRole(null);
-    localStorage.removeItem('jwtToken');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-  }
 
   return (
     <>
@@ -55,23 +47,41 @@ export function App() {
         </Routes>
       ) : (
         <>
-          {!isAuthPage && <Navbar username={username} isAuthenticated={isAuthenticated} onLogout={handleLogout} />}
+          {!isAuthPage && <Navbar />}
           <div className="pt-16 bg-gray-50 min-h-screen flex items-center justify-center">
             <div className="w-full max-w-7xl mx-auto px-4 py-8">
               <Routes>
                 <Route
                   path="/login"
-                  element={isAdmin ? (<Navigate to="/home" replace />) : (<Navigate to="/home" replace />)}
+                  element={
+                    isAuthenticated ? (role === 'admin' ? <Navigate to="/home-admin" replace /> : <Navigate to="/home" replace />) : <Login />
+                  }
                 />
                 <Route
                   path="/register"
-                  element={<Navigate to="/home" replace />}
+                  element={isAuthenticated ? (role === 'admin' ? <Navigate to="/home-admin" replace /> : <Navigate to="/home" replace />) : <Register />}
+                />
+                <Route
+                  path="/home-admin"
+                  element={
+                    isAuthenticated && role === 'admin'
+                      ? <HomePage />
+                      : <Navigate to="/login" replace />
+                  }
                 />
                 <Route
                   path="/home"
                   element={
-                    isAuthenticated && role === 'admin'
-                      ? <HomePage authToken={authToken} username={username} role={role}/>
+                    isAuthenticated && role === 'user'
+                      ? <UserHomePage />
+                      : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
+                  path="/user-profile"
+                  element={
+                    isAuthenticated && role === 'user'
+                      ? <UserProfile />
                       : <Navigate to="/login" replace />
                   }
                 />
