@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../auth/AuthProvider';
 
 interface CompanyFormProps {
-    authToken: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export function CompanyAddForm({ authToken, onSuccess, onCancel }: CompanyFormProps) {
+export function CompanyAddForm({ onSuccess, onCancel }: CompanyFormProps) {
     const [companyName, setCompanyName] = useState<string>('');
     const [companyLocation, setCompanyLocation] = useState<string>('');
     const [bankruptcy, setBankruptcy] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const { authToken } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

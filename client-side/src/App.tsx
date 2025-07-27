@@ -105,7 +105,7 @@ export function App() {
                   path="/tvrtke-admin"
                   element={
                     isAuthenticated && role === 'admin'
-                      ? <CompanyList authToken={authToken!} />
+                      ? <CompanyList />
                       : <Navigate to="/login" replace />
                   }
                 />

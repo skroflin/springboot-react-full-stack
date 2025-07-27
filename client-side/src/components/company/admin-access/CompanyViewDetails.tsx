@@ -2,18 +2,19 @@ import { useCallback, useEffect, useState } from "react";
 import type { CompanyResponseDTO } from "../../../types/Company";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAuth } from "../../auth/AuthProvider";
 
 interface CompanyDetailProps {
-    authToken: string;
     company: CompanyResponseDTO | null;
     show: boolean;
     onClose: () => void;
 }
 
-export function CompanyViewDetails({ authToken, company, onClose }: CompanyDetailProps) {
+export function CompanyViewDetails({ company, onClose }: CompanyDetailProps) {
     const [companyDetails, setCompanyDetails] = useState<CompanyResponseDTO | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { authToken } = useAuth();
 
     const fetchCompanyDetails = useCallback(async () => {
         if (!company?.id) {

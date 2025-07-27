@@ -2,18 +2,19 @@ import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import type { CompanyResponseDTO } from '../../../types/Company';
+import { useAuth } from '../../auth/AuthProvider';
 
 interface CompanyDeactivationModelProps {
     show: boolean;
     onHide: () => void;
     company: CompanyResponseDTO | null;
     onSuccess: () => void;
-    authToken: string;
 }
 
-export function CompanyDeactivationModel({ show, onHide, company, onSuccess, authToken }: CompanyDeactivationModelProps) {
+export function CompanyDeactivationModel({ show, onHide, company, onSuccess }: CompanyDeactivationModelProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { authToken } = useAuth();
 
     if (!show || !company) {
         return null;

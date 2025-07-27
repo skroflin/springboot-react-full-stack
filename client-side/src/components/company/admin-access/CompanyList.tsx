@@ -8,12 +8,9 @@ import { CompanyAddForm } from './CompanyAddForm';
 import { CompanyDeactivationModel } from './CompanyDeactivationModel';
 import { CompanyViewDetails } from './CompanyViewDetails';
 import { Footer } from '../../misc/Footer';
+import { useAuth } from '../../auth/AuthProvider';
 
-interface CompanyListProps {
-    authToken: string;
-}
-
-export function CompanyList({ authToken }: CompanyListProps) {
+export function CompanyList() {
     const [allTvrtke, setAllTvrtke] = useState<CompanyResponseDTO[]>([]);
     const [displayedCompanies, setDisplayedCompanies] = useState<CompanyResponseDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -27,6 +24,8 @@ export function CompanyList({ authToken }: CompanyListProps) {
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(4);
+
+    const { authToken } = useAuth();
 
     const fetchCompanies = useCallback(async () => {
         setLoading(true);
@@ -129,7 +128,6 @@ export function CompanyList({ authToken }: CompanyListProps) {
             </div>
 
             <CompanySearch
-                authToken={authToken}
                 onSearchResults={handleSearchResults}
                 onClearSearch={handleClearSearch}
             />
@@ -185,7 +183,6 @@ export function CompanyList({ authToken }: CompanyListProps) {
                             ))}
                             {showDetails && selectedCompany?.id == selectedCompany?.id && (
                                 <CompanyViewDetails
-                                    authToken={authToken}
                                     company={selectedCompany}
                                     show={showDetails}
                                     onClose={handleCloseDetails}
@@ -220,7 +217,6 @@ export function CompanyList({ authToken }: CompanyListProps) {
 
             {showAddCompanyForm && (
                 <CompanyAddForm
-                    authToken={authToken}
                     onSuccess={() => {
                         setShowAddCompanyForm(false);
                         fetchCompanies();
@@ -234,7 +230,6 @@ export function CompanyList({ authToken }: CompanyListProps) {
                 onHide={handleHideDeactivationModel}
                 company={selectedCompany}
                 onSuccess={fetchCompanies}
-                authToken={authToken}
             />
             <Footer />
         </div>
