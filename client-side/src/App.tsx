@@ -86,6 +86,30 @@ export function App() {
                   }
                 />
                 <Route
+                  path="/djelatnici"
+                  element={
+                    isAuthenticated && role === 'user'
+                      ? <UserProfile />
+                      : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
+                  path="/odjeli"
+                  element={
+                    isAuthenticated && role === 'user'
+                      ? <UserProfile />
+                      : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
+                  path="/tvrtke"
+                  element={
+                    isAuthenticated && role === 'user'
+                      ? <UserProfile />
+                      : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
                   path="/djelatnici-admin"
                   element={
                     isAuthenticated && role === 'admin'

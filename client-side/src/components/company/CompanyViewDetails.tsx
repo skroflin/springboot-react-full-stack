@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import type { CompanyResponseDTO } from "../../../types/Company";
+import type { CompanyResponseDTO } from "../../types/Company";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useAuth } from "../../auth/AuthProvider";
+import { useAuth } from "../auth/AuthProvider";
 
 interface CompanyDetailProps {
     company: CompanyResponseDTO | null;

@@ -56,6 +56,18 @@ export function Navbar() {
                             <Link to="/user-profile" className="text-white hover:text-blue-400 transition-colors duration-200 flex items-center">
                                 Profile
                             </Link>
+                            <Link to="/djelatnici" className="text-white hover:text-blue-400 transition-colors duration-200 flex items-center">
+                                Home
+                                <FaHome className="ml-2" />
+                            </Link>
+                            <Link to="/odjeli" className="text-white hover:text-blue-400 transition-colors duration-200 flex items-center">
+                                Home
+                                <FaHome className="ml-2" />
+                            </Link>
+                            <Link to="/tvrtke" className="text-white hover:text-blue-400 transition-colors duration-200 flex items-center">
+                                Home
+                                <FaHome className="ml-2" />
+                            </Link>
                         </>
                     )}
                 </div>

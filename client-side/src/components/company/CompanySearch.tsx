@@ -3,8 +3,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaSearch } from 'react-icons/fa';
 
-import type { CompanyResponseDTO } from '../../../types/Company';
-import { useAuth } from '../../auth/AuthProvider';
+import type { CompanyResponseDTO } from '../../types/Company';
+import { useAuth } from '../auth/AuthProvider';
 
 interface CompanySearchProps {
     onSearchResults: (results: CompanyResponseDTO[]) => void;

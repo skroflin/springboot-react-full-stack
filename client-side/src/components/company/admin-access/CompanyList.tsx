@@ -3,15 +3,15 @@ import axios from 'axios';
 import type { CompanyResponseDTO } from '../../../types/Company';
 import { FaArrowLeft, FaArrowRight, FaPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { CompanySearch } from './CompanySearch';
+import { CompanySearch } from '../CompanySearch';
 import { CompanyAddForm } from './CompanyAddForm';
 import { CompanyDeactivationModel } from './CompanyDeactivationModel';
-import { CompanyViewDetails } from './CompanyViewDetails';
+import { CompanyViewDetails } from '../CompanyViewDetails';
 import { Footer } from '../../misc/Footer';
 import { useAuth } from '../../auth/AuthProvider';
 
 export function CompanyList() {
-    const [allTvrtke, setAllTvrtke] = useState<CompanyResponseDTO[]>([]);
+    const [allCompanies, setAllCompanies] = useState<CompanyResponseDTO[]>([]);
     const [displayedCompanies, setDisplayedCompanies] = useState<CompanyResponseDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export function CompanyList() {
     const [showAddCompanyForm, setShowAddCompanyForm] = useState<boolean>(false);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [itemsPerPage] = useState<number>(4);
+    const [itemsPerPage] = useState<number>(5);
 
     const { authToken } = useAuth();
 
@@ -40,7 +40,7 @@ export function CompanyList() {
             };
 
             const response = await axios.get<CompanyResponseDTO[]>('http://localhost:8080/api/skroflin/company/get', { headers });
-            setAllTvrtke(response.data);
+            setAllCompanies(response.data);
             setDisplayedCompanies(response.data);
         } catch (err: any) {
             if (axios.isAxiosError(err)) {
@@ -89,7 +89,7 @@ export function CompanyList() {
     };
 
     const handleClearSearch = () => {
-        setDisplayedCompanies(allTvrtke);
+        setDisplayedCompanies(allCompanies);
         setCurrentPage(1);
     };
 
@@ -150,7 +150,7 @@ export function CompanyList() {
                     {displayedCompanies.length === 0 ? (
                         <p className="text-center text-gray-600">
                             {
-                                currentTvrtke.length === 0 && allTvrtke.length > 0
+                                currentTvrtke.length === 0 && allCompanies.length > 0
                                     ? "Nema pronađenih tvrtki koje odgovaraju kriterijima pretraživanja."
                                     : "Nema unesenih tvrtki."
                             }
