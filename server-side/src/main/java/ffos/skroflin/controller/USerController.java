@@ -218,7 +218,7 @@ public class UserController {
         }
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(dto.userName());
-        
+
         Role userRole = null;
         if (userDetails.getAuthorities() != null && !userDetails.getAuthorities().isEmpty()) {
             String authorityString = userDetails.getAuthorities().iterator().next().getAuthority();
@@ -233,9 +233,59 @@ public class UserController {
                 );
             }
         }
-        
+
         final String jwt = jwtTokenUtil.generateToken(userDetails);
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userRole));
     }
+
+    @GetMapping("/getNumOfUsers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfUsers() {
+        try {
+            Long user = userService.getNumOfUsers();
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon fetching" + " " + e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    @GetMapping("/getNumOfActiveUsers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumActiveUsers() {
+        try {
+            Long user = userService.getNumOfActiveUsers();
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon fetching" + " " + e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    @GetMapping("/getNumOfInactiveUsers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfInactiveUsers() {
+        try {
+            Long user = userService.getNumOfInactiveUsers();
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error upon fetching" + " " + e.getMessage(),
+                    e
+            );
+        }
+    }
 }
-    

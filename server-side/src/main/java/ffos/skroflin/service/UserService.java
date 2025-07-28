@@ -163,6 +163,29 @@ public class UserService extends MainService{
         return mapToResponseDTO(user);
     }
     
+    public Long getNumOfUsers(){
+        Long user = session.createQuery(
+                "select count(u.id) from Users u", Long.class)
+                .getSingleResult();
+        return user;
+    }
+    
+    public Long getNumOfActiveUsers(){
+        Long user = session.createQuery(
+                "select count(u.id) from Users u "
+                        + "where u.active = true", Long.class)
+                .getSingleResult();
+        return user;
+    }
+    
+    public Long getNumOfInactiveUsers(){
+        Long user = session.createQuery(
+                "select count(u.id)  from Users u "
+                        + "where u.active = false", Long.class)
+                .getSingleResult();
+        return user;
+    }
+    
     /*
     public UserResponseDTO massiveInsert(UserDTO o, int number){
         Users u;
