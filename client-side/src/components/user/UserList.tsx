@@ -6,12 +6,9 @@ import { UserViewDetails } from "./UserViewDetails";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { UserSearch } from "./UserSearch";
 import { Footer } from "../misc/Footer";
+import { useAuth } from "../auth/AuthProvider";
 
-interface UsersListProps {
-    authToken: string;
-}
-
-export function UsersList({ authToken }: UsersListProps) {
+export function UsersList() {
     const [allUsers, setAllUsers] = useState<UserResponseDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -20,6 +17,7 @@ export function UsersList({ authToken }: UsersListProps) {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [usersPerPage] = useState<number>(3);
     const [displayedUsers, setDisplayedUsers] = useState<UserResponseDTO[]>([]);
+    const {authToken} = useAuth();
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -101,7 +99,6 @@ export function UsersList({ authToken }: UsersListProps) {
         <div className="container mx-auto p-4 mt-8">
             <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b border-black-600 w-fit">Popis Korisnika</h2>
             <UserSearch
-                authToken={authToken}
                 onSearchResults={handleSearchResults}
                 onClearSearch={handleClearSearch}
             />
@@ -174,7 +171,6 @@ export function UsersList({ authToken }: UsersListProps) {
 
                                     {showDetails && selectedUser?.id === user.id && (
                                         <UserViewDetails
-                                            authToken={authToken}
                                             user={selectedUser}
                                             show={showDetails}
                                             onClose={handleCloseDetails}

@@ -4,16 +4,17 @@ import { toast } from 'react-toastify';
 import { FaSearch } from 'react-icons/fa';
 
 import type { UserResponseDTO } from '../../types/Users';
+import { useAuth } from '../auth/AuthProvider';
 
 interface UserSearchProps {
-    authToken: string;
     onSearchResults: (results: UserResponseDTO[]) => void;
     onClearSearch: () => void;
 }
 
-export function UserSearch({ authToken, onSearchResults, onClearSearch }: UserSearchProps) {
+export function UserSearch({ onSearchResults, onClearSearch }: UserSearchProps) {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
+    const { authToken } = useAuth();
 
     const handleSearch = async () => {
         if (!searchTerm.trim()) {

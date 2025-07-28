@@ -11,9 +11,12 @@ export function HomePage() {
     const [numOfCompanies, setNumOfCompanies] = useState<number | null>(null);
     const [numOfBankruptCompanies, setNumOfBankruptCompanies] = useState<number | null>(null);
     const [numOfNonBankruptCompanies, setNumOfNonBankruptCompanies] = useState<number | null>(null);
-    const { authToken, username, role } = useAuth();
+    const [numOfDepartments, setNumOfDepartments] = useState<number | null>(null);
+    const [numOfActiveDepartments, setNumOfActiveDepartments] = useState<number | null>(null);
+    const [numOfInactiveDepartments, setNumOfInactiveDepartments] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { authToken, username, role } = useAuth();
 
     useEffect(() => {
         if (!authToken) {
@@ -64,11 +67,46 @@ export function HomePage() {
         }
     }, [authToken]);
 
+    const fetchDepartmentData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        setNumOfDepartments(null);
+        setNumOfActiveDepartments(null);
+        setNumOfInactiveDepartments(null);
+
+        try {
+            const headers = { 'Authorization': `Bearer ${authToken}` };
+            const [departmentCountResponse, activeDepartmentCountResponse, inactiveDepartmentCountResponse] = await Promise.all([
+                axios.get('http://localhost:8080/api/skroflin/department/getNumOfDepartments', { headers }),
+                axios.get('http://localhost:8080/api/skroflin/department/getNumOfActiveDepartments', { headers }),
+                axios.get('http://localhost:8080/api/skroflin/department/getNumOfInactiveDepartments', { headers })
+            ]);
+
+            setNumOfDepartments(departmentCountResponse.data);
+            setNumOfActiveDepartments(activeDepartmentCountResponse.data);
+            setNumOfInactiveDepartments(inactiveDepartmentCountResponse.data);
+        } catch (err: any) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || "Error upon fetching companies.");
+                toast.error(err.response?.data?.message || "Error upon fetching companies.");
+            } else if (err.request) {
+                setError("No response from the server, check your connection.");
+                toast.error("No response from the server, check your connection.");
+            } else {
+                setError(err.message || "Unknown error.");
+                toast.error(err.message || "Unknown error.");
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [authToken]);
+
     useEffect(() => {
         if (authToken && role === 'admin') {
             fetchCompanyData();
+            fetchDepartmentData();
         }
-    }, [fetchCompanyData, authToken, role]);
+    }, [fetchCompanyData, fetchDepartmentData, authToken, role]);
 
     if (loading) {
         return <div className="text-center text-lg mt-8 text-gray-600">Učitavanje podataka...</div>;
@@ -114,6 +152,28 @@ export function HomePage() {
                                     {numOfNonBankruptCompanies}
                                 </span>
                                 /{numOfCompanies}
+                            </p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-200 py-2">Broj odjela</h2>
+                            <p className="text-3xl font-bold text-gray-700">{numOfDepartments}</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-200 py-2">Broj aktivnih odjela</h2>
+                            <p className="text-3xl font-bold text-gray-700">
+                                <span className="text-gray-500">
+                                    {numOfActiveDepartments}
+                                </span>
+                                /{numOfDepartments}
+                            </p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-200 py-2">Broj neaktivnih odjela</h2>
+                            <p className="text-3xl font-bold text-gray-700">
+                                <span className="text-gray-500">
+                                    {numOfInactiveDepartments}
+                                </span>
+                                /{numOfDepartments}
                             </p>
                         </div>
                     </div>

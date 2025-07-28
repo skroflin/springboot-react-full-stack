@@ -103,7 +103,7 @@ export function App() {
                   }
                 />
                 <Route
-                  path="/Djelatnici"
+                  path="/djelatnici"
                   element={
                     isAuthenticated && role === 'user'
                       ? <UserProfile />
@@ -122,7 +122,7 @@ export function App() {
                   path="/odjeli-admin"
                   element={
                     isAuthenticated && role === 'admin'
-                      ? <DepartmentList authToken={authToken!} />
+                      ? <DepartmentList />
                       : <Navigate to="/login" replace />
                   }
                 />
@@ -138,7 +138,7 @@ export function App() {
                   path="/korisnici-admin"
                   element={
                     isAuthenticated && role === 'admin'
-                      ? <UsersList authToken={authToken!} />
+                      ? <UsersList />
                       : <Navigate to="/login" replace />
                   }
                 />

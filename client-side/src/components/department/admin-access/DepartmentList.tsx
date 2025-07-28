@@ -7,18 +7,16 @@ import type { CompanyResponseDTO } from '../../../types/Company';
 import { DepartmentAddForm } from './DepartmentAddForm';
 import { DepartmentEditForm } from './DepartmentEditForm';
 import { Footer } from '../../misc/Footer';
+import { useAuth } from '../../auth/AuthProvider';
 
-interface Department {
-    authToken: string;
-}
-
-export function DepartmentList({ authToken }: Department) {
+export function DepartmentList() {
     const [department, setDepartment] = useState<DepartmentResponseDTO[]>([]);
-    const [company, setCompanyMap] = useState<Map<number, string>>(new Map());
+    const [companyMap, setCompanyMap] = useState<Map<number, string>>(new Map());
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showAddDepartmentForm, setShowAddDepartmentForm] = useState<boolean>(false);
     const [showEditDepartmentForm, setShowEditDepartmentForm] = useState<boolean>(false);
+    const {authToken} = useAuth();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -31,11 +29,11 @@ export function DepartmentList({ authToken }: Department) {
             setDepartment(departmentResponse.data);
 
             const tvrtkeResponse = await axios.get<CompanyResponseDTO[]>('http://localhost:8080/api/skroflin/company/get', { headers });
-            const newcompany = new Map<number, string>();
+            const newCompanyMap = new Map<number, string>();
             tvrtkeResponse.data.forEach(company => {
-                newcompany.set(company.id, company.companyLocation);
+                newCompanyMap.set(company.id, company.companyName);
             });
-            setCompanyMap(newcompany);
+            setCompanyMap(newCompanyMap);
 
         } catch (err: any) {
             console.error('Error upon fetching data for departments:', err);
@@ -149,7 +147,7 @@ export function DepartmentList({ authToken }: Department) {
                             <p className="text-sm text-gray-600 text-center mb-1 flex items-center justify-center">
                                 <FaBuilding className="mr-2 mr-2 text-gray-600" /> Tvrtka: {
                                     department.companyId !== null
-                                        ? company.get(department.companyId) || 'N/A'
+                                        ? companyMap.get(department.companyId) || 'N/A'
                                         : 'Nije dodijeljeno'
                                 }
                             </p>
@@ -178,7 +176,6 @@ export function DepartmentList({ authToken }: Department) {
 
             {showAddDepartmentForm && (
                 <DepartmentAddForm
-                    authToken={authToken}
                     onSuccess={handleHideAddDepartmentForm}
                     onCancel={handleHideAddDepartmentForm}
                 />
@@ -188,7 +185,6 @@ export function DepartmentList({ authToken }: Department) {
                 <DepartmentEditForm
                     show={showEditDepartmentForm}
                     department={department.length > 0 ? department[0] : null}
-                    authToken={authToken}
                     onSuccess={handleHideEditDepartmentForm}
                     onCancel={handleHideEditDepartmentForm}
                 />

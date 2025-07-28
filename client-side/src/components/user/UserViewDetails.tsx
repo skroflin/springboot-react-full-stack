@@ -5,18 +5,19 @@ import { toast } from "react-toastify";
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
 import { FaUser } from "react-icons/fa";
+import { useAuth } from "../auth/AuthProvider";
 
 interface UserDetailProps {
-    authToken: string;
     user: UserResponseDTO | null;
     show: boolean;
     onClose: () => void;
 }
 
-export function UserViewDetails({ authToken, user, onClose }: UserDetailProps) {
+export function UserViewDetails({ user, onClose }: UserDetailProps) {
     const [userDetails, setUserDetails] = useState<UserResponseDTO | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { authToken } = useAuth();
 
     const fetchUserDetails = useCallback(async () => {
         if (!user?.id) {

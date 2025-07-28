@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../auth/AuthProvider';
 
 interface CompanyDropdownItem {
     id: number;
@@ -8,12 +9,11 @@ interface CompanyDropdownItem {
 }
 
 interface DepartmentFormProps {
-    authToken: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export function DepartmentAddForm({ authToken, onSuccess, onCancel }: DepartmentFormProps) {
+export function DepartmentAddForm({ onSuccess, onCancel }: DepartmentFormProps) {
     const [departmentName, setDepartmentName] = useState<string>('');
     const [departmentLocation, setDepartmentLocation] = useState<string>('');
     const [companyId, setCompanyId] = useState<number | null>(null);
@@ -22,6 +22,7 @@ export function DepartmentAddForm({ authToken, onSuccess, onCancel }: Department
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [fetchingcompany, setFetchingCompany] = useState<boolean>(true);
+    const {authToken} = useAuth();
 
     useEffect(() => {
         const fetchcompanyForDropdown = async () => {

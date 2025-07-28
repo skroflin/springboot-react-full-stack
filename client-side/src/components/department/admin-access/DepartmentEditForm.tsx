@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import type { DepartmentResponseDTO } from '../../../types/Department';
+import { useAuth } from '../../auth/AuthProvider';
 
 interface CompanyDropdownItem {
     id: number;
@@ -9,14 +10,13 @@ interface CompanyDropdownItem {
 }
 
 interface DepartmentFormProps {
-    authToken: string;
     department: DepartmentResponseDTO | null;
     show: boolean;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export function DepartmentEditForm({ authToken, onSuccess, onCancel, department }: DepartmentFormProps) {
+export function DepartmentEditForm({ onSuccess, onCancel, department }: DepartmentFormProps) {
     const [departmentName, setDepartmentName] = useState<string>('');
     const [departmentLocation, setDepartmentLocation] = useState<string>('');
     const [companyId, setCompanyId] = useState<number | null>(null);
@@ -25,6 +25,7 @@ export function DepartmentEditForm({ authToken, onSuccess, onCancel, department 
     const [loading, setLoading] = useState<boolean>(false);
     const [fetchingcompany, setFetchingCompany] = useState<boolean>(true);
     const [departmentData, setDepartmentData] = useState<DepartmentResponseDTO | null>(null);
+    const {authToken} = useAuth();
 
     const fetchDepartmentData = useCallback(async () => {
         if (!department?.id) {
