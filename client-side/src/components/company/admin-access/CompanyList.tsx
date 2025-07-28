@@ -62,8 +62,8 @@ export function CompanyList() {
         fetchCompanies();
     }, [fetchCompanies]);
 
-    const handleShowDetails = (tvrtka: CompanyResponseDTO) => {
-        setSelectedCompany(tvrtka);
+    const handleShowDetails = (company: CompanyResponseDTO) => {
+        setSelectedCompany(company);
         setShowDetails(true);
     };
 
@@ -72,8 +72,8 @@ export function CompanyList() {
         setSelectedCompany(null);
     };
 
-    const handleShowDeactivationModel = (tvrtka: CompanyResponseDTO) => {
-        setSelectedCompany(tvrtka);
+    const handleShowDeactivationModel = (company: CompanyResponseDTO) => {
+        setSelectedCompany(company);
         setShowDeactivationModel(true);
     };
 
@@ -95,7 +95,7 @@ export function CompanyList() {
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentTvrtke = displayedCompanies.slice(indexOfFirstItem, indexOfLastItem);
+    const currentCompanies = displayedCompanies.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(displayedCompanies.length / itemsPerPage);
 
     const handlePageChange = (pageNumber: number) => {
@@ -141,7 +141,7 @@ export function CompanyList() {
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                     <strong className="font-bold">Greška!</strong>
-                    <span className="block sm:inline"> {error}</span>
+                    <span className="block sm:inline">{error}</span>
                 </div>
             )}
 
@@ -150,14 +150,14 @@ export function CompanyList() {
                     {displayedCompanies.length === 0 ? (
                         <p className="text-center text-gray-600">
                             {
-                                currentTvrtke.length === 0 && allCompanies.length > 0
+                                currentCompanies.length === 0 && allCompanies.length > 0
                                     ? "Nema pronađenih tvrtki koje odgovaraju kriterijima pretraživanja."
                                     : "Nema unesenih tvrtki."
                             }
                         </p>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {currentTvrtke.map((company) => (
+                            {currentCompanies.map((company) => (
                                 <div key={company.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
                                     <div>
                                         <h3

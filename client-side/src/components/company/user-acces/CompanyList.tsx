@@ -1,13 +1,13 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { CompanyResponseDTO } from "../../../types/Company";
 import { useAuth } from "../../auth/AuthProvider";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-export function CompanyList(){
+export function CompanyList() {
     const [allCompanies, setAllCompanies] = useState<CompanyResponseDTO[]>([]);
     const [displayedCompanies, setDisplayedCompanies] = useState<CompanyResponseDTO[]>([]);
-    const [selectedCompany, setSelectedCompany] = useState<CompanyResponseDTO[] | null>([]);
+    const [selectedCompany, setSelectedCompany] = useState<CompanyResponseDTO | null>(null);
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(3);
@@ -46,4 +46,49 @@ export function CompanyList(){
             setLoading(false);
         }
     }, [authToken]);
+
+    useEffect(() => {
+        fetchCompanies();
+    }, [fetchCompanies]);
+
+    const handleShowDetails = (company: CompanyResponseDTO) => {
+        setSelectedCompany(company);
+        setShowDetails(true);
+    };
+
+    const handleCloseDetails = () => {
+        setShowDetails(false);
+        setSelectedCompany(null);
+    }
+
+    const handleSearchResults = (results: CompanyResponseDTO[]) => {
+        setDisplayedCompanies(results);
+        setCurrentPage(1);
+    }
+
+    const handleClearSearch = () => {
+        setDisplayedCompanies(allCompanies);
+        setCurrentPage(1);
+    }
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentCompanies = displayedCompanies.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(displayedCompanies.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    }
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            handlePageChange(currentPage + 1);
+        }
+    }
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            handlePageChange(currentPage - 1);
+        }
+    }
 }
