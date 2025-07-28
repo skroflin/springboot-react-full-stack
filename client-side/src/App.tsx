@@ -12,6 +12,7 @@ import { UsersList } from './components/user/UserList';
 import { useAuth } from './components/auth/AuthProvider';
 import { UserHomePage } from './pages/user-access/UserHome';
 import { UserProfile } from './pages/user-access/UserProfile';
+import { UserCompanyList } from './components/company/user-acces/UserCompanyList';
 
 export function App() {
   const { authToken, role } = useAuth();
@@ -86,10 +87,10 @@ export function App() {
                   }
                 />
                 <Route
-                  path="/djelatnici"
+                  path="/tvrtke"
                   element={
                     isAuthenticated && role === 'user'
-                      ? <UserProfile />
+                      ? <UserCompanyList />
                       : <Navigate to="/login" replace />
                   }
                 />
@@ -102,7 +103,7 @@ export function App() {
                   }
                 />
                 <Route
-                  path="/tvrtke"
+                  path="/Djelatnici"
                   element={
                     isAuthenticated && role === 'user'
                       ? <UserProfile />
