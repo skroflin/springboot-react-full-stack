@@ -15,7 +15,7 @@ public record UserSignUpDTO(
         int id,
         @Schema(example = "skroflin")
         String userName,
-        @Schema(example = "lozinka123")
+        @Schema(example = "lozinka")
         String password
         ) {
 

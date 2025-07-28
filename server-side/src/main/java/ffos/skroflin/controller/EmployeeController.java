@@ -355,7 +355,41 @@ public class EmployeeController {
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, 
-                    "Error upon inserting" + " " + e.getMessage(), 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
+    
+    @GetMapping("/getNumOfEmployeed")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfEmployed(){
+        try {
+            Long employee = employeeService.getNumOfEmployeed();
+            return new ResponseEntity<>(employee, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
+                    e
+            );
+        }
+    }
+    
+    @GetMapping("/getNumOfUnemployeed")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getNumOfUnemployed(){
+        try {
+            Long employee = employeeService.getNumOfUnemployeed();
+            return new ResponseEntity<>(employee, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error upon fetching" + " " + e.getMessage(), 
                     e
             );
         }

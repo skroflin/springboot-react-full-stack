@@ -242,13 +242,6 @@ public class EmployeeService extends MainService {
         }
     }
     
-    public Long getNumOfEmployees(){
-        Long employee = session.createQuery(
-                "select count(e.id) from Employee e", Long.class)
-                .getSingleResult();
-        return employee;
-    }
-    
     public List<EmployeeResponseDTO> massiveInsert(EmployeeDTO o, int number){
         List<EmployeeResponseDTO> insertedEmployees = new ArrayList<>();
         try {
@@ -333,4 +326,27 @@ public class EmployeeService extends MainService {
                 netSalary
         );
     }
+    
+    public Long getNumOfEmployees(){
+        Long employee = session.createQuery(
+                "select count(e.id) from Employee e", Long.class)
+                .getSingleResult();
+        return employee;
+    }
+    
+    public Long getNumOfEmployeed(){
+        Long employee = session.createQuery(
+                "select count(e.id) from Employee e "
+                        + "where e.employeed = true", Long.class)
+                .getSingleResult();
+        return employee;
+   }
+    
+    public Long getNumOfUnemployeed(){
+        Long employee = session.createQuery(
+                "select count(e.id) from Employee e "
+                        + "where e.employeed = false", Long.class)
+                .getSingleResult();
+        return employee;
+   }
 }
